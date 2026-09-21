@@ -1,0 +1,9 @@
+{
+  "name": "earnings-intelligence-hub",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "generate-reports": "node scripts/generateReportsJson.js"
+  },
+  "devDependencies": {}
+}

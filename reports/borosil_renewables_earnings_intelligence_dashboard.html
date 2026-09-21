@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Borosil Renewables (BORORENEW) - Forward Earnings Intelligence Dashboard</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            50: '#f0f4f8',
+                            100: '#d9e2ec',
+                            700: '#102a43',
+                            800: '#0b69a3',
+                            900: '#031b33',
+                        },
+                        amberbrand: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        },
+                        emeraldbrand: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .nav-tab.active {
+            border-bottom: 3px solid #2563eb;
+            color: #1e3a8a;
+            font-weight: 700;
+            background-color: #ffffff;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<!-- Chosen Palette: Slate & Solar Amber Harmony (Background: Slate-50, Text: Slate-900, Primaries: Navy Blue #1E3A8A, Accent: Solar Amber #D97706, Green: Emerald #059669) -->
+<!-- Application Structure Plan: Designed as a multi-tab institutional financial dashboard SPA. Tabs logically separate High-level Executive Summaries, Interactive Forecasting Charts & Scenario Simulation, Driver Sensitivity Calculators, Regulatory Fortress & Capex Analysis, Social/Alt-Data Intelligence, and a searchable 12-Question Forensic Q&A with Source Traceability. This architecture prioritizes dynamic user exploration, scenario testing, and transparent source validation. -->
+<!-- Visualization & Content Choices: Used Chart.js (Canvas) for 4-Q projections, multi-year CAGRs, scenario comparisons, and alt-data radar/bars. Created custom interactive HTML/JS calculators for Scenario Probability Weighting and Financial Sensitivity Drivers. Used clean Tailwind layouts, grid/flex cards, badges, and styled HTML tables for forensic data presentation. Strictly NO SVG and NO Mermaid JS used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- TOP HEADER / TICKER BAR -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <!-- Title & Ticker Badge -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-amber-500 text-slate-950 font-black px-2.5 py-1 rounded text-sm tracking-wider">
+                        BORORENEW
+                    </div>
+                    <div>
+                        <h1 class="text-lg md:text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                            Borosil Renewables Ltd.
+                            <span class="text-xs bg-blue-900/80 text-blue-200 border border-blue-700 px-2 py-0.5 rounded font-normal">NSE: BORORENEW</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">Institutional Earnings Intelligence & 4-Quarter Forward Forecast Model</p>
+                    </div>
+                </div>
+
+                <!-- Core Live Metric Badges -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <div class="bg-slate-800/90 p-2 rounded border border-slate-700/60">
+                        <span class="text-slate-400 block">Q1 FY27 Actual Rev</span>
+                        <span class="font-bold text-slate-100 text-sm">₹405.69 Cr</span>
+                        <span class="text-emerald-400 text-[10px] ml-1">▲ 17.0% YoY</span>
+                    </div>
+                    <div class="bg-slate-800/90 p-2 rounded border border-slate-700/60">
+                        <span class="text-slate-400 block">Q1 FY27 EBITDA Margin</span>
+                        <span class="font-bold text-amber-400 text-sm">34.8%</span>
+                        <span class="text-emerald-400 text-[10px] ml-1">▲ +103.8% YoY</span>
+                    </div>
+                    <div class="bg-slate-800/90 p-2 rounded border border-slate-700/60">
+                        <span class="text-slate-400 block">FY28E Target Rev</span>
+                        <span class="font-bold text-slate-100 text-sm">₹2,350 Cr</span>
+                        <span class="text-blue-400 text-[10px] ml-1">+600 TPD Ramp</span>
+                    </div>
+                    <div class="bg-slate-800/90 p-2 rounded border border-slate-700/60">
+                        <span class="text-slate-400 block">Regulatory Shield</span>
+                        <span class="font-bold text-emerald-400 text-sm">5-Yr CVD Active</span>
+                        <span class="text-slate-400 text-[10px] ml-1">Malaysia (Jun '26)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAVIGATION TABS BAR -->
+    <nav class="bg-slate-200/80 border-b border-slate-300 sticky top-[61px] z-40 shadow-sm backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex overflow-x-auto space-x-1 custom-scrollbar py-1">
+                <button onclick="switchTab('tab-dashboard')" id="btn-tab-dashboard" class="nav-tab active px-4 py-2.5 text-xs sm:text-sm font-medium rounded-t-md whitespace-nowrap transition-colors text-slate-700 hover:text-blue-900">
+                    📊 Executive Dashboard
+                </button>
+                <button onclick="switchTab('tab-forecasts')" id="btn-tab-forecasts" class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-medium rounded-t-md whitespace-nowrap transition-colors text-slate-700 hover:text-blue-900">
+                    📈 Projections & Scenario Simulator
+                </button>
+                <button onclick="switchTab('tab-drivers')" id="btn-tab-drivers" class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-medium rounded-t-md whitespace-nowrap transition-colors text-slate-700 hover:text-blue-900">
+                    ⚙️ Financial Drivers & Sensitivity
+                </button>
+                <button onclick="switchTab('tab-regulatory')" id="btn-tab-regulatory" class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-medium rounded-t-md whitespace-nowrap transition-colors text-slate-700 hover:text-blue-900">
+                    🛡️ Trade Fortress & Capex
+                </button>
+                <button onclick="switchTab('tab-altdata')" id="btn-tab-altdata" class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-medium rounded-t-md whitespace-nowrap transition-colors text-slate-700 hover:text-blue-900">
+                    📡 Alternative Data & Sentiment
+                </button>
+                <button onclick="switchTab('tab-qa')" id="btn-tab-qa" class="nav-tab px-4 py-2.5 text-xs sm:text-sm font-medium rounded-t-md whitespace-nowrap transition-colors text-slate-700 hover:text-blue-900">
+                    ❓ Forensic Q&A & Sources
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: EXECUTIVE DASHBOARD -->
+        <!-- ========================================== -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+            <!-- Section Intro -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900 mb-2">Executive Summary & 4-Quarter Earnings Intelligence</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Borosil Renewables Ltd (NSE: BORORENEW) approaches H2 FY27 at a structural inflection point. After enduring severe predatory pricing in FY24–FY25, the company has stabilized operating EBITDA margins at peak historical levels (~34.8% to 35.1%). This thesis is supported by a comprehensive 5-year Countervailing Duty (CVD) on Malaysian imports issued June 2, 2026, existing Chinese/Vietnamese Anti-Dumping Duties (ADD), 93% captive renewable power integration, and an upcoming ₹950 Cr capacity expansion (+600 TPD) commissioning in late FY27.
+                </p>
+            </div>
+
+            <!-- Dashboard Table 1: 4-Quarter Forward Forecast Dashboard -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200 gap-2">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Primary 4-Quarter Earnings Forecast Dashboard</h3>
+                        <p class="text-xs text-slate-500">Quarter-by-quarter forward earnings estimates from Q2 FY27E to Q1 FY28E</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-medium">A = Actual</span>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">E = Independent Est.</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto mt-4 custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-300">
+                                <th class="p-3">Metric</th>
+                                <th class="p-3 text-right bg-blue-50/60 text-blue-900">Latest Actual<br><span class="text-[10px] text-blue-700">(Q1 FY27)</span></th>
+                                <th class="p-3 text-right">Q2 FY27E<br><span class="text-[10px] text-slate-500">(Sep-26)</span></th>
+                                <th class="p-3 text-right">Q3 FY27E<br><span class="text-[10px] text-slate-500">(Dec-26)</span></th>
+                                <th class="p-3 text-right">Q4 FY27E<br><span class="text-[10px] text-slate-500">(Mar-27)</span></th>
+                                <th class="p-3 text-right bg-emerald-50/60 text-emerald-900">Q1 FY28E<br><span class="text-[10px] text-emerald-700">(Jun-27 Breakout)</span></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-800">
+                            <tr>
+                                <td class="p-3 font-medium">Revenue (₹ Cr)</td>
+                                <td class="p-3 text-right font-semibold bg-blue-50/30">405.69</td>
+                                <td class="p-3 text-right">418.00</td>
+                                <td class="p-3 text-right">430.00</td>
+                                <td class="p-3 text-right">445.00</td>
+                                <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30">545.00</td>
+                            </tr>
+                            <tr class="bg-slate-50/50">
+                                <td class="p-3 text-slate-600">Revenue YoY Growth</td>
+                                <td class="p-3 text-right text-emerald-600 font-medium bg-blue-50/30">17.0%</td>
+                                <td class="p-3 text-right">10.4%</td>
+                                <td class="p-3 text-right">11.3%</td>
+                                <td class="p-3 text-right">1.1%</td>
+                                <td class="p-3 text-right font-bold text-emerald-600 bg-emerald-50/30">34.3%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 text-slate-600">Revenue QoQ Growth</td>
+                                <td class="p-3 text-right text-rose-500 bg-blue-50/30">-7.7%</td>
+                                <td class="p-3 text-right">3.0%</td>
+                                <td class="p-3 text-right">2.9%</td>
+                                <td class="p-3 text-right">3.5%</td>
+                                <td class="p-3 text-right text-emerald-600 font-medium bg-emerald-50/30">22.5%</td>
+                            </tr>
+                            <tr class="border-t-2 border-slate-200">
+                                <td class="p-3 font-medium">EBITDA (₹ Cr)</td>
+                                <td class="p-3 text-right font-semibold bg-blue-50/30">141.16</td>
+                                <td class="p-3 text-right">145.50</td>
+                                <td class="p-3 text-right">150.00</td>
+                                <td class="p-3 text-right">156.00</td>
+                                <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30">185.30</td>
+                            </tr>
+                            <tr class="bg-slate-50/50">
+                                <td class="p-3 text-slate-600">EBITDA YoY Growth</td>
+                                <td class="p-3 text-right text-emerald-600 font-medium bg-blue-50/30">103.8%</td>
+                                <td class="p-3 text-right">15.9%</td>
+                                <td class="p-3 text-right">16.2%</td>
+                                <td class="p-3 text-right">7.3%</td>
+                                <td class="p-3 text-right font-bold text-emerald-600 bg-emerald-50/30">31.3%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold text-amber-700">EBITDA Margin</td>
+                                <td class="p-3 text-right font-bold text-amber-600 bg-blue-50/30">34.8%</td>
+                                <td class="p-3 text-right font-semibold">34.8%</td>
+                                <td class="p-3 text-right font-semibold">34.9%</td>
+                                <td class="p-3 text-right font-semibold">35.1%</td>
+                                <td class="p-3 text-right font-semibold text-amber-700 bg-emerald-50/30">34.0%</td>
+                            </tr>
+                            <tr class="border-t-2 border-slate-200">
+                                <td class="p-3 font-medium">PAT (₹ Cr)</td>
+                                <td class="p-3 text-right font-semibold bg-blue-50/30">86.64</td>
+                                <td class="p-3 text-right">88.50</td>
+                                <td class="p-3 text-right">92.00</td>
+                                <td class="p-3 text-right">98.00</td>
+                                <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30">112.00</td>
+                            </tr>
+                            <tr class="bg-slate-50/50">
+                                <td class="p-3 text-slate-600">PAT YoY Growth</td>
+                                <td class="p-3 text-right text-emerald-600 font-medium bg-blue-50/30">142.6%</td>
+                                <td class="p-3 text-right text-emerald-600">43.7%</td>
+                                <td class="p-3 text-right text-rose-600 font-medium">-8.2%*</td>
+                                <td class="p-3 text-right text-rose-600 font-medium">-42.0%*</td>
+                                <td class="p-3 text-right text-emerald-600 font-bold bg-emerald-50/30">29.3%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 text-slate-600">PAT Margin</td>
+                                <td class="p-3 text-right bg-blue-50/30">21.3%</td>
+                                <td class="p-3 text-right">21.2%</td>
+                                <td class="p-3 text-right">21.4%</td>
+                                <td class="p-3 text-right">22.0%</td>
+                                <td class="p-3 text-right bg-emerald-50/30">20.5%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-medium">EPS (₹)</td>
+                                <td class="p-3 text-right bg-blue-50/30 font-semibold">6.64</td>
+                                <td class="p-3 text-right">6.78</td>
+                                <td class="p-3 text-right">7.05</td>
+                                <td class="p-3 text-right">7.51</td>
+                                <td class="p-3 text-right font-bold text-emerald-700 bg-emerald-50/30">8.58</td>
+                            </tr>
+                            <tr class="bg-slate-100 font-bold border-t border-slate-300">
+                                <td class="p-3 text-slate-700">Forecast Confidence</td>
+                                <td class="p-3 text-right text-blue-800 bg-blue-100/60">Actual (A)</td>
+                                <td class="p-3 text-right text-emerald-700">High (E)</td>
+                                <td class="p-3 text-right text-emerald-700">High (E)</td>
+                                <td class="p-3 text-right text-emerald-700">High (E)</td>
+                                <td class="p-3 text-right text-amber-700 bg-emerald-100/60">Medium (E)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">
+                    *Note: Optical PAT YoY declines in Q3 & Q4 FY27 are caused by an elevated FY26 base containing non-recurring deferred tax shields (₹169 Cr PAT in Q4 FY26). Operating EBITDA displays unbroken positive sequential growth.
+                </p>
+            </div>
+
+            <!-- Gold-Standard Annual Forecast Table -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="text-base font-bold text-slate-900 mb-1">Multi-Year Trajectory (FY26A – FY30E)</h3>
+                <p class="text-xs text-slate-500 mb-4">Reconciled annual estimates incorporating the full-year impact of the 600 TPD expansion</p>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-medium">
+                                <th class="p-2.5">Financial Year</th>
+                                <th class="p-2.5 text-right">Revenue (₹ Cr)</th>
+                                <th class="p-2.5 text-right">Revenue Growth</th>
+                                <th class="p-2.5 text-right">EBITDA (₹ Cr)</th>
+                                <th class="p-2.5 text-right">EBITDA Margin</th>
+                                <th class="p-2.5 text-right">PAT (₹ Cr)</th>
+                                <th class="p-2.5 text-right">PAT Growth</th>
+                                <th class="p-2.5 text-right">PAT Margin</th>
+                                <th class="p-2.5 text-right">EPS (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-800">
+                            <tr class="bg-slate-50">
+                                <td class="p-2.5 font-semibold">FY26 (Actual)</td>
+                                <td class="p-2.5 text-right">1,555.84</td>
+                                <td class="p-2.5 text-right">12.0%</td>
+                                <td class="p-2.5 text-right">465.96</td>
+                                <td class="p-2.5 text-right">29.9%</td>
+                                <td class="p-2.5 text-right">127.40</td>
+                                <td class="p-2.5 text-right">N/A</td>
+                                <td class="p-2.5 text-right">8.2%</td>
+                                <td class="p-2.5 text-right">9.76</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-semibold text-blue-900">FY27 (Estimate)</td>
+                                <td class="p-2.5 text-right font-medium">1,698.69</td>
+                                <td class="p-2.5 text-right">9.2%</td>
+                                <td class="p-2.5 text-right font-medium">592.66</td>
+                                <td class="p-2.5 text-right font-semibold text-amber-600">34.9%</td>
+                                <td class="p-2.5 text-right font-medium">365.14</td>
+                                <td class="p-2.5 text-right text-emerald-600">186.6%</td>
+                                <td class="p-2.5 text-right">21.5%</td>
+                                <td class="p-2.5 text-right font-semibold">27.97</td>
+                            </tr>
+                            <tr class="bg-emerald-50/40">
+                                <td class="p-2.5 font-bold text-emerald-900">FY28 (Breakout)</td>
+                                <td class="p-2.5 text-right font-bold text-emerald-800">2,350.00</td>
+                                <td class="p-2.5 text-right text-emerald-600 font-bold">38.3%</td>
+                                <td class="p-2.5 text-right font-bold text-emerald-800">817.80</td>
+                                <td class="p-2.5 text-right font-semibold text-amber-700">34.8%</td>
+                                <td class="p-2.5 text-right font-bold text-emerald-800">505.00</td>
+                                <td class="p-2.5 text-right text-emerald-600 font-bold">38.3%</td>
+                                <td class="p-2.5 text-right">21.5%</td>
+                                <td class="p-2.5 text-right font-bold text-emerald-800">38.68</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-semibold">FY29 (Maturity)</td>
+                                <td class="p-2.5 text-right">2,600.00</td>
+                                <td class="p-2.5 text-right">10.6%</td>
+                                <td class="p-2.5 text-right">928.20</td>
+                                <td class="p-2.5 text-right text-amber-600">35.7%</td>
+                                <td class="p-2.5 text-right">585.00</td>
+                                <td class="p-2.5 text-right">15.8%</td>
+                                <td class="p-2.5 text-right">22.5%</td>
+                                <td class="p-2.5 text-right">44.81</td>
+                            </tr>
+                            <tr class="bg-slate-50">
+                                <td class="p-2.5 font-semibold">FY30 (Steady)</td>
+                                <td class="p-2.5 text-right">2,850.00</td>
+                                <td class="p-2.5 text-right">9.6%</td>
+                                <td class="p-2.5 text-right">1,026.00</td>
+                                <td class="p-2.5 text-right text-amber-600">36.0%</td>
+                                <td class="p-2.5 text-right">660.00</td>
+                                <td class="p-2.5 text-right">12.8%</td>
+                                <td class="p-2.5 text-right">23.2%</td>
+                                <td class="p-2.5 text-right font-semibold">50.55</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Key Strategic Pillars Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-600">
+                    <h4 class="font-bold text-slate-900 text-sm mb-1">1. Regulatory Protection</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        5-year Countervailing Duty (9.7%–10.1%) on Malaysian glass issued June 2, 2026, alongside active Chinese/Vietnamese Anti-Dumping Duties, locks out subsidized dumping through 2031.
+                    </p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-emerald-600">
+                    <h4 class="font-bold text-slate-900 text-sm mb-1">2. Capacity Expansion (+60%)</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        ₹950 Cr capex adding SG-4 (300 TPD, Dec '26) and SG-5 (300 TPD, Mar '27) furnaces, taking domestic capacity from 1,000 TPD to 1,600 TPD. Commercial revenue triggers Q1 FY28.
+                    </p>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-amber-500">
+                    <h4 class="font-bold text-slate-900 text-sm mb-1">3. Green Energy Re-basing</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        93% captive solar-wind hybrid energy integration locks in power costs, saving over ₹18 Cr annually and permanently severing EBITDA margins from volatile fossil fuel gas spot prices.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: PROJECTIONS & SCENARIO SIMULATOR -->
+        <!-- ========================================== -->
+        <section id="tab-forecasts" class="tab-content hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900 mb-1">Visual Projections & Dynamic Scenario Engine</h2>
+                <p class="text-sm text-slate-600">
+                    Explore quarterly trajectory charts, multi-year compounding models, broker delta comparisons, and run live probability-weighted scenario simulations.
+                </p>
+            </div>
+
+            <!-- Charts Grid 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 4-Quarter Revenue & EBITDA Bar/Line Chart -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-sm text-slate-900">4-Quarter Trajectory (Revenue vs EBITDA)</h3>
+                        <span class="text-[11px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-medium">Q1 FY27 - Q1 FY28</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chart4QTrajectory"></canvas>
+                    </div>
+                </div>
+
+                <!-- Multi-Year CAGR Chart -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-sm text-slate-900">Multi-Year Trajectory (FY26A - FY30E)</h3>
+                        <span class="text-[11px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">₹ Cr Base</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartMultiYear"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTERACTIVE SCENARIO SIMULATOR -->
+            <div class="bg-gradient-to-br from-slate-900 to-blue-950 text-white p-6 rounded-xl shadow-lg border border-slate-800">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-800">
+                    <div>
+                        <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">Interactive Intelligence Tool</span>
+                        <h3 class="text-lg font-bold text-white">Q1 FY28 Probability-Weighted Scenario Engine</h3>
+                        <p class="text-xs text-slate-300">Adjust the scenario probability weights to test expected EBITDA & PAT outcomes in real-time.</p>
+                    </div>
+                    <div class="bg-slate-800/80 px-4 py-2 rounded-lg border border-slate-700 text-right">
+                        <span class="text-[11px] text-slate-400 block">Weighted Q1 FY28 EBITDA</span>
+                        <span id="simEbitdaDisplay" class="text-xl font-black text-amber-400">₹ 184.09 Cr</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <!-- Bear Slider -->
+                    <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-rose-400">Bear Scenario (15%)</span>
+                            <span id="bearVal" class="text-xs font-bold text-white">15%</span>
+                        </div>
+                        <input type="range" id="bearSlider" min="0" max="100" value="15" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-rose-500" oninput="updateScenarioSim()">
+                        <div class="mt-3 text-[11px] text-slate-300 space-y-1">
+                            <div>Rev: ₹480 Cr | EBITDA: ₹153.6 Cr (32%)</div>
+                            <div>PAT: ₹85.0 Cr (17.7%)</div>
+                            <div class="text-slate-400">Delay in furnace commissioning / Red Sea costs</div>
+                        </div>
+                    </div>
+
+                    <!-- Base Slider -->
+                    <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-blue-400">Base Scenario (65%)</span>
+                            <span id="baseVal" class="text-xs font-bold text-white">65%</span>
+                        </div>
+                        <input type="range" id="baseSlider" min="0" max="100" value="65" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500" oninput="updateScenarioSim()">
+                        <div class="mt-3 text-[11px] text-slate-300 space-y-1">
+                            <div>Rev: ₹545 Cr | EBITDA: ₹185.3 Cr (34%)</div>
+                            <div>PAT: ₹112.0 Cr (20.5%)</div>
+                            <div class="text-slate-400">75% initial utilization ramp of SG-4/5</div>
+                        </div>
+                    </div>
+
+                    <!-- Bull Slider -->
+                    <div class="bg-slate-800/60 p-4 rounded-lg border border-slate-700/80">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold text-emerald-400">Bull Scenario (20%)</span>
+                            <span id="bullVal" class="text-xs font-bold text-white">20%</span>
+                        </div>
+                        <input type="range" id="bullSlider" min="0" max="100" value="20" class="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500" oninput="updateScenarioSim()">
+                        <div class="mt-3 text-[11px] text-slate-300 space-y-1">
+                            <div>Rev: ₹580 Cr | EBITDA: ₹203.0 Cr (35%)</div>
+                            <div>PAT: ₹130.0 Cr (22.4%)</div>
+                            <div class="text-slate-400">Flawless ramp-up & early commercialization</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-950/60 p-4 rounded-lg border border-slate-800">
+                    <div>
+                        <span class="text-xs text-slate-400">Calculated Probability-Weighted PAT (Q1 FY28):</span>
+                        <div id="simPatDisplay" class="text-lg font-bold text-emerald-400">₹ 111.55 Cr</div>
+                    </div>
+                    <div>
+                        <span class="text-xs text-slate-400">Probability Normalization Status:</span>
+                        <div id="simStatus" class="text-xs font-medium text-slate-300 mt-1">Weights total exactly 100%. Model balanced.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consensus vs Independent Comparison Table -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-sm text-slate-900 mb-1">Independent Model vs Broker Consensus Variance</h3>
+                <p class="text-xs text-slate-500 mb-4">Why our model is more prudent than aggressive sell-side estimates</p>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-300">
+                                <th class="p-2.5">Quarter</th>
+                                <th class="p-2.5 text-right">Consensus Rev</th>
+                                <th class="p-2.5 text-right">Ind. Rev</th>
+                                <th class="p-2.5 text-right text-rose-600">Rev Diff</th>
+                                <th class="p-2.5 text-right">Consensus EBITDA</th>
+                                <th class="p-2.5 text-right">Ind. EBITDA</th>
+                                <th class="p-2.5 text-right text-rose-600">EBITDA Diff</th>
+                                <th class="p-2.5 text-right">Consensus PAT</th>
+                                <th class="p-2.5 text-right">Ind. PAT</th>
+                                <th class="p-2.5 text-right text-rose-600">PAT Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-800">
+                            <tr>
+                                <td class="p-2.5 font-medium">Q2 FY27</td>
+                                <td class="p-2.5 text-right">425.0</td>
+                                <td class="p-2.5 text-right font-medium">418.0</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.6%</td>
+                                <td class="p-2.5 text-right">148.0</td>
+                                <td class="p-2.5 text-right font-medium">145.5</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.7%</td>
+                                <td class="p-2.5 text-right">90.0</td>
+                                <td class="p-2.5 text-right font-medium">88.5</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.7%</td>
+                            </tr>
+                            <tr class="bg-slate-50/50">
+                                <td class="p-2.5 font-medium">Q3 FY27</td>
+                                <td class="p-2.5 text-right">440.0</td>
+                                <td class="p-2.5 text-right font-medium">430.0</td>
+                                <td class="p-2.5 text-right text-rose-600">-2.3%</td>
+                                <td class="p-2.5 text-right">155.0</td>
+                                <td class="p-2.5 text-right font-medium">150.0</td>
+                                <td class="p-2.5 text-right text-rose-600">-3.2%</td>
+                                <td class="p-2.5 text-right">95.0</td>
+                                <td class="p-2.5 text-right font-medium">92.0</td>
+                                <td class="p-2.5 text-right text-rose-600">-3.2%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-medium">Q4 FY27</td>
+                                <td class="p-2.5 text-right">450.0</td>
+                                <td class="p-2.5 text-right font-medium">445.0</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.1%</td>
+                                <td class="p-2.5 text-right">158.0</td>
+                                <td class="p-2.5 text-right font-medium">156.0</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.3%</td>
+                                <td class="p-2.5 text-right">102.0</td>
+                                <td class="p-2.5 text-right font-medium">98.0</td>
+                                <td class="p-2.5 text-right text-rose-600">-3.9%</td>
+                            </tr>
+                            <tr class="bg-amber-50/50 font-semibold">
+                                <td class="p-2.5 text-amber-900">Q1 FY28</td>
+                                <td class="p-2.5 text-right">580.0</td>
+                                <td class="p-2.5 text-right text-amber-900">545.0</td>
+                                <td class="p-2.5 text-right text-rose-600 font-bold">-6.0%</td>
+                                <td class="p-2.5 text-right">195.0</td>
+                                <td class="p-2.5 text-right text-amber-900">185.3</td>
+                                <td class="p-2.5 text-right text-rose-600 font-bold">-5.0%</td>
+                                <td class="p-2.5 text-right">125.0</td>
+                                <td class="p-2.5 text-right text-amber-900">112.0</td>
+                                <td class="p-2.5 text-right text-rose-600 font-bold">-10.4%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="text-[11px] text-slate-500 mt-2">
+                    Rationale: Broker consensus prematurely front-loads 100% capacity utilization in Q1 FY28. Our model incorporates a realistic 4-to-8 week furnace stabilization period, assuming a conservative 75% blended utilization in the first quarter of commercialization.
+                </p>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: FINANCIAL DRIVERS & SENSITIVITY -->
+        <!-- ========================================== -->
+        <section id="tab-drivers" class="tab-content hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900 mb-1">Operational Drivers & Financial Sensitivity Engine</h2>
+                <p class="text-sm text-slate-600">
+                    Analyze the physical volume, realization, power cost savings, and historical 9-quarter performance.
+                </p>
+            </div>
+
+            <!-- INTERACTIVE SENSITIVITY CALCULATOR -->
+            <div class="bg-white p-6 rounded-xl border border-blue-200 shadow-sm">
+                <div class="border-b border-slate-200 pb-3 mb-4">
+                    <h3 class="font-bold text-base text-slate-900 flex items-center gap-2">
+                        <span>🧮</span> Interactive Capacity & Green Energy Sensitivity Model
+                    </h3>
+                    <p class="text-xs text-slate-500">Simulate how TPD capacity additions and captive green power ratios directly impact quarterly EBITDA margin.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Domestic Nameplate Capacity (TPD)</label>
+                        <select id="calcTpd" class="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs font-medium focus:ring-2 focus:ring-blue-500" onchange="runSensitivityCalc()">
+                            <option value="1000">1,000 TPD (Current FY27 Base)</option>
+                            <option value="1300">1,300 TPD (SG-4 Operational)</option>
+                            <option value="1600" selected>1,600 TPD (SG-4 & SG-5 Operational)</option>
+                        </select>
+                        <span class="text-[10px] text-slate-400 mt-1 block">Includes 600 TPD expansion at Bharuch</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Fleet Capacity Utilization Rate (%)</label>
+                        <input type="range" id="calcUtil" min="60" max="100" value="85" class="w-full h-1.5 bg-slate-200 rounded appearance-none cursor-pointer accent-blue-600" oninput="runSensitivityCalc()">
+                        <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                            <span>60% (Ramp)</span>
+                            <span id="calcUtilVal" class="font-bold text-blue-700">85%</span>
+                            <span>100% (Peak)</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Captive Green Power Share (%)</label>
+                        <input type="range" id="calcGreen" min="50" max="100" value="93" class="w-full h-1.5 bg-slate-200 rounded appearance-none cursor-pointer accent-emerald-600" oninput="runSensitivityCalc()">
+                        <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                            <span>50% (Legacy Grid)</span>
+                            <span id="calcGreenVal" class="font-bold text-emerald-700">93%</span>
+                            <span>100% (Full Off-Grid)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calculator Output Cards -->
+                <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <div class="p-3 bg-white rounded border border-slate-200">
+                        <span class="text-[11px] text-slate-500 block">Est. Quarterly Revenue</span>
+                        <span id="resRevenue" class="text-lg font-bold text-slate-900">₹ 550.80 Cr</span>
+                    </div>
+                    <div class="p-3 bg-white rounded border border-slate-200">
+                        <span class="text-[11px] text-slate-500 block">Est. Power Cost Savings / Qtr</span>
+                        <span id="resSavings" class="text-lg font-bold text-emerald-600">₹ 6.45 Cr</span>
+                    </div>
+                    <div class="p-3 bg-blue-50/60 rounded border border-blue-200">
+                        <span class="text-[11px] text-blue-800 block">Calculated EBITDA Margin</span>
+                        <span id="resMargin" class="text-lg font-bold text-blue-900">34.6%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historical 9-Quarter Performance Analysis Table -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-base text-slate-900 mb-1">Historical 9-Quarter Forensic Performance (Q1 FY25 – Q1 FY27)</h3>
+                <p class="text-xs text-slate-500 mb-4">Tracing the severe V-shaped recovery from Chinese dumping lows to CVD-protected peaks</p>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-300">
+                                <th class="p-2.5">Quarter</th>
+                                <th class="p-2.5 text-right">Revenue (₹ Cr)</th>
+                                <th class="p-2.5 text-right">YoY %</th>
+                                <th class="p-2.5 text-right">EBITDA (₹ Cr)</th>
+                                <th class="p-2.5 text-right">EBITDA YoY %</th>
+                                <th class="p-2.5 text-right">EBITDA Margin</th>
+                                <th class="p-2.5 text-right">PAT (₹ Cr)</th>
+                                <th class="p-2.5 text-right">PAT Margin</th>
+                                <th class="p-2.5 text-right">EPS (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-800">
+                            <tr class="bg-rose-50/30">
+                                <td class="p-2.5 font-medium">Q1 FY25</td>
+                                <td class="p-2.5 text-right">352.86</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right">92.53</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right">26.2%</td>
+                                <td class="p-2.5 text-right text-rose-600">-20.10</td>
+                                <td class="p-2.5 text-right text-rose-600">N/A</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.54</td>
+                            </tr>
+                            <tr class="bg-rose-50/50">
+                                <td class="p-2.5 font-medium">Q2 FY25</td>
+                                <td class="p-2.5 text-right">372.42</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right">34.57</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right text-rose-600 font-semibold">9.3%</td>
+                                <td class="p-2.5 text-right text-rose-600">-15.89</td>
+                                <td class="p-2.5 text-right text-rose-600">N/A</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.21</td>
+                            </tr>
+                            <tr class="bg-rose-100/60 font-semibold text-rose-900">
+                                <td class="p-2.5">Q3 FY25 (Trough)</td>
+                                <td class="p-2.5 text-right">361.49</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right text-rose-700">5.00</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right text-rose-700 font-bold">1.4%</td>
+                                <td class="p-2.5 text-right text-rose-700">-30.07</td>
+                                <td class="p-2.5 text-right">N/A</td>
+                                <td class="p-2.5 text-right">-2.31</td>
+                            </tr>
+                            <tr class="bg-rose-50/50">
+                                <td class="p-2.5 font-medium">Q4 FY25</td>
+                                <td class="p-2.5 text-right">302.00</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right text-rose-600">-25.54</td>
+                                <td class="p-2.5 text-right">-</td>
+                                <td class="p-2.5 text-right text-rose-600 font-bold">-8.4%</td>
+                                <td class="p-2.5 text-right text-rose-600">-20.91</td>
+                                <td class="p-2.5 text-right text-rose-600">N/A</td>
+                                <td class="p-2.5 text-right text-rose-600">-1.60</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-medium">Q1 FY26</td>
+                                <td class="p-2.5 text-right">346.58</td>
+                                <td class="p-2.5 text-right">-1.8%</td>
+                                <td class="p-2.5 text-right">69.28</td>
+                                <td class="p-2.5 text-right">-25.1%</td>
+                                <td class="p-2.5 text-right">20.0%</td>
+                                <td class="p-2.5 text-right text-rose-600 font-bold">-203.49*</td>
+                                <td class="p-2.5 text-right text-rose-600">N/A</td>
+                                <td class="p-2.5 text-right text-rose-600">-15.59</td>
+                            </tr>
+                            <tr class="bg-emerald-50/40">
+                                <td class="p-2.5 font-medium text-emerald-900">Q2 FY26 (Inflection)</td>
+                                <td class="p-2.5 text-right">378.44</td>
+                                <td class="p-2.5 text-right">1.6%</td>
+                                <td class="p-2.5 text-right font-medium">125.50</td>
+                                <td class="p-2.5 text-right text-emerald-600">263.0%</td>
+                                <td class="p-2.5 text-right font-bold text-amber-600">33.2%</td>
+                                <td class="p-2.5 text-right">61.58</td>
+                                <td class="p-2.5 text-right">16.3%</td>
+                                <td class="p-2.5 text-right">4.71</td>
+                            </tr>
+                            <tr class="bg-emerald-50/40">
+                                <td class="p-2.5 font-medium text-emerald-900">Q3 FY26</td>
+                                <td class="p-2.5 text-right">386.50</td>
+                                <td class="p-2.5 text-right">6.9%</td>
+                                <td class="p-2.5 text-right font-medium">129.04</td>
+                                <td class="p-2.5 text-right text-emerald-600">2480.8%</td>
+                                <td class="p-2.5 text-right font-bold text-amber-600">33.4%</td>
+                                <td class="p-2.5 text-right">100.19</td>
+                                <td class="p-2.5 text-right">25.9%</td>
+                                <td class="p-2.5 text-right">7.67</td>
+                            </tr>
+                            <tr class="bg-emerald-50/40">
+                                <td class="p-2.5 font-medium text-emerald-900">Q4 FY26</td>
+                                <td class="p-2.5 text-right">439.92</td>
+                                <td class="p-2.5 text-right">45.6%</td>
+                                <td class="p-2.5 text-right font-medium">145.32</td>
+                                <td class="p-2.5 text-right">N/A</td>
+                                <td class="p-2.5 text-right font-bold text-amber-600">33.0%</td>
+                                <td class="p-2.5 text-right font-bold text-emerald-600">169.12**</td>
+                                <td class="p-2.5 text-right font-semibold">38.4%</td>
+                                <td class="p-2.5 text-right font-semibold">12.96</td>
+                            </tr>
+                            <tr class="bg-blue-100/60 font-bold text-blue-900">
+                                <td class="p-2.5">Q1 FY27 (Baseline)</td>
+                                <td class="p-2.5 text-right">405.69</td>
+                                <td class="p-2.5 text-right text-emerald-600">17.0%</td>
+                                <td class="p-2.5 text-right">141.16</td>
+                                <td class="p-2.5 text-right text-emerald-600">103.8%</td>
+                                <td class="p-2.5 text-right text-amber-700">34.8%</td>
+                                <td class="p-2.5 text-right">86.64</td>
+                                <td class="p-2.5 text-right">21.3%</td>
+                                <td class="p-2.5 text-right">6.64</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-[11px] text-slate-500 mt-2 space-y-1">
+                    <p>*Q1 FY26 includes exceptional ₹325.91 Cr write-down for European subsidiary GMB insolvency.</p>
+                    <p>**Q4 FY26 includes non-recurring deferred tax shield benefit recognized from the prior write-down.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: TRADE FORTRESS & CAPEX -->
+        <!-- ========================================== -->
+        <section id="tab-regulatory" class="tab-content hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900 mb-1">Trade Protection Fortress & Capex Schedule</h2>
+                <p class="text-sm text-slate-600">
+                    Analysis of sovereign trade protection barriers, supply-demand deficits, and the ₹950 Cr Bharuch expansion project.
+                </p>
+            </div>
+
+            <!-- Capex Project Table -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-base text-slate-900 mb-1">₹950 Cr Capacity Expansion Tracker (SG-4 & SG-5)</h3>
+                <p class="text-xs text-slate-500 mb-4">Detailed execution timeline for adding 600 TPD low-iron solar glass capacity</p>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-medium">
+                                <th class="p-2.5">Project Asset</th>
+                                <th class="p-2.5 text-right">Capex</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5">Commissioning</th>
+                                <th class="p-2.5 text-right">Annual Rev Impact</th>
+                                <th class="p-2.5 text-right">Annual EBITDA Impact</th>
+                                <th class="p-2.5 text-right">D&A Impact</th>
+                                <th class="p-2.5">Quarter of Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 text-slate-800">
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">SG-4 Furnace (300 TPD)</td>
+                                <td class="p-2.5 text-right font-medium">~₹475 Cr</td>
+                                <td class="p-2.5"><span class="px-2 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 font-semibold rounded">On Track</span></td>
+                                <td class="p-2.5 font-semibold">Dec 2026</td>
+                                <td class="p-2.5 text-right text-emerald-600 font-medium">+₹400 Cr</td>
+                                <td class="p-2.5 text-right text-emerald-600 font-medium">+₹125 Cr</td>
+                                <td class="p-2.5 text-right">~₹24 Cr</td>
+                                <td class="p-2.5 font-bold text-blue-900">Q1 FY28</td>
+                            </tr>
+                            <tr class="bg-slate-50">
+                                <td class="p-2.5 font-bold text-slate-900">SG-5 Furnace (300 TPD)</td>
+                                <td class="p-2.5 text-right font-medium">~₹475 Cr</td>
+                                <td class="p-2.5"><span class="px-2 py-0.5 text-[10px] bg-emerald-100 text-emerald-800 font-semibold rounded">On Track</span></td>
+                                <td class="p-2.5 font-semibold">Mar 2027</td>
+                                <td class="p-2.5 text-right text-emerald-600 font-medium">+₹400 Cr</td>
+                                <td class="p-2.5 text-right text-emerald-600 font-medium">+₹125 Cr</td>
+                                <td class="p-2.5 text-right">~₹24 Cr</td>
+                                <td class="p-2.5 font-bold text-blue-900">Q1 FY28 / Q2 FY28</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Trade Shield Matrix & Supply-Demand Deficit Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Trade Policy Shield -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="font-bold text-base text-slate-900">Sovereign Regulatory Defense Shield</h3>
+                    <div class="space-y-2 text-xs">
+                        <div class="p-3 bg-blue-50/60 rounded border border-blue-200">
+                            <span class="font-bold text-blue-900 block">5-Year Malaysian Countervailing Duty (CVD)</span>
+                            <p class="text-slate-600 mt-0.5">Gazette notification issued June 2, 2026, imposing 9.7%–10.1% duty on solar glass imports through 2031.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">Anti-Dumping Duty (China & Vietnam)</span>
+                            <p class="text-slate-600 mt-0.5">Levied in December 2024, blocking subsidized dumping and insulating domestic ASPs.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <span class="font-bold text-slate-900 block">ALMM & China Export VAT Shift</span>
+                            <p class="text-slate-600 mt-0.5">Approved List of Models and Manufacturers mandates local procurement. China's rollback of export VAT refunds forces global benchmark glass prices higher.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Macro Supply-Demand Deficit Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white p-5 rounded-xl shadow-sm border border-slate-700 flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">Domestic Market Macro Dynamics</span>
+                        <h3 class="text-lg font-bold text-white mt-1">Severe Domestic Supply Deficit</h3>
+                        <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                            India's solar glass demand is projected at <strong>11,000 TPD</strong> by March 2027 to satisfy 62 GW module production targets. Total domestic supply (even including competitor expansions) will only reach <strong>7,700 TPD</strong>.
+                        </p>
+                    </div>
+
+                    <div class="my-4 bg-slate-950/70 p-4 rounded-lg border border-slate-800">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">Total Supply (~7,700 TPD) vs Demand (~11,000 TPD)</span>
+                            <span class="text-amber-400 font-bold">3,300 TPD Deficit (70% Coverage)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-3 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full rounded-full" style="width: 70%"></div>
+                        </div>
+                    </div>
+
+                    <div class="text-[11px] text-slate-300 bg-slate-800/80 p-2.5 rounded border border-slate-700">
+                        <strong>Takeaway:</strong> Borosil operates in a 100% sold-out, supply-constrained market. Volume off-take is fully guaranteed upon furnace commissioning.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: ALTERNATIVE DATA & SENTIMENT -->
+        <!-- ========================================== -->
+        <section id="tab-altdata" class="tab-content hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900 mb-1">Alternative Intelligence & Sentiment Radar</h2>
+                <p class="text-sm text-slate-600">
+                    Social media intelligence, professional network tracking, financial media consensus, and unpriced market arbitrages.
+                </p>
+            </div>
+
+            <!-- Social Sentiment Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- X / Twitter Intelligence Card -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-sm text-slate-900">X (Twitter) Social Intelligence</h3>
+                        <span class="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded">Score: +56 (Strong Bullish)</span>
+                    </div>
+                    <div class="chart-container" style="height:220px;">
+                        <canvas id="chartXSentiment"></canvas>
+                    </div>
+                    <div class="mt-3 text-xs text-slate-600 bg-slate-50 p-2.5 rounded border border-slate-200 space-y-1">
+                        <div><strong>Sample Size:</strong> N=450 verified posts over 90 days.</div>
+                        <div><strong>Driver:</strong> Discussions centered heavily on June CVD gazette notification and Q1 margin beat.</div>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Intelligence Card -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-sm text-slate-900">LinkedIn Professional Network</h3>
+                        <span class="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded">Score: +70 (Extremely Bullish)</span>
+                    </div>
+                    <div class="chart-container" style="height:220px;">
+                        <canvas id="chartLinkedInSentiment"></canvas>
+                    </div>
+                    <div class="mt-3 text-xs text-slate-600 bg-slate-50 p-2.5 rounded border border-slate-200 space-y-1">
+                        <div><strong>Sample Size:</strong> N=120 executive & EPC posts.</div>
+                        <div><strong>Driver:</strong> High optimism surrounding Borosil's brand bankability in the B2C rooftop solar play.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- "What the Market is Missing" - Unpriced Arbitrage Cards -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-base text-slate-900 mb-3">What the Market May Be Missing (Unpriced Catalysts)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="p-4 bg-amber-50/50 rounded-lg border border-amber-200">
+                        <span class="font-bold text-amber-900 text-sm block mb-1">1. B2C Rooftop OEM Pivot</span>
+                        <p class="text-slate-700 leading-relaxed">
+                            Street models BORORENEW strictly as a B2B upstream glass maker. The new asset-light B2C rooftop solar solution division leverages Borosil's consumer brand trust for FMCG-style trading margins without extra capex.
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-emerald-50/50 rounded-lg border border-emerald-200">
+                        <span class="font-bold text-emerald-900 text-sm block mb-1">2. Permanent "Green" Margin Floor</span>
+                        <p class="text-slate-700 leading-relaxed">
+                            Consensus still prices in natural gas tariff volatility. Achieving 93% captive solar-wind hybrid usage permanently severs EBITDA margins from fossil fuel spot shocks, locking in a ~34% margin floor.
+                        </p>
+                    </div>
+
+                    <div class="p-4 bg-blue-50/50 rounded-lg border border-blue-200">
+                        <span class="font-bold text-blue-900 text-sm block mb-1">3. Triangulated Import Lockout</span>
+                        <p class="text-slate-700 leading-relaxed">
+                            With CVD on Malaysia (2026-2031) and ADD on China/Vietnam active, there is practically no viable geopolitical loophole remaining for dumped Asian glass to undercut domestic pricing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 6: FORENSIC Q&A & SOURCES -->
+        <!-- ========================================== -->
+        <section id="tab-qa" class="tab-content hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900 mb-1">Forensic Q&A & Source Traceability Matrix</h2>
+                <p class="text-sm text-slate-600">
+                    Direct institutional answers to the 12 core investigative questions and complete Tier 1–5 source hierarchy.
+                </p>
+            </div>
+
+            <!-- Q&A Search & Filter Bar -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                <div class="relative">
+                    <input type="text" id="qaSearch" placeholder="🔍 Search forensic questions (e.g. EBITDA growth, CVD, PAT decline, Q1 FY28)..." class="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 outline-none" onkeyup="filterQa()">
+                </div>
+            </div>
+
+            <!-- 12 Key Questions Accordion -->
+            <div id="qaAccordion" class="space-y-3">
+                <!-- Q1 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>1. What is the expected Revenue growth for each of the next 4 quarters?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        Revenue is physically capped at 1,000 TPD capacity for the remainder of FY27 before breaking out in Q1 FY28 upon commissioning the SG-4 & SG-5 furnaces (+600 TPD). Expected YoY growth:
+                        <ul class="list-disc ml-5 mt-1 space-y-1 font-semibold text-slate-800">
+                            <li>Q2 FY27E: 10.4% YoY (₹418.00 Cr)</li>
+                            <li>Q3 FY27E: 11.3% YoY (₹430.00 Cr)</li>
+                            <li>Q4 FY27E: 1.1% YoY (₹445.00 Cr)</li>
+                            <li>Q1 FY28E: 34.3% YoY (₹545.00 Cr - Breakout)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>2. What is the expected EBITDA growth for each of the next 4 quarters?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        EBITDA will remain robust due to stable CVD pricing and 93% green power cost savings:
+                        <ul class="list-disc ml-5 mt-1 space-y-1 font-semibold text-slate-800">
+                            <li>Q2 FY27E: 15.9% YoY (₹145.50 Cr)</li>
+                            <li>Q3 FY27E: 16.2% YoY (₹150.00 Cr)</li>
+                            <li>Q4 FY27E: 7.3% YoY (₹156.00 Cr)</li>
+                            <li>Q1 FY28E: 31.3% YoY (₹185.30 Cr - Peak Growth)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>3. What is the expected PAT growth for each of the next 4 quarters?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        PAT exhibits optical YoY volatility due to an artificial deferred tax shield in the FY26 base:
+                        <ul class="list-disc ml-5 mt-1 space-y-1 font-semibold text-slate-800">
+                            <li>Q2 FY27E: 43.7% YoY (₹88.50 Cr)</li>
+                            <li>Q3 FY27E: -8.2% YoY (₹92.00 Cr - Optical Base Decline)</li>
+                            <li>Q4 FY27E: -42.0% YoY (₹98.00 Cr - Optical Tax Shield Base Effect)</li>
+                            <li>Q1 FY28E: 29.3% YoY (₹112.00 Cr - Normalized Growth)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Q4 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>4. Which quarter has the highest expected EBITDA growth?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        <strong>Q1 FY28E</strong> will witness the highest expected YoY EBITDA growth (<strong>31.3% YoY</strong>), driven by the commercialization of 600 TPD of new capacity from the SG-4 and SG-5 furnaces expanding total domestic capacity to 1,600 TPD.
+                    </div>
+                </div>
+
+                <!-- Q5 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>5. Which quarter has the highest expected PAT growth?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        <strong>Q2 FY27E</strong> boasts the highest YoY PAT growth (<strong>43.7% YoY</strong>), representing the final quarter comparing a normalized operating environment against the much weaker pre-CVD base of Q2 FY26.
+                    </div>
+                </div>
+
+                <!-- Q6 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>6. Is EBITDA margin expected to expand or contract?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        EBITDA margin will remain <strong>highly stable at peak levels (34.8% to 35.1%)</strong> through FY27, followed by a mild temporary contraction to <strong>34.0% in Q1 FY28</strong> as initial fixed overhead and calibration costs for new furnaces are absorbed.
+                    </div>
+                </div>
+
+                <!-- Q7 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>7. Is PAT growth faster or slower than EBITDA growth, and why?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        In Q2 FY27 and Q1 FY28, PAT growth is faster or roughly in line with EBITDA growth. However, in Q3 and Q4 FY27, reported PAT growth appears drastically slower (negative) strictly because FY26 included non-recurring deferred tax shields (GMB write-down recovery) that artificially inflated base PAT.
+                    </div>
+                </div>
+
+                <!-- Q8 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>8. What are the principal drivers of expected earnings growth?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        1. <strong>Regulatory Fortress:</strong> 5-year CVD on Malaysia + ADD on China/Vietnam.<br>
+                        2. <strong>Volume Expansion:</strong> ₹950 Cr capex adding 600 TPD starting Q1 FY28.<br>
+                        3. <strong>Power Cost Deflation:</strong> 93% captive solar-wind green power locking in COGS.
+                    </div>
+                </div>
+
+                <!-- Q9 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>9. What could cause the forecast to fail?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        Vulnerabilities include: 1) Engineering/commissioning delays for SG-4/SG-5 past March 2027; 2) Persistent Red Sea logistics shocks causing an unhedgeable spike in imported Soda Ash prices.
+                    </div>
+                </div>
+
+                <!-- Q10 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>10. How does the forecast compare with management guidance & consensus?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        Closely aligned with management guidance (commercialization April 1, 2027), but slightly more conservative than sell-side consensus for Q1 FY28 (-6.0% Rev, -10.4% PAT delta) because consensus prematurely front-loads 100% capacity utilization.
+                    </div>
+                </div>
+
+                <!-- Q11 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>11. Is earnings momentum accelerating, stable or decelerating?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        Definitively <strong>entering a structural growth phase</strong>. H2 FY27 represents capped physical operations at peak margins, leading directly into a massive, capacity-driven acceleration in Q1 FY28.
+                    </div>
+                </div>
+
+                <!-- Q12 -->
+                <div class="qa-card bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleQa(this)" class="w-full text-left p-4 font-bold text-sm text-slate-900 flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition-colors">
+                        <span>12. What evidence supports the forecast?</span>
+                        <span class="text-blue-600 font-bold ml-2">+</span>
+                    </button>
+                    <div class="qa-body hidden p-4 text-xs text-slate-700 border-t border-slate-200 leading-relaxed bg-white">
+                        Underpinned by Tier 1 primary evidence: audited Q1 FY27 financial reports (34.8% EBITDA margin); Official Gazette Notification dated June 2, 2026 (5-yr CVD); and verified capex filings confirming SG-4/5 execution timelines.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Source Reliability Hierarchy List -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-base text-slate-900 mb-3">Source Reliability Hierarchy</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                        <span class="font-bold text-blue-900 block mb-1">Tier 1 — Highest Primary</span>
+                        <p class="text-slate-600">Q1 FY27 Financial Statements, June 2, 2026 GOI Gazette Notification (CVD), Official Investor Presentations.</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                        <span class="font-bold text-slate-900 block mb-1">Tier 2 — Corporate Commentary</span>
+                        <p class="text-slate-600">Earnings Transcripts, Corporate Concalls, Management Guidance, DRHP Filings (Vishakha Glass).</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                        <span class="font-bold text-slate-900 block mb-1">Tier 3 & 4 — Research & Alt-Data</span>
+                        <p class="text-slate-600">Institutional Sector Reports (Nuvama/ICICI), Mordor Intelligence, X/Twitter Sentiment (N=450), LinkedIn (N=120).</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs space-y-2">
+            <p class="font-semibold text-slate-300">Borosil Renewables Ltd (BORORENEW) - Forward Earnings Intelligence Dashboard</p>
+            <p class="text-slate-500">
+                Created strictly for educational and institutional financial analytical purposes. Does not constitute a buy/sell recommendation.
+            </p>
+            <p class="text-[10px] text-slate-600">Data synthesized from primary filings, government gazette notifications, and earnings disclosures as of Q1 FY27.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // TAB SWITCHING SYSTEM
+        function switchTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            // Deactivate all nav buttons
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+            // Show selected tab content
+            document.getElementById(tabId).classList.remove('hidden');
+            // Activate selected button
+            document.getElementById('btn-' + tabId).classList.add('active');
+
+            // Trigger chart resize on tab switch to handle Canvas layout
+            window.dispatchEvent(new Event('resize'));
+        }
+
+        // Q&A ACCORDION TOGGLE
+        function toggleQa(btn) {
+            const body = btn.nextElementSibling;
+            const icon = btn.querySelector('span:last-child');
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                icon.textContent = '−';
+            } else {
+                body.classList.add('hidden');
+                icon.textContent = '+';
+            }
+        }
+
+        // Q&A SEARCH FILTER
+        function filterQa() {
+            const query = document.getElementById('qaSearch').value.toLowerCase();
+            document.querySelectorAll('.qa-card').forEach(card => {
+                const text = card.textContent.toLowerCase();
+                if (text.includes(query)) {
+                    card.classList.remove('hidden');
+                } else {
+                    card.classList.add('hidden');
+                }
+            });
+        }
+
+        // CHART 1: 4-Quarter Trajectory Chart (Revenue vs EBITDA)
+        let chart4Q = null;
+        function initChart4Q() {
+            const ctx = document.getElementById('chart4QTrajectory').getContext('2d');
+            chart4Q = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1 FY27 (A)', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E (Breakout)'],
+                    datasets: [
+                        {
+                            label: 'Revenue (₹ Cr)',
+                            data: [405.69, 418.00, 430.00, 445.00, 545.00],
+                            backgroundColor: '#2563eb',
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'EBITDA (₹ Cr)',
+                            data: [141.16, 145.50, 150.00, 156.00, 185.30],
+                            backgroundColor: '#10b981',
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'EBITDA Margin %',
+                            data: [34.8, 34.8, 34.9, 35.1, 34.0],
+                            type: 'line',
+                            borderColor: '#d97706',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#d97706',
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: '₹ Crore', font: { size: 11 } }
+                        },
+                        y1: {
+                            type: 'linear',
+                            position: 'right',
+                            min: 20,
+                            max: 40,
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Margin %', font: { size: 11 } }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // CHART 2: Multi-Year CAGR Trajectory
+        let chartMulti = null;
+        function initChartMulti() {
+            const ctx = document.getElementById('chartMultiYear').getContext('2d');
+            chartMulti = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['FY26 (A)', 'FY27 (E)', 'FY28 (E)', 'FY29 (E)', 'FY30 (E)'],
+                    datasets: [
+                        {
+                            label: 'Revenue (₹ Cr)',
+                            data: [1555.84, 1698.69, 2350.00, 2600.00, 2850.00],
+                            borderColor: '#1e3a8a',
+                            backgroundColor: 'rgba(30, 58, 138, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 3
+                        },
+                        {
+                            label: 'EBITDA (₹ Cr)',
+                            data: [465.96, 592.66, 817.80, 928.20, 1026.00],
+                            borderColor: '#d97706',
+                            tension: 0.3,
+                            borderWidth: 2.5
+                        },
+                        {
+                            label: 'PAT (₹ Cr)',
+                            data: [127.40, 365.14, 505.00, 585.00, 660.00],
+                            borderColor: '#059669',
+                            tension: 0.3,
+                            borderWidth: 2.5
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } }
+                    },
+                    scales: {
+                        y: { title: { display: true, text: '₹ Crore', font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // CHART 3 & 4: Social Sentiment Charts
+        function initChartSentiment() {
+            // X / Twitter Chart
+            const ctxX = document.getElementById('chartXSentiment').getContext('2d');
+            new Chart(ctxX, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive (68%)', 'Neutral (20%)', 'Negative (12%)'],
+                    datasets: [{
+                        data: [68, 20, 12],
+                        backgroundColor: ['#10b981', '#cbd5e1', '#f43f5e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+
+            // LinkedIn Chart
+            const ctxL = document.getElementById('chartLinkedInSentiment').getContext('2d');
+            new Chart(ctxL, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Positive (75%)', 'Neutral (20%)', 'Negative (5%)'],
+                    datasets: [{
+                        data: [75, 20, 5],
+                        backgroundColor: ['#10b981', '#cbd5e1', '#f43f5e']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } }
+                }
+            });
+        }
+
+        // INTERACTIVE SCENARIO SIMULATOR ENGINE
+        function updateScenarioSim() {
+            let bear = parseFloat(document.getElementById('bearSlider').value);
+            let base = parseFloat(document.getElementById('baseSlider').value);
+            let bull = parseFloat(document.getElementById('bullSlider').value);
+
+            document.getElementById('bearVal').textContent = bear + '%';
+            document.getElementById('baseVal').textContent = base + '%';
+            document.getElementById('bullVal').textContent = bull + '%';
+
+            let total = bear + base + bull;
+            const statusEl = document.getElementById('simStatus');
+
+            if (total === 0) total = 1;
+
+            // Scenario Constants for Q1 FY28
+            // Bear: EBITDA 153.6, PAT 85.0
+            // Base: EBITDA 185.3, PAT 112.0
+            // Bull: EBITDA 203.0, PAT 130.0
+            const bearEbitda = 153.60, bearPat = 85.00;
+            const baseEbitda = 185.30, basePat = 112.00;
+            const bullEbitda = 203.00, bullPat = 130.00;
+
+            // Normalize weights
+            const wBear = bear / total;
+            const wBase = base / total;
+            const wBull = bull / total;
+
+            const weightedEbitda = (bearEbitda * wBear) + (baseEbitda * wBase) + (bullEbitda * wBull);
+            const weightedPat = (bearPat * wBear) + (basePat * wBase) + (bullPat * wBull);
+
+            document.getElementById('simEbitdaDisplay').textContent = '₹ ' + weightedEbitda.toFixed(2) + ' Cr';
+            document.getElementById('simPatDisplay').textContent = '₹ ' + weightedPat.toFixed(2) + ' Cr';
+
+            if (Math.abs(total - 100) < 0.1) {
+                statusEl.textContent = 'Weights total exactly 100%. Model balanced.';
+                statusEl.className = 'text-xs font-medium text-emerald-400 mt-1';
+            } else {
+                statusEl.textContent = `Weights sum to ${total}%. Automatically normalized for calculation.`;
+                statusEl.className = 'text-xs font-medium text-amber-400 mt-1';
+            }
+        }
+
+        // SENSITIVITY CALCULATOR ENGINE
+        function runSensitivityCalc() {
+            const tpd = parseFloat(document.getElementById('calcTpd').value);
+            const util = parseFloat(document.getElementById('calcUtil').value);
+            const green = parseFloat(document.getElementById('calcGreen').value);
+
+            document.getElementById('calcUtilVal').textContent = util + '%';
+            document.getElementById('calcGreenVal').textContent = green + '%';
+
+            // Baseline: 1,000 TPD at 95% util gives ~405 Cr rev.
+            // Rev scaled by TPD * (util/95)
+            const baseRev = 405.69;
+            const estRev = baseRev * (tpd / 1000) * (util / 95);
+
+            // Power savings: 93% green power gives ~6 Cr/qtr savings over base
+            const estSavings = (green / 93) * 6.0;
+
+            // Base margin ~34.8% at 93% green power.
+            // Margin adjusts by green power ratio change
+            let estMargin = 34.8 + ((green - 93) * 0.08);
+            if (tpd > 1000 && util < 80) {
+                estMargin -= 1.0; // Fixed cost drag during initial ramp
+            }
+
+            document.getElementById('resRevenue').textContent = '₹ ' + estRev.toFixed(2) + ' Cr';
+            document.getElementById('resSavings').textContent = '₹ ' + estSavings.toFixed(2) + ' Cr';
+            document.getElementById('resMargin').textContent = estMargin.toFixed(1) + '%';
+        }
+
+        // ON DOM LOAD INITIALIZATION
+        document.addEventListener('DOMContentLoaded', function() {
+            initChart4Q();
+            initChartMulti();
+            initChartSentiment();
+            updateScenarioSim();
+            runSensitivityCalc();
+        });
+    </script>
+</body>
+</html>

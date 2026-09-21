@@ -1,0 +1,212 @@
+:root {
+  --bg: #f7fafc;
+  --surface: #ffffff;
+  --muted: #6b7280;
+  --primary: #0ea5e9;
+  --accent: #7c3aed;
+  --radius: 12px;
+  --card-border: rgba(15, 23, 42, 0.04);
+  --shadow: 0 6px 20px rgba(2, 6, 23, 0.06);
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+  :root {
+    --bg: #f7fafc;
+    --surface: #ffffff;
+    --muted: #6b7280;
+    --primary: #0ea5e9;
+    --accent: #7c3aed;
+    --radius: 12px;
+    --card-border: rgba(15, 23, 42, 0.04);
+    --shadow: 0 6px 20px rgba(2, 6, 23, 0.06);
+    --text: #0f172a;
+  }
+  * {
+    box-sizing: border-box;
+  }
+  html,
+  body {
+    height: 100%;
+  }
+  body {
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      "Segoe UI",
+      Roboto,
+      "Helvetica Neue",
+      Arial;
+    margin: 0;
+    color: var(--text);
+    background: var(--bg);
+  }
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+  }
+  .site-header h1 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+  .lead {
+    color: var(--muted);
+    margin-top: 6px;
+  }
+  .controls {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 20px 0;
+    align-items: end;
+  }
+  .control-row {
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+  }
+  label {
+    font-size: 0.95rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  input,
+  select {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: var(--surface);
+    color: inherit;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-top: 18px;
+  }
+  .card {
+    background: var(--surface);
+    padding: 14px 14px 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 38px;
+  }
+  .card h3 {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+    color: var(--text);
+  }
+  .card .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 0;
+  }
+  .company {
+    margin: 0;
+    color: #334155;
+    line-height: 1.4;
+    font-size: 0.86rem;
+  }
+  .card .actions {
+    margin-top: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .card .badge {
+    font-size: 0.75rem;
+    padding: 6px 8px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    color: white;
+  }
+  .thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+  .tags {
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    background: rgba(124, 58, 237, 0.08);
+    color: var(--accent);
+    padding: 6px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+  }
+  .btn {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: white;
+    background: var(--primary);
+    font-weight: 600;
+    font-size: 0.88rem;
+    line-height: 1.2;
+  }
+  .btn.secondary {
+    background: transparent;
+    color: #475569;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .site-footer {
+    padding: 20px 0;
+    margin-top: 28px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .card:focus {
+    outline: none;
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.15);
+    transform: translateY(-2px);
+  }
+  .card {
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.12s ease;
+  }
+  @media (max-width: 640px) {
+    .controls {
+      flex-direction: column;
+    }
+    .control-row {
+      min-width: 100%;
+    }
+  }
+}

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Earnings Intelligence Hub</title>
+    <meta
+      name="description"
+      content="Navigate earnings forecast HTML dashboards and store prompts for each report."
+    />
+    <link rel="stylesheet" href="assets/css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <div>
+          <h1>Earnings Intelligence Hub</h1>
+          <p class="lead">
+            Open any interactive earnings HTML. Designed for usability and
+            GitHub Pages deployment.
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="controls" aria-label="Report controls">
+        <div class="control-row">
+          <label for="search">Search reports</label>
+          <input
+            id="search"
+            placeholder="Search by name or keyword"
+            aria-label="Search reports"
+          />
+        </div>
+        <div class="control-row">
+          <label for="sort">Sort</label>
+          <select id="sort" aria-label="Sort reports">
+            <option value="alpha">Alphabetical</option>
+            <option value="nameDesc">Reverse</option>
+          </select>
+        </div>
+      </section>
+
+      <section id="cards" class="cards" aria-live="polite">
+        <!-- cards rendered by JS -->
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small
+          >Ready for GitHub Pages. Store report notes in the
+          <a href="prompts/">prompts/</a> folder.</small
+        >
+      </div>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+  </body>
+</html>

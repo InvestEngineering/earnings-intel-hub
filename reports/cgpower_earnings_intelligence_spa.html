@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CG Power (CGPOWER) - Master Earnings Intelligence & Forward Forecast Dashboard</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Custom chart container styling for responsive boundaries */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 100%;
+      height: 320px;
+      max-height: 400px;
+    }
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 380px;
+      }
+    }
+    html {
+      scroll-behavior: smooth;
+    }
+    /* Custom scrollbar for clean table navigation */
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased leading-relaxed">
+
+  <!-- Chosen Palette: Slate & Sky Executive Balance (Background: Slate-50, Primary: Slate-900, Accent: Sky-600, Growth: Emerald-600, Alert: Amber-600) -->
+  
+  <!-- Application Structure Plan: The SPA is structured into five thematic, non-linear modules: 1) Executive Command Center & Key Q&A for quick synthesis and scenario controls, 2) 8-Quarter Forward Forecast Engine with interactive Scenario Toggles (Bear/Base/Bull) that dynamically adjust future projections and Chart.js graphs, 3) Segment & Capex Catalysts exploring Power, Industrial, and OSAT growth drivers with project execution timelines, 4) Historical Performance & Multi-Year CAGR Deep Dive tracking 12-quarter trajectories, and 5) Market Consensus & Alt-Data Radar analyzing broker dispersion (Motilal, Nomura, ICICI, etc.) and social sentiment. This structure prioritizes immediate decision insights before allowing deep-dive forensic exploration. -->
+
+  <!-- Visualization & Content Choices: 1. 8-Quarter Forecast -> Dynamic Chart.js Combo Chart (Bars for Revenue, Lines for EBITDA/PAT Margins) -> Interaction: Scenario Selector + Quarter Highlight -> Justification: Displays top-line scale alongside margin inflection without clutter. 2. Historical & Future Growth -> Interactive Line Chart -> Justification: Tracks transition from debt-turnaround to multi-vertical capex phase. 3. Segment Revenue/EBIT Breakdown -> Interactive Donut & Stacked Bar -> Justification: Visualizes the strategic margin divergence between Power Systems (+23.1% PBIT) and initial OSAT cash burn. 4. Alt-Data & Broker Matrix -> Custom Tailwind Grid & Search/Filter JS -> Justification: Avoids static table fatigue and enables fast cross-referencing. NO SVG/Mermaid used. -->
+
+  <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+          <div class="bg-sky-500 text-slate-900 font-bold px-2.5 py-1 rounded text-sm tracking-wider">CGPOWER</div>
+          <span class="text-xs sm:text-sm font-medium text-slate-300 hidden md:inline">Earnings Intelligence & Forward Forecast Engine</span>
+        </div>
+        <nav class="hidden md:flex space-x-6 text-sm font-medium text-slate-300">
+          <a href="#overview" class="hover:text-sky-400 transition">Command Center</a>
+          <a href="#forecast" class="hover:text-sky-400 transition">8-Quarter Forecast</a>
+          <a href="#segments-capex" class="hover:text-sky-400 transition">Segments & Capex</a>
+          <a href="#broker-altdata" class="hover:text-sky-400 transition">Broker & Alt-Data</a>
+          <a href="#qa-section" class="hover:text-sky-400 transition">Executive Q&A</a>
+        </nav>
+        <div class="flex items-center space-x-2">
+          <span class="text-xs text-slate-400 hidden sm:inline">Scenario:</span>
+          <select id="globalScenarioSelect" onchange="changeScenario(this.value)" class="bg-slate-800 text-sky-400 text-xs sm:text-sm font-semibold rounded border border-slate-700 px-2.5 py-1.5 focus:outline-none focus:border-sky-500">
+            <option value="base">Base Case (60% Prob)</option>
+            <option value="bull">Bull Case (25% Prob)</option>
+            <option value="bear">Bear Case (15% Prob)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- SECTION 1: EXECUTIVE COMMAND CENTER -->
+    <section id="overview" class="space-y-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">NSE: CGPOWER</span>
+              <span class="text-xs text-slate-500">Murugappa Group | Capital Goods & Industrial Tech</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-1">CG Power & Industrial Solutions Ltd</h1>
+            <p class="text-slate-600 text-sm mt-1">Multi-Source EBITDA & PAT Growth Forecast Model (FY26–FY29E)</p>
+          </div>
+          <div class="flex items-center space-x-4 bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <div>
+              <div class="text-xs text-slate-500 font-medium">Order Backlog</div>
+              <div class="text-lg font-bold text-slate-900">₹18,965 Cr <span class="text-xs text-emerald-600 font-semibold">+45% YoY</span></div>
+            </div>
+            <div class="h-8 w-px bg-slate-300"></div>
+            <div>
+              <div class="text-xs text-slate-500 font-medium">Net Debt Position</div>
+              <div class="text-lg font-bold text-emerald-700">Net Cash <span class="text-xs text-slate-500">(₹2,820Cr QIP FDs)</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 text-slate-600 text-sm leading-relaxed">
+          <p><strong>Executive Thesis:</strong> CGPOWER is entering a multi-year super-cycle propelled by high-margin export expansion (US hyperscale data centers), domestic power transmission infrastructure under the National Electricity Plan (NEP), and massive capacity additions (45,000 MVA Sehore transformer plant). Near-term consolidated EBITDA margins face temporary friction due to raw material cost lags in Industrial Systems and upfront operational expenditures for the ₹7,600 Cr Sanand OSAT semiconductor JV (CG Semi). Earnings acceleration triggers sharply from Q1 FY28 as new capex synchronizes.</p>
+        </div>
+
+        <!-- KPI Highlight Cards -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-sky-300 transition">
+            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">3-Yr Rev CAGR (FY26-29E)</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1" id="kpiRevCagr">24.6%</div>
+            <span class="text-xs text-emerald-600 font-medium" id="kpiRevSub">Base: ₹24,150 Cr by FY29</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-sky-300 transition">
+            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">3-Yr PAT CAGR (FY26-29E)</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1" id="kpiPatCagr">31.8%</div>
+            <span class="text-xs text-emerald-600 font-medium" id="kpiPatSub">Base: ₹2,750 Cr by FY29</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-sky-300 transition">
+            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Peak Growth Quarter</span>
+            <div class="text-2xl font-extrabold text-sky-700 mt-1">Q4 FY28</div>
+            <span class="text-xs text-slate-500 font-medium" id="kpiPeakSub">PAT YoY: +53.1% | EBITDA: +49.7%</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 hover:border-sky-300 transition">
+            <span class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Target EBITDA Margin</span>
+            <div class="text-2xl font-extrabold text-slate-900 mt-1" id="kpiMarginTarget">16.1%</div>
+            <span class="text-xs text-amber-600 font-medium" id="kpiMarginSub">Bottoms ~13.8% in FY27E</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: 8-QUARTER FORWARD FORECAST ENGINE -->
+    <section id="forecast" class="space-y-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+              <span class="inline-block w-2.5 h-6 bg-sky-600 rounded-sm"></span>
+              8-Quarter Forward Earnings Forecast Engine
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">Projections span Q2 FY27 (Q+1E) through Q1 FY29 (Q+8E) based on capacity ramp-ups and order execution.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="updateForecastMetric('revenue')" id="btnMetricRev" class="px-3 py-1.5 text-xs font-semibold rounded bg-sky-600 text-white shadow-sm">Revenue View</button>
+            <button onclick="updateForecastMetric('ebitda')" id="btnMetricEbitda" class="px-3 py-1.5 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200">EBITDA View</button>
+            <button onclick="updateForecastMetric('pat')" id="btnMetricPat" class="px-3 py-1.5 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200">PAT View</button>
+          </div>
+        </div>
+
+        <!-- Introductory Paragraph -->
+        <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 text-xs text-slate-600 mb-6 leading-relaxed">
+          <strong>Section Guidance:</strong> This interactive engine models quarterly revenue trajectory alongside operational and net profitability. Select different views or toggle the active scenario in the header to assess how capacity additions at Sehore (Transformers) and Nashik (Switchgear) counteract initial OSAT gestation expenses. Notice the inflection starting in Q1 FY28 as high-margin US data center exports accelerate.
+        </div>
+
+        <!-- Chart Container -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider" id="chartForecastTitle">Quarterly Revenue & Margin Trajectory</span>
+              <span class="text-xs text-slate-500" id="currentScenarioBadge">Active Scenario: Base Case</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="forecastChart"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 mb-3">Quarter Focus Insights</h3>
+              <div id="quarterInsightBox" class="space-y-3 text-xs text-slate-600">
+                <p class="font-semibold text-slate-800 text-sm">Select a quarter in the forecast table to inspect specific operating drivers.</p>
+                <div class="p-3 bg-white rounded border border-slate-200 space-y-1">
+                  <div class="text-slate-500">Key Execution Driver:</div>
+                  <div class="font-bold text-slate-900" id="insightDriver">45,000 MVA Sehore Transformer Plant Integration</div>
+                </div>
+                <div class="p-3 bg-white rounded border border-slate-200 space-y-1">
+                  <div class="text-slate-500">Margin Factor:</div>
+                  <div class="font-bold text-sky-700" id="insightMargin">OSAT cash burn absorbed by H2 FY27; Power Systems PBIT >23%</div>
+                </div>
+                <div class="p-3 bg-white rounded border border-slate-200 space-y-1">
+                  <div class="text-slate-500">Forecast Confidence Level:</div>
+                  <div class="font-bold text-emerald-700" id="insightConfidence">High (Supported by ₹18,965 Cr Backlog)</div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-500">
+              * YoY calculations strictly benchmarked against corresponding previous-year quarters.
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed 8-Quarter Forecast Table -->
+        <div class="mt-6 overflow-x-auto custom-scrollbar">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-900 text-white font-semibold">
+                <th class="p-3 rounded-tl-lg">Metric / Quarter</th>
+                <th class="p-3 bg-slate-800 text-sky-400">Q1 FY27 (Act)</th>
+                <th class="p-3">Q2 FY27E</th>
+                <th class="p-3">Q3 FY27E</th>
+                <th class="p-3">Q4 FY27E</th>
+                <th class="p-3">Q1 FY28E</th>
+                <th class="p-3">Q2 FY28E</th>
+                <th class="p-3">Q3 FY28E</th>
+                <th class="p-3">Q4 FY28E</th>
+                <th class="p-3 rounded-tr-lg">Q1 FY29E</th>
+              </tr>
+            </thead>
+            <tbody id="forecastTableBody" class="divide-y divide-slate-200 bg-white text-slate-700">
+              <!-- Dynamically populated via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: SEGMENT DYNAMICS & CAPEX CATALYSTS -->
+    <section id="segments-capex" class="space-y-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <span class="inline-block w-2.5 h-6 bg-sky-600 rounded-sm"></span>
+            Segment Dynamics & Capex Catalyst Matrix
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Analysis of core business divisions and the ₹3,000 Cr QIP capital allocation program.</p>
+        </div>
+
+        <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 text-xs text-slate-600 mb-6 leading-relaxed">
+          <strong>Section Guidance:</strong> CGPOWER operates three distinct operating pillars. While Power Systems is enjoying record high margins (23.1% PBIT in Q1 FY27) due to global transformer deficits, Industrial Systems is recovering from raw material lag via 22.5% cumulative price hikes. Meanwhile, the nascent Semiconductor OSAT JV (Sanand) represents a temporary margin drag (₹43 Cr in Q1 FY27) that pivots into a massive terminal value driver by FY28.
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Segment Breakdown Card -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200 flex flex-col justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 mb-3">Operating Segment Margin Bifurcation</h3>
+              <div class="chart-container">
+                <canvas id="segmentChart"></canvas>
+              </div>
+            </div>
+            <div class="mt-4 grid grid-cols-3 gap-2 text-center text-xs">
+              <div class="p-2 bg-white rounded border border-slate-200">
+                <div class="text-slate-500">Power Sys PBIT</div>
+                <div class="font-extrabold text-emerald-600 text-sm">23.1%</div>
+                <div class="text-[10px] text-slate-400">Global Shortage</div>
+              </div>
+              <div class="p-2 bg-white rounded border border-slate-200">
+                <div class="text-slate-500">Industrial PBIT</div>
+                <div class="font-extrabold text-amber-600 text-sm">8.8%</div>
+                <div class="text-[10px] text-slate-400">Price Hikes Active</div>
+              </div>
+              <div class="p-2 bg-white rounded border border-slate-200">
+                <div class="text-slate-500">OSAT Impact</div>
+                <div class="font-extrabold text-red-600 text-sm">-132 bps</div>
+                <div class="text-[10px] text-slate-400">Talent Burn (Q1)</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Capex & Capacity Tracker -->
+          <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+            <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 mb-3">Major Capex Execution Tracker</h3>
+            <div class="space-y-3 text-xs">
+              
+              <!-- Project 1 -->
+              <div class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold text-slate-900">Nashik GIS Switchgear Expansion</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[10px]">Complete (Jun 2026)</span>
+                </div>
+                <p class="text-slate-600 text-[11px]">Capex: ₹35.2 Cr | Switchgear capacity expanded by 80% to 16,000 units. Executed 50% faster than planned 18-month timeline.</p>
+                <div class="mt-2 text-slate-500 flex justify-between text-[10px]">
+                  <span>Revenue Impact: Medium</span>
+                  <span>EBITDA Accretion: Immediate (Q2 FY27)</span>
+                </div>
+              </div>
+
+              <!-- Project 2 -->
+              <div class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold text-slate-900">Sehore Greenfield Transformer Facility</span>
+                  <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 font-semibold text-[10px]">Phased Integration</span>
+                </div>
+                <p class="text-slate-600 text-[11px]">Capex: ₹792 Cr | Expands capacity by 45,000 MVA (1.7x current). Initial 10k MVA online, scaling to 45k MVA by late FY28.</p>
+                <div class="mt-2 text-slate-500 flex justify-between text-[10px]">
+                  <span>Revenue Impact: Very High</span>
+                  <span>Key Market: US Data Center Exports</span>
+                </div>
+              </div>
+
+              <!-- Project 3 -->
+              <div class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-1">
+                  <span class="font-bold text-slate-900">Sanand OSAT Semiconductor JV (CG Semi)</span>
+                  <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold text-[10px]">Phase 1 (July 2026)</span>
+                </div>
+                <p class="text-slate-600 text-[11px]">Total Outlay: ~₹7,600 Cr (Supported by ISM 2.0 Subsidies). Equity backed by QIP proceeds. G1 facility live, G2 in FY28.</p>
+                <div class="mt-2 text-slate-500 flex justify-between text-[10px]">
+                  <span>Near-term Drag: ₹40-50Cr/qtr</span>
+                  <span>EBITDA Breakeven Target: FY28</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: HISTORICAL CONTEXT & MULTI-YEAR trajectory -->
+    <section class="space-y-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <span class="inline-block w-2.5 h-6 bg-sky-600 rounded-sm"></span>
+            Historical Performance & Multi-Year Scale (FY22–FY29E)
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Tracking turnaround debt resolution into multi-vertical execution.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Annual Revenue & PAT Escalation (₹ Cr)</span>
+              <span class="text-xs text-emerald-600 font-semibold">Consolidated Financial Model</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="historicalChart"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 overflow-x-auto custom-scrollbar">
+            <h3 class="text-sm font-bold text-slate-900 border-b border-slate-200 pb-2 mb-3">Annual Financial Summary</h3>
+            <table class="w-full text-xs text-left">
+              <thead>
+                <tr class="bg-slate-200 text-slate-800 font-semibold">
+                  <th class="p-2">FY</th>
+                  <th class="p-2">Rev (₹Cr)</th>
+                  <th class="p-2">EBITDA %</th>
+                  <th class="p-2">PAT (₹Cr)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 text-slate-700">
+                <tr><td class="p-2 font-medium">FY22</td><td class="p-2">5,484</td><td class="p-2">11.8%</td><td class="p-2">913</td></tr>
+                <tr><td class="p-2 font-medium">FY23</td><td class="p-2">6,973</td><td class="p-2">14.4%</td><td class="p-2">963</td></tr>
+                <tr><td class="p-2 font-medium">FY24</td><td class="p-2">8,046</td><td class="p-2">14.2%</td><td class="p-2">1,428</td></tr>
+                <tr><td class="p-2 font-medium">FY25</td><td class="p-2">9,909</td><td class="p-2">13.3%</td><td class="p-2">973</td></tr>
+                <tr class="bg-slate-100 font-bold"><td class="p-2">FY26 (A)</td><td class="p-2">12,418</td><td class="p-2">13.2%</td><td class="p-2">1,199</td></tr>
+                <tr class="text-sky-700 font-bold"><td class="p-2">FY27E</td><td class="p-2">14,911</td><td class="p-2">14.0%</td><td class="p-2">1,429</td></tr>
+                <tr class="text-sky-700 font-bold"><td class="p-2">FY28E</td><td class="p-2">19,700</td><td class="p-2">14.9%</td><td class="p-2">2,007</td></tr>
+                <tr class="text-emerald-700 font-bold"><td class="p-2">FY29E</td><td class="p-2">24,150</td><td class="p-2">16.1%</td><td class="p-2">2,750</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: BROKER CONSENSUS VS INDEPENDENT MODEL & ALT-DATA RADAR -->
+    <section id="broker-altdata" class="space-y-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <span class="inline-block w-2.5 h-6 bg-sky-600 rounded-sm"></span>
+            Broker Consensus vs. Independent Model & Alternative Data
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Triangulating institutional equity research with channel intelligence.</p>
+        </div>
+
+        <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 text-xs text-slate-600 mb-6 leading-relaxed">
+          <strong>Section Guidance:</strong> Institutional analysts agree on high top-line growth but diverge on EBITDA margins due to varying assumptions on OSAT cash burn. Nomura holds an aggressive target price (₹1,100) focused on US data center exports, while Motilal Oswal trimmed near-term estimates to factor in semiconductor setup drag. Alternate data (X/LinkedIn) indicates extremely high hiring velocity and strong confidence among suppliers.
+        </div>
+
+        <!-- Broker Matrix -->
+        <div class="mb-6">
+          <h3 class="text-sm font-bold text-slate-900 mb-3">Institutional Research Matrix (FY27E Estimates)</h3>
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-900 text-white font-semibold">
+                  <th class="p-2.5">Institution / Broker</th>
+                  <th class="p-2.5">Target Price</th>
+                  <th class="p-2.5">FY27E Revenue</th>
+                  <th class="p-2.5">FY27E EBITDA</th>
+                  <th class="p-2.5">FY27E PAT</th>
+                  <th class="p-2.5">Core Rationale</th>
+                  <th class="p-2.5">Estimate Direction</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 bg-white text-slate-700">
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 font-bold text-slate-900">Nomura</td>
+                  <td class="p-2.5 font-bold text-emerald-700">₹1,100</td>
+                  <td class="p-2.5">₹15,620 Cr</td>
+                  <td class="p-2.5">₹2,210 Cr</td>
+                  <td class="p-2.5">₹1,580 Cr</td>
+                  <td class="p-2.5">US Data Center export acceleration; 18-33% EPS CAGR.</td>
+                  <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">Upgrade</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 font-bold text-slate-900">ICICI Securities</td>
+                  <td class="p-2.5 font-bold text-emerald-700">₹1,120</td>
+                  <td class="p-2.5">₹15,100 Cr</td>
+                  <td class="p-2.5">₹2,160 Cr</td>
+                  <td class="p-2.5">₹1,510 Cr</td>
+                  <td class="p-2.5">27% Revenue CAGR, 35% EBITDA CAGR; strong execution.</td>
+                  <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-slate-100 text-slate-800 font-semibold">Stable</span></td>
+                </tr>
+                <tr class="hover:bg-slate-50">
+                  <td class="p-2.5 font-bold text-slate-900">Motilal Oswal</td>
+                  <td class="p-2.5 font-bold text-slate-700">₹1,020</td>
+                  <td class="p-2.5">₹15,350 Cr</td>
+                  <td class="p-2.5">₹2,103 Cr</td>
+                  <td class="p-2.5">₹1,465 Cr</td>
+                  <td class="p-2.5">Factoring OSAT talent setup burn; EBITDA breakeven by FY28.</td>
+                  <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">Minor Cut</span></td>
+                </tr>
+                <tr class="bg-sky-50 font-semibold">
+                  <td class="p-2.5 text-sky-900 font-extrabold">Independent Model (Base)</td>
+                  <td class="p-2.5 text-sky-900">—</td>
+                  <td class="p-2.5 text-sky-900">₹14,911 Cr</td>
+                  <td class="p-2.5 text-sky-900">₹2,091 Cr</td>
+                  <td class="p-2.5 text-sky-900">₹1,429 Cr</td>
+                  <td class="p-2.5 text-sky-900">Strict probability weighting on Industrial RM lag & depreciation.</td>
+                  <td class="p-2.5"><span class="px-2 py-0.5 rounded bg-sky-200 text-sky-900 font-bold">Conservative</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Alternative Data Gauges -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+            <span class="text-xs text-slate-500 font-semibold uppercase">X / Twitter Sentiment</span>
+            <div class="text-3xl font-black text-emerald-600 mt-1">+40 Score</div>
+            <p class="text-[11px] text-slate-600 mt-1">55% Positive | Retail celebration of $99.2M Tallgrass US export order offset brief auditor rotation speculation.</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+            <span class="text-xs text-slate-500 font-semibold uppercase">LinkedIn Channel Intelligence</span>
+            <div class="text-3xl font-black text-emerald-600 mt-1">+70 Score</div>
+            <p class="text-[11px] text-slate-600 mt-1">75% Positive | Heavy talent acquisition in Sanand OSAT; strategic appointment of Samit Khanna (B2C expansion).</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+            <span class="text-xs text-slate-500 font-semibold uppercase">Business Media & Forums</span>
+            <div class="text-3xl font-black text-sky-600 mt-1">High Conviction</div>
+            <p class="text-[11px] text-slate-600 mt-1">ET Now concall highlights: Nashik GIS completed 50% faster than target. Forum risks: CRGO steel import dependency.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: EXECUTIVE Q&A ACCORDION -->
+    <section id="qa-section" class="space-y-6">
+      <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+        <div class="mb-4">
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <span class="inline-block w-2.5 h-6 bg-sky-600 rounded-sm"></span>
+            12 Core Earnings Intelligence Questions
+          </h2>
+          <p class="text-xs text-slate-500 mt-0.5">Definitive evidence-driven answers synthesized from the multi-source research report.</p>
+        </div>
+
+        <div class="space-y-3" id="qaAccordion">
+          <!-- Populated by JS for interactivity -->
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-8 rounded-xl px-6 text-center space-y-2 border border-slate-800">
+      <p class="font-semibold text-slate-300">CG POWER AND INDUSTRIAL SOLUTIONS LTD — INDEPENDENT EARNINGS MODEL</p>
+      <p>Data Sources: Q1 FY27 Disclosures, Concall Transcripts, ISM 2.0 Subsidies, Channel Checks, & Broker Research Notes.</p>
+      <p class="text-slate-500 text-[11px]">For analytical and informational visualization purposes only. No buy/sell investment recommendations intended.</p>
+    </footer>
+
+  </main>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- DATA STORE ---
+    const rawData = {
+      base: {
+        quarters: ["Q1 FY27 (A)", "Q2 FY27E", "Q3 FY27E", "Q4 FY27E", "Q1 FY28E", "Q2 FY28E", "Q3 FY28E", "Q4 FY28E", "Q1 FY29E"],
+        revenue: [3281, 3595, 3820, 4215, 4350, 4720, 5080, 5550, 5725],
+        revYoY: [14.0, 19.7, 20.3, 22.5, 32.6, 31.3, 33.0, 31.7, 31.6],
+        ebitda: [397, 496, 531, 582, 643, 717, 787, 871, 916],
+        ebitdaYoY: [21.4, 13.5, 16.2, 18.0, 33.7, 44.6, 48.2, 49.7, 42.5],
+        ebitdaMargin: [12.1, 13.8, 13.9, 13.8, 14.8, 15.2, 15.5, 15.7, 16.0],
+        pat: [308, 320, 345, 382, 425, 472, 525, 585, 618],
+        patYoY: [16.0, 14.0, 17.2, 20.2, 38.0, 47.5, 52.2, 53.1, 45.4],
+        patMargin: [9.4, 8.9, 9.0, 9.1, 9.8, 10.0, 10.3, 10.5, 10.8],
+        eps: [2.01, 2.09, 2.26, 2.50, 2.78, 3.09, 3.44, 3.83, 4.05],
+        confidence: ["Actual", "High", "High", "High", "Medium", "Medium", "Medium", "Medium", "Low"],
+        cagrRev: "24.6%",
+        cagrPat: "31.8%",
+        targetMargin: "16.1%"
+      },
+      bull: {
+        quarters: ["Q1 FY27 (A)", "Q2 FY27E", "Q3 FY27E", "Q4 FY27E", "Q1 FY28E", "Q2 FY28E", "Q3 FY28E", "Q4 FY28E", "Q1 FY29E"],
+        revenue: [3281, 3750, 4050, 4500, 4700, 5100, 5500, 6000, 6200],
+        revYoY: [14.0, 24.9, 27.6, 30.7, 43.2, 36.0, 35.8, 33.3, 31.9],
+        ebitda: [397, 543, 587, 675, 728, 816, 907, 1020, 1085],
+        ebitdaYoY: [21.4, 24.2, 28.4, 36.9, 51.3, 50.2, 54.5, 55.4, 49.0],
+        ebitdaMargin: [12.1, 14.5, 14.5, 15.0, 15.5, 16.0, 16.5, 17.0, 17.5],
+        pat: [308, 355, 385, 450, 490, 550, 620, 700, 745],
+        patYoY: [16.0, 26.5, 30.8, 41.5, 59.0, 54.9, 60.6, 55.5, 52.0],
+        patMargin: [9.4, 9.5, 9.5, 10.0, 10.4, 10.8, 11.3, 11.7, 12.0],
+        eps: [2.01, 2.32, 2.51, 2.94, 3.20, 3.60, 4.05, 4.58, 4.87],
+        confidence: ["Actual", "High", "High", "Medium", "Medium", "Medium", "Low", "Low", "Low"],
+        cagrRev: "28.1%",
+        cagrPat: "37.5%",
+        targetMargin: "17.5%"
+      },
+      bear: {
+        quarters: ["Q1 FY27 (A)", "Q2 FY27E", "Q3 FY27E", "Q4 FY27E", "Q1 FY28E", "Q2 FY28E", "Q3 FY28E", "Q4 FY28E", "Q1 FY29E"],
+        revenue: [3281, 3350, 3550, 3900, 4000, 4300, 4600, 5000, 5150],
+        revYoY: [14.0, 11.5, 11.8, 13.3, 21.9, 19.6, 20.4, 19.3, 28.7],
+        ebitda: [397, 435, 475, 510, 560, 610, 667, 735, 772],
+        ebitdaYoY: [21.4, -0.4, 3.9, 3.4, 16.4, 23.0, 26.0, 30.3, 20.0],
+        ebitdaMargin: [12.1, 13.0, 13.4, 13.1, 14.0, 14.2, 14.5, 14.7, 15.0],
+        pat: [308, 275, 305, 335, 365, 400, 440, 490, 515],
+        patYoY: [16.0, -2.1, 3.6, 5.3, 18.5, 23.1, 28.2, 30.7, 26.8],
+        patMargin: [9.4, 8.2, 8.6, 8.6, 9.1, 9.3, 9.6, 9.8, 10.0],
+        eps: [2.01, 1.80, 1.99, 2.19, 2.39, 2.61, 2.88, 3.20, 3.37],
+        confidence: ["Actual", "High", "Medium", "Medium", "Low", "Low", "Low", "Low", "Low"],
+        cagrRev: "19.2%",
+        cagrPat: "22.4%",
+        targetMargin: "15.0%"
+      }
+    };
+
+    const quarterDrivers = [
+      { driver: "Q1 FY27 Actuals", margin: "Power Sys PBIT 23.1%; OSAT drag -132 bps", conf: "Actual (Reported)" },
+      { driver: "Motor price hike absorption + Nashik GIS ramp", margin: "Industrial margins stabilizing ~13.8%", conf: "High (Backlog backed)" },
+      { driver: "Sehore Greenfield Transformer Phase 1 Integration", margin: "Operating leverage offsets RM steel lag", conf: "High (Backlog backed)" },
+      { driver: "Tallgrass US $99.2M Data Center Order Deliveries", margin: "High-margin export mix expansion", conf: "High (Contracted)" },
+      { driver: "Sanand OSAT G1 Production Ramp", margin: "Structural margin inflection begins (>14.8%)", conf: "Medium (Execution dependent)" },
+      { driver: "Nashik Switchgear full 80% capacity utilization", margin: "EBITDA margin reaches 15.2%", conf: "Medium" },
+      { driver: "Sehore 45,000 MVA capacity reaching critical mass", margin: "EBITDA YoY growth surges +48.2%", conf: "Medium" },
+      { driver: "Peak Synergies: US Exports + OSAT Scaling", margin: "Peak EBITDA YoY +49.7%, PAT YoY +53.1%", conf: "Medium" },
+      { driver: "Sanand OSAT G2 Mass Production Launch", margin: "Blended EBITDA Margin hits 16.0%", conf: "Low (Long-term model)" }
+    ];
+
+    const qaList = [
+      { q: "1. What is the expected Revenue growth for each of the next 8 quarters?", a: "Q2 FY27: 19.7% | Q3 FY27: 20.3% | Q4 FY27: 22.5% | Q1 FY28: 32.6% | Q2 FY28: 31.3% | Q3 FY28: 33.0% | Q4 FY28: 31.7% | Q1 FY29: 31.6%" },
+      { q: "2. What is the expected EBITDA growth for each of the next 8 quarters?", a: "Q2 FY27: 13.5% | Q3 FY27: 16.2% | Q4 FY27: 18.0% | Q1 FY28: 33.7% | Q2 FY28: 44.6% | Q3 FY28: 48.2% | Q4 FY28: 49.7% | Q1 FY29: 42.5%" },
+      { q: "3. What is the expected PAT growth for each of the next 8 quarters?", a: "Q2 FY27: 14.0% | Q3 FY27: 17.2% | Q4 FY27: 20.2% | Q1 FY28: 38.0% | Q2 FY28: 47.5% | Q3 FY28: 52.2% | Q4 FY28: 53.1% | Q1 FY29: 45.4%" },
+      { q: "4. Which quarter has the highest expected EBITDA growth?", a: "Q4 FY28 (Q+7E) is expected to deliver the highest EBITDA growth at 49.7% YoY. This reflects full operational utilization of the 45,000 MVA Sehore plant alongside Sanand OSAT scaling." },
+      { q: "5. Which quarter has the highest expected PAT growth?", a: "Q4 FY28 (Q+7E) is expected to see peak PAT growth at 53.1% YoY, tracing peak EBITDA expansion and stabilized depreciation curves." },
+      { q: "6. Is EBITDA margin expected to expand or contract?", a: "EBITDA margin contracts slightly in near-term FY27 (~14.0%) due to OSAT setup drag and raw material price lag in Industrials, but expands structurally to ~16.1% by FY29 as capacity is absorbed and exports surge." },
+      { q: "7. Is PAT growth faster or slower than EBITDA growth, and why?", a: "PAT growth is faster than EBITDA growth over the extended horizon. Although capex increases depreciation, CGPOWER holds ₹2,820 Cr in fixed deposits from its QIP, generating substantial treasury income with near-zero finance costs." },
+      { q: "8. What are the principal drivers of expected earnings growth?", a: "1) 1.7x Transformer expansion at Sehore. 2) 80% Switchgear expansion at Nashik. 3) US Data Center exports ($99.2M order). 4) Motor price hikes (22.5% cumulative) absorbing RM costs." },
+      { q: "9. What could cause the forecast to fail?", a: "1) CRGO electrical steel supply shocks (India imports 88-90% of its needs). 2) Delays in global IDM customer qualifications for the Sanand OSAT semiconductor facility prolonging cash burn." },
+      { q: "10. How does the independent forecast compare with consensus?", a: "The independent model (FY27E Rev: ₹14,911 Cr; EBITDA: ₹2,091 Cr) is slightly more conservative in near-term FY27 than broker median (Rev: ₹15,375 Cr; EBITDA: ₹2,160 Cr) due to stricter probability weighting on OSAT talent burn." },
+      { q: "11. Is earnings momentum accelerating, stable or decelerating?", a: "Currently masking a bifurcation—Power Systems is accelerating while Industrial/OSAT drags near term. Consolidated momentum accelerates dramatically from Q1 FY28 onwards." },
+      { q: "12. What evidence supports the forecast?", a: "1) Firm order backlog of ₹18,965 Cr (+45% YoY). 2) Disclosed commissioning of Nashik GIS (50% faster than target). 3) Confirmed $99.2M Tallgrass US export order. 4) Concall disclosures on price hikes." }
+    ];
+
+    let currentScenario = "base";
+    let currentMetricView = "revenue";
+    let forecastChartInstance = null;
+    let segmentChartInstance = null;
+    let historicalChartInstance = null;
+
+    // --- INITIALIZATION ---
+    window.addEventListener("DOMContentLoaded", () => {
+      initForecastChart();
+      initSegmentChart();
+      initHistoricalChart();
+      renderForecastTable();
+      renderQAAccordion();
+      updateQuarterInsight(1); // Default to Q2 FY27E
+    });
+
+    // --- SCENARIO TOGGLE FUNCTION ---
+    function changeScenario(scenarioKey) {
+      currentScenario = scenarioKey;
+      const data = rawData[scenarioKey];
+
+      // Update KPI Cards
+      document.getElementById("kpiRevCagr").innerText = data.cagrRev;
+      document.getElementById("kpiPatCagr").innerText = data.cagrPat;
+      document.getElementById("kpiMarginTarget").innerText = data.targetMargin;
+      document.getElementById("currentScenarioBadge").innerText = `Active Scenario: ${scenarioKey.toUpperCase()} Case`;
+
+      // Update Chart & Table
+      updateForecastChart();
+      renderForecastTable();
+    }
+
+    // --- METRIC VIEW SWITCHER ---
+    function updateForecastMetric(metric) {
+      currentMetricView = metric;
+
+      // Update Buttons UI
+      document.getElementById("btnMetricRev").className = metric === "revenue" ? "px-3 py-1.5 text-xs font-semibold rounded bg-sky-600 text-white shadow-sm" : "px-3 py-1.5 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200";
+      document.getElementById("btnMetricEbitda").className = metric === "ebitda" ? "px-3 py-1.5 text-xs font-semibold rounded bg-sky-600 text-white shadow-sm" : "px-3 py-1.5 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200";
+      document.getElementById("btnMetricPat").className = metric === "pat" ? "px-3 py-1.5 text-xs font-semibold rounded bg-sky-600 text-white shadow-sm" : "px-3 py-1.5 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200";
+
+      updateForecastChart();
+    }
+
+    // --- FORECAST CHART (CHART.JS) ---
+    function initForecastChart() {
+      const ctx = document.getElementById("forecastChart").getContext("2d");
+      const data = rawData[currentScenario];
+
+      forecastChartInstance = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: data.quarters,
+          datasets: [
+            {
+              label: "Revenue (₹ Cr)",
+              data: data.revenue,
+              backgroundColor: "rgba(2, 132, 199, 0.8)",
+              borderColor: "rgb(2, 132, 199)",
+              borderWidth: 1,
+              yAxisID: "y"
+            },
+            {
+              label: "EBITDA Margin (%)",
+              data: data.ebitdaMargin,
+              type: "line",
+              borderColor: "rgb(5, 150, 105)",
+              backgroundColor: "rgb(5, 150, 105)",
+              borderWidth: 2,
+              pointRadius: 4,
+              yAxisID: "y1"
+            },
+            {
+              label: "PAT Margin (%)",
+              data: data.patMargin,
+              type: "line",
+              borderColor: "rgb(217, 119, 6)",
+              backgroundColor: "rgb(217, 119, 6)",
+              borderWidth: 2,
+              pointRadius: 4,
+              yAxisID: "y1"
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: { position: "top", labels: { boxWidth: 12, font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || "";
+                  if (label) label += ": ";
+                  if (context.dataset.yAxisID === "y1") {
+                    label += context.parsed.y + "%";
+                  } else {
+                    label += "₹" + context.parsed.y + " Cr";
+                  }
+                  return label;
+                }
+              }
+            }
+          },
+          scales: {
+            x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+            y: {
+              type: "linear",
+              position: "left",
+              title: { display: true, text: "Amount (₹ Cr)", font: { size: 10 } },
+              ticks: { font: { size: 10 } }
+            },
+            y1: {
+              type: "linear",
+              position: "right",
+              title: { display: true, text: "Margin %", font: { size: 10 } },
+              grid: { display: false },
+              ticks: { font: { size: 10 }, callback: v => v + "%" }
+            }
+          }
+        }
+      });
+    }
+
+    function updateForecastChart() {
+      if (!forecastChartInstance) return;
+      const data = rawData[currentScenario];
+
+      forecastChartInstance.data.labels = data.quarters;
+
+      if (currentMetricView === "revenue") {
+        document.getElementById("chartForecastTitle").innerText = "Quarterly Revenue & Margin Trajectory";
+        forecastChartInstance.data.datasets[0].label = "Revenue (₹ Cr)";
+        forecastChartInstance.data.datasets[0].data = data.revenue;
+        forecastChartInstance.data.datasets[0].backgroundColor = "rgba(2, 132, 199, 0.8)";
+      } else if (currentMetricView === "ebitda") {
+        document.getElementById("chartForecastTitle").innerText = "Quarterly EBITDA & YoY Growth Trajectory";
+        forecastChartInstance.data.datasets[0].label = "EBITDA (₹ Cr)";
+        forecastChartInstance.data.datasets[0].data = data.ebitda;
+        forecastChartInstance.data.datasets[0].backgroundColor = "rgba(5, 150, 105, 0.8)";
+      } else if (currentMetricView === "pat") {
+        document.getElementById("chartForecastTitle").innerText = "Quarterly PAT & YoY Growth Trajectory";
+        forecastChartInstance.data.datasets[0].label = "PAT (₹ Cr)";
+        forecastChartInstance.data.datasets[0].data = data.pat;
+        forecastChartInstance.data.datasets[0].backgroundColor = "rgba(217, 119, 6, 0.8)";
+      }
+
+      forecastChartInstance.data.datasets[1].data = data.ebitdaMargin;
+      forecastChartInstance.data.datasets[2].data = data.patMargin;
+      forecastChartInstance.update();
+    }
+
+    // --- RENDER FORECAST TABLE ---
+    function renderForecastTable() {
+      const data = rawData[currentScenario];
+      const tbody = document.getElementById("forecastTableBody");
+
+      const rows = [
+        { name: "Revenue (₹ Cr)", values: data.revenue, bold: true },
+        { name: "Revenue YoY Growth", values: data.revYoY.map(v => v + "%"), color: "text-sky-700" },
+        { name: "EBITDA (₹ Cr)", values: data.ebitda, bold: true },
+        { name: "EBITDA YoY Growth", values: data.ebitdaYoY.map(v => v + "%"), color: "text-emerald-700" },
+        { name: "EBITDA Margin", values: data.ebitdaMargin.map(v => v + "%"), bg: "bg-slate-50" },
+        { name: "PAT (₹ Cr)", values: data.pat, bold: true },
+        { name: "PAT YoY Growth", values: data.patYoY.map(v => v + "%"), color: "text-amber-700" },
+        { name: "PAT Margin", values: data.patMargin.map(v => v + "%"), bg: "bg-slate-50" },
+        { name: "EPS (₹)", values: data.eps },
+        { name: "Forecast Confidence", values: data.confidence, isBadge: true }
+      ];
+
+      let html = "";
+      rows.forEach((row) => {
+        html += `<tr class="${row.bg || 'bg-white'} hover:bg-slate-100 transition cursor-pointer">`;
+        html += `<td class="p-2.5 font-medium border-r border-slate-200 ${row.bold ? 'font-bold text-slate-900' : ''}">${row.name}</td>`;
+        
+        row.values.forEach((val, idx) => {
+          let cellContent = val;
+          if (row.isBadge) {
+            let badgeClass = val === "Actual" ? "bg-slate-200 text-slate-800" : val === "High" ? "bg-emerald-100 text-emerald-800" : val === "Medium" ? "bg-sky-100 text-sky-800" : "bg-amber-100 text-amber-800";
+            cellContent = `<span class="px-2 py-0.5 rounded ${badgeClass} text-[10px] font-bold">${val}</span>`;
+          }
+          html += `<td onclick="updateQuarterInsight(${idx})" class="p-2.5 ${row.bold ? 'font-bold' : ''} ${row.color || ''}">${cellContent}</td>`;
+        });
+        html += `</tr>`;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function updateQuarterInsight(qIdx) {
+      const qName = rawData[currentScenario].quarters[qIdx];
+      const driver = quarterDrivers[qIdx];
+      
+      document.getElementById("insightDriver").innerText = driver.driver;
+      document.getElementById("insightMargin").innerText = driver.margin;
+      document.getElementById("insightConfidence").innerText = driver.conf;
+    }
+
+    // --- SEGMENT BIFURCATION CHART ---
+    function initSegmentChart() {
+      const ctx = document.getElementById("segmentChart").getContext("2d");
+      segmentChartInstance = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Power Systems (T&D)", "Industrial Systems (Motors/Rail)", "Semiconductor OSAT (CG Semi)"],
+          datasets: [{
+            data: [1402, 1671, 43], // Q1 FY27 Revenue / Drag representation
+            backgroundColor: ["#059669", "#0284c7", "#e11d48"],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 10 } } },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ": ₹" + context.parsed + " Cr Revenue/Cost";
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // --- HISTORICAL CHART ---
+    function initHistoricalChart() {
+      const ctx = document.getElementById("historicalChart").getContext("2d");
+      historicalChartInstance = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: ["FY22", "FY23", "FY24", "FY25", "FY26", "FY27E", "FY28E", "FY29E"],
+          datasets: [
+            {
+              label: "Revenue (₹ Cr)",
+              data: [5484, 6973, 8046, 9909, 12418, 14911, 19700, 24150],
+              borderColor: "rgb(2, 132, 199)",
+              backgroundColor: "rgba(2, 132, 199, 0.1)",
+              fill: true,
+              tension: 0.3
+            },
+            {
+              label: "PAT (₹ Cr)",
+              data: [913, 963, 1428, 973, 1199, 1429, 2007, 2750],
+              borderColor: "rgb(5, 150, 105)",
+              backgroundColor: "transparent",
+              borderDash: [5, 5],
+              tension: 0.3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { position: "top", labels: { boxWidth: 10, font: { size: 10 } } } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { title: { display: true, text: "₹ Crore", font: { size: 10 } } }
+          }
+        }
+      });
+    }
+
+    // --- RENDER Q&A ACCORDION ---
+    function renderQAAccordion() {
+      const container = document.getElementById("qaAccordion");
+      let html = "";
+      qaList.forEach((item, idx) => {
+        html += `
+          <div class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+            <button onclick="toggleQA(${idx})" class="w-full text-left p-3.5 bg-slate-50 hover:bg-slate-100 flex justify-between items-center transition">
+              <span class="font-bold text-slate-800 text-xs sm:text-sm">${item.q}</span>
+              <span id="qaIcon-${idx}" class="text-slate-500 font-bold text-base">＋</span>
+            </button>
+            <div id="qaBody-${idx}" class="hidden p-4 text-xs text-slate-600 bg-white border-t border-slate-100 leading-relaxed">
+              ${item.a}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleQA(idx) {
+      const body = document.getElementById(`qaBody-${idx}`);
+      const icon = document.getElementById(`qaIcon-${idx}`);
+      if (body.classList.contains("hidden")) {
+        body.classList.remove("hidden");
+        icon.innerText = "－";
+      } else {
+        body.classList.add("hidden");
+        icon.innerText = "＋";
+      }
+    }
+  </script>
+</body>
+</html>

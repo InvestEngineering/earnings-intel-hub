@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEGA Industries — Earnings Intelligence & Forward Forecast Dashboard</title>
+    <!-- Chosen Palette: Slate & Amber Financial Executive Palette -->
+    <!-- Application Structure Plan: The application is structured into 6 thematic interactive modules: 
+         1. Executive Summary & M&A Transformation (Key metrics, deal snapshot, deleveraging timeline)
+         2. Interactive 4-Quarter Earnings Model & Scenario Simulator (Bear/Base/Bull toggle, dynamic Chart.js forecast curves, sensitivity calculator)
+         3. Historical Performance & Margin Evolution (8-quarter trend, 4-year CAGR, margin dilution vs organic expansion)
+         4. Segment & Capital Structure Engine (Sum-of-the-parts revenue/EBITDA, Chile plant capex, debt profile)
+         5. Concall & Multi-Source Sentiment Matrix (Filterable forensic transcript insights, X/LinkedIn/YouTube sentiment)
+         6. Catalysts, Risks & Institutional Q&A (Direct responses to the 12 key institutional query mandates, source traceability)
+         This task-oriented, non-linear architecture allows portfolio managers, forensic analysts, and investors to explore structural inflections seamlessly. -->
+    <!-- Visualization & Content Choices: 
+         1. Dynamic Consolidated Revenue & EBITDA Scaling Chart (Chart.js Canvas) -> Visualizes the 10x revenue step-up and EBITDA trajectory from Q1 FY25 to Q1 FY28E.
+         2. Margin Profile & EPS Expansion Line/Bar Chart (Chart.js Canvas) -> Illustrates how legacy margins vs Molycop consolidation blend and expand organically.
+         3. Dynamic Scenario Switcher & Deleveraging Sensitivity Calculator (Vanilla JS) -> Interactive controls for Bear/Base/Bull cases and custom interest paydown modeling.
+         4. Concall Forensic Filter Matrix (HTML/JS) -> Interactive category tabs to filter management commentary on demand, pricing, debt, and capex.
+         5. Structured Institutional Q&A Accordion -> Complete resolution of all 12 core earnings forecast questions.
+         Confirming NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            600: '#1e40af',
+                            700: '#1d4ed8',
+                            800: '#1e3a8a',
+                            900: '#0f172a'
+                        },
+                        accent: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .tab-btn.active {
+            border-bottom: 3px solid #f59e0b;
+            color: #1e3a8a;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-amber-100 selection:text-amber-900 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="bg-amber-500 text-slate-900 px-2.5 py-1 rounded text-xs font-black tracking-wider uppercase">NSE: TEGA</span>
+                    <div>
+                        <h1 class="text-lg font-bold leading-tight">TEGA Industries Ltd</h1>
+                        <p class="text-xs text-slate-400">Institutional Earnings Intelligence & 4-Quarter Forward Forecast</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-4 text-xs">
+                    <div class="bg-slate-800 px-3 py-1.5 rounded border border-slate-700">
+                        <span class="text-slate-400 block">Transaction Scale</span>
+                        <span class="font-semibold text-amber-400">USD 1.5B Molycop Acquisition</span>
+                    </div>
+                    <div class="bg-slate-800 px-3 py-1.5 rounded border border-slate-700">
+                        <span class="text-slate-400 block">Credit Rating</span>
+                        <span class="font-semibold text-emerald-400">A+ / Stable (CRISIL/ICRA)</span>
+                    </div>
+                    <div class="bg-slate-800 px-3 py-1.5 rounded border border-slate-700">
+                        <span class="text-slate-400 block">Inflection Point</span>
+                        <span class="font-semibold text-blue-400">Q2 FY27E Structural Acceleration</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="bg-slate-800 border-t border-slate-700 text-slate-300 text-sm overflow-x-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto px-4 flex space-x-6 whitespace-nowrap">
+                <button onclick="switchTab('exec-summary')" id="tab-exec-summary" class="tab-btn py-3 px-1 text-slate-300 hover:text-white transition active">Executive Summary & M&A</button>
+                <button onclick="switchTab('forecast-dashboard')" id="tab-forecast-dashboard" class="tab-btn py-3 px-1 text-slate-300 hover:text-white transition">4-Quarter Forecast & Simulator</button>
+                <button onclick="switchTab('historical-trends')" id="tab-historical-trends" class="tab-btn py-3 px-1 text-slate-300 hover:text-white transition">Historical Financials</button>
+                <button onclick="switchTab('segment-drivers')" id="tab-segment-drivers" class="tab-btn py-3 px-1 text-slate-300 hover:text-white transition">Segments & Capital Structure</button>
+                <button onclick="switchTab('concall-sentiment')" id="tab-concall-sentiment" class="tab-btn py-3 px-1 text-slate-300 hover:text-white transition">Concall & Sentiment Matrix</button>
+                <button onclick="switchTab('qa-catalysts')" id="tab-qa-catalysts" class="tab-btn py-3 px-1 text-slate-300 hover:text-white transition">Institutional Q&A & Catalysts</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ================= SECTION 1: EXECUTIVE SUMMARY ================= -->
+        <section id="exec-summary" class="space-y-6">
+            <!-- Context Header Banner -->
+            <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-950 text-white p-6 rounded-xl shadow-lg border border-slate-700">
+                <div class="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                    <div>
+                        <span class="inline-block px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full text-xs font-semibold uppercase mb-2">Transformational Inflection Point</span>
+                        <h2 class="text-2xl font-bold text-white">Consolidation of Molycop Scales Enterprise Revenue by 10x</h2>
+                        <p class="text-slate-300 text-sm mt-1 max-w-3xl">
+                            The acquisition of Molycop on June 1, 2026, fundamentally converts Tega Industries from a mid-cap niche polymer liner producer (₹1,773 Cr run-rate) into an integrated global comminution titan with an annual revenue run-rate exceeding ₹18,000 Crore. While reported Q1 FY27 results showed an optical loss of ₹108 Cr due to ₹190 Cr in exceptional M&A costs, core legacy operating margins expanded 320 bps to 24.1%, and forward operating earnings are poised for immediate violent acceleration.
+                        </p>
+                    </div>
+                    <div class="bg-slate-800/80 p-4 rounded-lg border border-slate-700 flex flex-col justify-center text-center min-w-[200px]">
+                        <span class="text-slate-400 text-xs">Next 4Q Estimated EBITDA</span>
+                        <span class="text-2xl font-extrabold text-amber-400 mt-1">₹2,710 Cr</span>
+                        <span class="text-emerald-400 text-xs mt-1 font-medium">▲ +988.3% YoY Growth</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Metric Snapshot Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Next 4Q Revenue</span>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1">₹17,920 Cr</h3>
+                            <p class="text-xs text-emerald-600 font-semibold mt-1">▲ +486.0% vs Prev 4Q Actual</p>
+                        </div>
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg text-lg">📊</div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        Baseline shift from ₹400Cr/qtr to &gt;₹4,300Cr/qtr.
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Next 4Q PAT (Est.)</span>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1">₹785 Cr</h3>
+                            <p class="text-xs text-emerald-600 font-semibold mt-1">Turnaround from -₹3 Cr</p>
+                        </div>
+                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg text-lg">💵</div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        Consolidated EPS forecast at ₹103.63 for next 4Q.
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Peak Leverage</span>
+                            <h3 class="text-2xl font-black text-amber-600 mt-1">4.0x – 4.5x</h3>
+                            <p class="text-xs text-amber-700 font-semibold mt-1">Net Debt / EBITDA Multiple</p>
+                        </div>
+                        <div class="p-2 bg-amber-50 text-amber-600 rounded-lg text-lg">🛡️</div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        CRISIL/ICRA downgrade to A+/Stable absorbed.
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Target Synergies</span>
+                            <h3 class="text-2xl font-black text-slate-900 mt-1">$20 Million</h3>
+                            <p class="text-xs text-indigo-600 font-semibold mt-1">Over 2–2.5 Years Execution</p>
+                        </div>
+                        <div class="p-2 bg-indigo-50 text-indigo-600 rounded-lg text-lg">⚡</div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-slate-100 text-xs text-slate-500">
+                        Cross-selling DynaPrime + Molycop grinding media.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strategic Overview Columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Column 1: Core Investment Thesis -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center">
+                        <span class="mr-2 text-amber-500">📌</span> Core Investment Narrative
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Tega Industries has executed a transformative leap by acquiring Molycop for USD 1.5 billion. This transaction provides Tega with dominant global market share across North America, Latin America, and Australasia in grinding media and comminution consumables.
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded-lg text-xs space-y-2 border border-slate-200">
+                        <div class="font-semibold text-slate-800">Key Fundamental Catalysts:</div>
+                        <ul class="list-disc list-inside text-slate-600 space-y-1">
+                            <li><strong>Mine-to-Mill Integration:</strong> Combining Tega's DynaPrime composite liners with Molycop grinding balls.</li>
+                            <li><strong>High-Chrome Transition:</strong> Shifting Molycop from 20k to 200k tons capacity in premium High-Chrome media.</li>
+                            <li><strong>Chile Facility:</strong> $25M-$30M plant commissioning in Mar 2027 slashing LATAM freight costs.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Column 2: Forensics on Q1 FY27 Loss -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center">
+                        <span class="mr-2 text-blue-500">🔍</span> Forensic Deconstruction of Q1 FY27
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        The headline net loss of ₹108 Crore in Q1 FY27 is an optical distortion created by standard M&A accounting treatment of exceptional acquisition costs.
+                    </p>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between items-center bg-red-50 p-2 rounded border border-red-100">
+                            <span class="text-red-800 font-medium">Reported PAT (Q1 FY27)</span>
+                            <span class="font-bold text-red-700">-₹108.0 Cr</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-200">
+                            <span class="text-slate-600">(+) M&A Exceptional Charge</span>
+                            <span class="font-bold text-slate-800">+₹190.0 Cr (₹1.9B)</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-emerald-50 p-2 rounded border border-emerald-200">
+                            <span class="text-emerald-900 font-semibold">Adjusted Core Operating PAT</span>
+                            <span class="font-bold text-emerald-700">₹54.7 Cr (+26% YoY)</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-500 italic">
+                        Legacy Tega standalone revenue grew 21% YoY to ₹430 Cr with EBITDA margins expanding to 24.1%.
+                    </p>
+                </div>
+
+                <!-- Column 3: The Deleveraging Imperative & Risk -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h3 class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2 flex items-center">
+                        <span class="mr-2 text-rose-500">⚠️</span> Leverage & Working Capital Watch
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        To fund the transaction, Tega assumed $672.5m in Molycop debt and issued a ₹1,500 Cr parent-level term loan, creating an quarterly interest burden of ₹180-210 Cr.
+                    </p>
+                    <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 text-xs space-y-1.5 text-amber-900">
+                        <div class="font-bold">Primary Risk Factor: Working Capital</div>
+                        <p>
+                            Tega operates with an extended cash conversion cycle exceeding 200 days and DSO of 100-114 days. If working capital bloats under Molycop, free cash flow conversion could stall.
+                        </p>
+                    </div>
+                    <div class="text-xs text-slate-600">
+                        <span class="font-semibold">Deleveraging Mitigant:</span> ₹75.4 Cr from Apollo Funds' ₹95.4 Cr preferential issue is explicitly earmarked for immediate debt paydown.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 2: 4-QUARTER FORECAST & SIMULATOR ================= -->
+        <section id="forecast-dashboard" class="space-y-6 hidden">
+            <!-- Section Intro -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-100 pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Master 4-Quarter Earnings Forecast Engine</h2>
+                        <p class="text-xs text-slate-500 mt-1">
+                            Interactive scenario modeler and quarterly financial projections for Q2 FY27E through Q1 FY28E based on multi-source triangulation.
+                        </p>
+                    </div>
+                    <!-- Scenario Switcher Buttons -->
+                    <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-xs">
+                        <span class="text-slate-500 font-medium px-2">Scenario:</span>
+                        <button onclick="updateScenario('bear')" id="btn-scenario-bear" class="px-3 py-1.5 rounded font-bold transition text-slate-600 hover:text-slate-900">Bear (25%)</button>
+                        <button onclick="updateScenario('base')" id="btn-scenario-base" class="px-3 py-1.5 rounded font-bold transition bg-slate-900 text-white shadow-sm">Base (60%)</button>
+                        <button onclick="updateScenario('bull')" id="btn-scenario-bull" class="px-3 py-1.5 rounded font-bold transition text-slate-600 hover:text-slate-900">Bull (15%)</button>
+                    </div>
+                </div>
+
+                <!-- Scenario Description Banner -->
+                <div id="scenario-banner" class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-900 flex items-center justify-between">
+                    <div>
+                        <strong>Base Case Assumptions:</strong> Firm execution of ₹906 Cr legacy executable order book, 3-5% Molycop volume growth, Chilean plant commissioning in Mar 2027, and linear realization of $20M synergies starting Q3 FY27.
+                    </div>
+                    <span class="text-xs bg-blue-200 text-blue-800 px-2 py-0.5 rounded font-bold ml-2 whitespace-nowrap">60% Probability</span>
+                </div>
+            </div>
+
+            <!-- Dynamic Interactive Forecast Dashboard Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-sm">4-Quarter Forward Earnings Dashboard</h3>
+                    <span class="text-xs text-amber-400 font-mono">Q1 FY27 (Actual) ➔ Q2 FY27E to Q1 FY28E (Independent Forecast)</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase font-semibold">
+                                <th class="p-3">Financial Metric</th>
+                                <th class="p-3 bg-slate-200/60 font-bold text-slate-900">Latest Actual (Q1 FY27)</th>
+                                <th class="p-3">Q+1E (Q2 FY27)</th>
+                                <th class="p-3">Q+2E (Q3 FY27)</th>
+                                <th class="p-3">Q+3E (Q4 FY27)</th>
+                                <th class="p-3">Q+4E (Q1 FY28)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-800 font-mono">
+                            <tr>
+                                <td class="p-3 font-sans font-semibold text-slate-900">Quarter Date</td>
+                                <td class="p-3 bg-slate-50 font-bold text-slate-700">Jun-26</td>
+                                <td class="p-3 text-blue-700 font-bold">Sep-26</td>
+                                <td class="p-3 text-blue-700 font-bold">Dec-26</td>
+                                <td class="p-3 text-blue-700 font-bold">Mar-27</td>
+                                <td class="p-3 text-blue-700 font-bold">Jun-27</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-medium text-slate-800">Revenue (₹ Cr)</td>
+                                <td class="p-3 bg-slate-50 font-bold">1,723</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-rev-q1">4,350</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-rev-q2">4,420</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-rev-q3">4,650</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-rev-q4">4,500</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 text-slate-600">
+                                <td class="p-3 font-sans">Revenue YoY Growth (%)</td>
+                                <td class="p-3 bg-slate-50">383.9%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-revyoy-q1">974.0%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-revyoy-q2">996.7%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-revyoy-q3">782.3%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-revyoy-q4">161.1%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-medium text-slate-800">EBITDA (₹ Cr)</td>
+                                <td class="p-3 bg-slate-50 font-bold text-slate-600">74</td>
+                                <td class="p-3 font-bold text-indigo-700" id="val-ebitda-q1">630</td>
+                                <td class="p-3 font-bold text-indigo-700" id="val-ebitda-q2">663</td>
+                                <td class="p-3 font-bold text-indigo-700" id="val-ebitda-q3">720</td>
+                                <td class="p-3 font-bold text-indigo-700" id="val-ebitda-q4">697</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 text-slate-600">
+                                <td class="p-3 font-sans">EBITDA YoY Growth (%)</td>
+                                <td class="p-3 bg-slate-50 text-rose-600">-26.0%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-ebitdayoy-q1">813.0%</td>
+                                <td class="p-3 text-emerald-600 font-extrabold bg-amber-50 rounded" id="val-ebitdayoy-q2">1341.3%★</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-ebitdayoy-q3">1100.0%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-ebitdayoy-q4">841.8%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-medium text-slate-800">EBITDA Margin (%)</td>
+                                <td class="p-3 bg-slate-50 text-rose-600 font-bold">4.3%</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-margin-q1">14.5%</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-margin-q2">15.0%</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-margin-q3">15.5%</td>
+                                <td class="p-3 font-bold text-slate-900" id="val-margin-q4">15.5%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 bg-amber-50/30">
+                                <td class="p-3 font-sans font-semibold text-slate-900">PAT (₹ Cr)</td>
+                                <td class="p-3 bg-slate-50 text-rose-700 font-bold">-108</td>
+                                <td class="p-3 font-extrabold text-emerald-700" id="val-pat-q1">155</td>
+                                <td class="p-3 font-extrabold text-emerald-700" id="val-pat-q2">185</td>
+                                <td class="p-3 font-extrabold text-emerald-700" id="val-pat-q3">230</td>
+                                <td class="p-3 font-extrabold text-emerald-700" id="val-pat-q4">215</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 text-slate-600">
+                                <td class="p-3 font-sans">PAT YoY Growth (%)</td>
+                                <td class="p-3 bg-slate-50 text-rose-600">-408.5%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-patyoy-q1">252.2%</td>
+                                <td class="p-3 text-emerald-600 font-extrabold bg-amber-100/80 rounded" id="val-patyoy-q2">873.6%★</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-patyoy-q3">447.6%</td>
+                                <td class="p-3 text-emerald-600 font-bold" id="val-patyoy-q4">299.0%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-medium text-slate-800">EPS (₹ per share)</td>
+                                <td class="p-3 bg-slate-50 text-rose-600 font-bold">-14.26</td>
+                                <td class="p-3 font-bold" id="val-eps-q1">20.46</td>
+                                <td class="p-3 font-bold" id="val-eps-q2">24.42</td>
+                                <td class="p-3 font-bold" id="val-eps-q3">30.37</td>
+                                <td class="p-3 font-bold" id="val-eps-q4">28.38</td>
+                            </tr>
+                            <tr class="bg-slate-50 font-sans text-xs">
+                                <td class="p-3 font-semibold text-slate-700">Forecast Confidence</td>
+                                <td class="p-3 text-slate-500 font-bold">Actual</td>
+                                <td class="p-3 text-emerald-700 font-bold">High</td>
+                                <td class="p-3 text-amber-700 font-bold">Medium</td>
+                                <td class="p-3 text-amber-700 font-bold">Medium</td>
+                                <td class="p-3 text-amber-700 font-bold">Medium</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="p-3 bg-slate-100 text-slate-600 text-[11px] border-t border-slate-200">
+                    *★ Marks Peak Growth Quarter (Q3 FY27 expected peak EBITDA growth 1341.3% and PAT growth 873.6% driven by consolidation against low Q3 FY26 legacy base of ₹46 Cr EBITDA).
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Chart 1: Revenue & EBITDA Trajectory -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-slate-900">Revenue & EBITDA Scale (₹ Cr)</h3>
+                        <span class="text-xs text-slate-500">Includes Forecast Data</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartRevenueEbitda"></canvas>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Margin & PAT Trajectory -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-bold text-slate-900">EBITDA & PAT Margin Expansion (%)</h3>
+                        <span class="text-xs text-slate-500">Organic Margin Recovery Curve</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="chartMarginsPat"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Sensitivity & Debt Paydown Calculator -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <div class="border-b border-slate-100 pb-3">
+                    <h3 class="text-base font-bold text-slate-900 flex items-center">
+                        <span class="mr-2 text-indigo-600">⚡</span> Debt Deleveraging & Synergy Interactive Sensitivity Simulator
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-0.5">
+                        Adjust debt paydown rate and cross-selling synergy realization speed to model forward quarterly interest cost savings and PAT uplift.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">
+                            Accelerated Debt Paydown (₹ Cr / Qtr): <span id="lbl-debt-paydown" class="text-indigo-600 font-bold">₹100 Cr</span>
+                        </label>
+                        <input type="range" id="slider-debt-paydown" min="0" max="300" step="25" value="100" oninput="calculateSensitivity()" class="w-full accent-indigo-600 cursor-pointer">
+                        <p class="text-slate-400 text-[11px] mt-1">Includes ₹75.4 Cr Apollo preferential proceeds.</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">
+                            Synergy Realization (% of $20M Target): <span id="lbl-synergy-pct" class="text-emerald-600 font-bold">50%</span>
+                        </label>
+                        <input type="range" id="slider-synergy" min="0" max="100" step="10" value="50" oninput="calculateSensitivity()" class="w-full accent-emerald-600 cursor-pointer">
+                        <p class="text-slate-400 text-[11px] mt-1">Annualized $20M (~₹168 Cr) target run-rate.</p>
+                    </div>
+
+                    <div class="bg-slate-900 text-white p-4 rounded-lg flex flex-col justify-between">
+                        <span class="text-slate-400 text-[11px]">Modeled Q4 FY27 PAT Uplift</span>
+                        <div class="text-2xl font-black text-amber-400 mt-1" id="out-simulated-pat">₹242.5 Cr</div>
+                        <span class="text-emerald-400 text-[11px]" id="out-simulated-eps">EPS: ₹32.03 (+₹1.66 vs Base)</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 3: HISTORICAL FINANCIALS ================= -->
+        <section id="historical-trends" class="space-y-6 hidden">
+            <!-- Section Intro -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900">Historical Financial Performance & Trend Analysis</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Examine 8 quarterly actuals alongside 4-year annual CAGRs demonstrating legacy operational resilience prior to the Molycop consolidation.
+                </p>
+            </div>
+
+            <!-- Historical Quarterly Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-800 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-sm">8-Quarter Historical Financial Summary (Q2 FY25 to Q1 FY27)</h3>
+                    <span class="text-xs text-slate-400">Values in ₹ Crore</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase font-semibold">
+                                <th class="p-3">Quarter</th>
+                                <th class="p-3">Revenue</th>
+                                <th class="p-3">YoY %</th>
+                                <th class="p-3">EBITDA</th>
+                                <th class="p-3">EBITDA YoY</th>
+                                <th class="p-3">Margin %</th>
+                                <th class="p-3">PAT</th>
+                                <th class="p-3">PAT YoY</th>
+                                <th class="p-3">Margin %</th>
+                                <th class="p-3">EPS (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-800 font-mono">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-semibold">Q2 FY25</td>
+                                <td class="p-3">353</td>
+                                <td class="p-3 text-emerald-600">27.6%</td>
+                                <td class="p-3">47</td>
+                                <td class="p-3 text-emerald-600">12.0%</td>
+                                <td class="p-3">13.3%</td>
+                                <td class="p-3">7</td>
+                                <td class="p-3 text-rose-600">-40.0%</td>
+                                <td class="p-3">1.9%</td>
+                                <td class="p-3">1.05</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-semibold">Q3 FY25</td>
+                                <td class="p-3">409</td>
+                                <td class="p-3 text-emerald-600">24.1%</td>
+                                <td class="p-3">91</td>
+                                <td class="p-3 text-emerald-600">18.0%</td>
+                                <td class="p-3 font-bold text-slate-900">22.2%</td>
+                                <td class="p-3">54</td>
+                                <td class="p-3 text-emerald-600">28.5%</td>
+                                <td class="p-3">13.2%</td>
+                                <td class="p-3">8.20</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-semibold">Q4 FY25</td>
+                                <td class="p-3">542</td>
+                                <td class="p-3 text-emerald-600">18.5%</td>
+                                <td class="p-3">156</td>
+                                <td class="p-3 text-emerald-600">15.1%</td>
+                                <td class="p-3 font-bold text-emerald-700">28.7%</td>
+                                <td class="p-3">101</td>
+                                <td class="p-3 text-emerald-600">21.0%</td>
+                                <td class="p-3">18.6%</td>
+                                <td class="p-3">15.30</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-semibold">Q1 FY26</td>
+                                <td class="p-3">356</td>
+                                <td class="p-3 text-slate-500">0.0%</td>
+                                <td class="p-3">100</td>
+                                <td class="p-3 text-rose-600">-10.0%</td>
+                                <td class="p-3 font-bold text-emerald-700">28.0%</td>
+                                <td class="p-3">35</td>
+                                <td class="p-3 text-slate-500">0.0%</td>
+                                <td class="p-3">9.8%</td>
+                                <td class="p-3">5.50</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-semibold">Q2 FY26</td>
+                                <td class="p-3">405</td>
+                                <td class="p-3 text-emerald-600">14.7%</td>
+                                <td class="p-3">69</td>
+                                <td class="p-3 text-emerald-600">46.8%</td>
+                                <td class="p-3">17.0%</td>
+                                <td class="p-3">44</td>
+                                <td class="p-3 text-emerald-600">528.5%</td>
+                                <td class="p-3">10.8%</td>
+                                <td class="p-3">6.75</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 bg-amber-50/20">
+                                <td class="p-3 font-sans font-semibold text-amber-900">Q3 FY26</td>
+                                <td class="p-3">403</td>
+                                <td class="p-3 text-rose-600">-1.4%</td>
+                                <td class="p-3 text-amber-800 font-bold">46</td>
+                                <td class="p-3 text-rose-600">-49.4%</td>
+                                <td class="p-3 text-rose-600 font-bold">11.4%</td>
+                                <td class="p-3">19</td>
+                                <td class="p-3 text-rose-600">-64.8%</td>
+                                <td class="p-3">4.7%</td>
+                                <td class="p-3">2.60</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-sans font-semibold">Q4 FY26</td>
+                                <td class="p-3">527</td>
+                                <td class="p-3 text-rose-600">-2.7%</td>
+                                <td class="p-3">60</td>
+                                <td class="p-3 text-rose-600">-61.5%</td>
+                                <td class="p-3 text-rose-600 font-bold">11.4%</td>
+                                <td class="p-3">42</td>
+                                <td class="p-3 text-rose-600">-58.4%</td>
+                                <td class="p-3">7.9%</td>
+                                <td class="p-3">12.40</td>
+                            </tr>
+                            <tr class="bg-slate-100 font-bold">
+                                <td class="p-3 font-sans text-blue-900">Q1 FY27 (Hybrid)</td>
+                                <td class="p-3 text-blue-900">1,723</td>
+                                <td class="p-3 text-emerald-600">383.9%</td>
+                                <td class="p-3 text-blue-900">74</td>
+                                <td class="p-3 text-rose-600">-26.0%</td>
+                                <td class="p-3 text-rose-600">4.3%</td>
+                                <td class="p-3 text-rose-700">-108</td>
+                                <td class="p-3 text-rose-600">-408.5%</td>
+                                <td class="p-3 text-rose-600">-6.2%</td>
+                                <td class="p-3 text-rose-700">-14.26</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Annual Financial Performance Table -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-900 text-white">
+                        <h3 class="font-bold text-sm">Annual Historical Financials (FY23 to FY26)</h3>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase font-semibold">
+                                    <th class="p-3">Financial Year</th>
+                                    <th class="p-3">Revenue (₹Cr)</th>
+                                    <th class="p-3">YoY Growth</th>
+                                    <th class="p-3">EBITDA (₹Cr)</th>
+                                    <th class="p-3">Margin %</th>
+                                    <th class="p-3">PAT (₹Cr)</th>
+                                    <th class="p-3">EPS (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-800 font-mono">
+                                <tr>
+                                    <td class="p-3 font-sans font-semibold">FY23</td>
+                                    <td class="p-3">1,214</td>
+                                    <td class="p-3 text-emerald-600">27.6%</td>
+                                    <td class="p-3">270</td>
+                                    <td class="p-3 font-bold">22.3%</td>
+                                    <td class="p-3">184</td>
+                                    <td class="p-3">27.70</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-sans font-semibold">FY24</td>
+                                    <td class="p-3">1,492</td>
+                                    <td class="p-3 text-emerald-600">23.0%</td>
+                                    <td class="p-3">316</td>
+                                    <td class="p-3 font-bold">21.2%</td>
+                                    <td class="p-3">193</td>
+                                    <td class="p-3">29.18</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 font-sans font-semibold">FY25</td>
+                                    <td class="p-3">1,638</td>
+                                    <td class="p-3 text-emerald-600">9.8%</td>
+                                    <td class="p-3">339</td>
+                                    <td class="p-3 font-bold">20.7%</td>
+                                    <td class="p-3">200</td>
+                                    <td class="p-3">30.08</td>
+                                </tr>
+                                <tr class="bg-slate-50">
+                                    <td class="p-3 font-sans font-bold">FY26</td>
+                                    <td class="p-3 font-bold">1,773</td>
+                                    <td class="p-3 text-emerald-600 font-bold">8.2%</td>
+                                    <td class="p-3 font-bold">396</td>
+                                    <td class="p-3 font-bold text-emerald-700">22.3%</td>
+                                    <td class="p-3 font-bold text-rose-600">142</td>
+                                    <td class="p-3 font-bold">20.14</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <h3 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-2">3-Year Growth Metrics</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded">
+                            <span class="text-slate-600">3-Year Revenue CAGR (FY23–26)</span>
+                            <span class="font-bold text-slate-900 font-mono">13.4%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded">
+                            <span class="text-slate-600">3-Year EBITDA CAGR</span>
+                            <span class="font-bold text-indigo-700 font-mono">13.6%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2.5 bg-amber-50 rounded border border-amber-200">
+                            <span class="text-amber-900 font-semibold">Legacy Margin Corridor</span>
+                            <span class="font-bold text-amber-800 font-mono">20.7% – 22.3%</span>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-500 leading-normal">
+                        Legacy Tega demonstrated exceptional pricing power, maintaining &gt;20% EBITDA margins throughout global freight spikes and raw material price swings.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 4: SEGMENT & CAPITAL STRUCTURE ================= -->
+        <section id="segment-drivers" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900">Segment Breakdown, Capex & Capital Structure</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Sum-of-the-parts methodology, regional expansion projects, and debt amortization profile.
+                </p>
+            </div>
+
+            <!-- Segment Drivers Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Segment 1: Molycop -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-sm text-slate-900">Molycop Grinding Media</h3>
+                        <span class="text-[10px] bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded">~85% Consolidated Rev</span>
+                    </div>
+                    <div class="text-xs space-y-2 text-slate-600">
+                        <div class="flex justify-between"><span>Annual Revenue Base:</span> <span class="font-bold font-mono">~₹13,000 Cr</span></div>
+                        <div class="flex justify-between"><span>EBITDA Margin Base:</span> <span class="font-bold font-mono">12.0% – 13.5%</span></div>
+                        <div class="flex justify-between"><span>Volume Growth Guidance:</span> <span class="font-bold font-mono text-emerald-600">3.0% – 5.0%</span></div>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded text-[11px] text-slate-600">
+                        Pass-through scrap pricing protects absolute margins. Conversion from forged steel to High-Chrome media acts as main margin driver.
+                    </div>
+                </div>
+
+                <!-- Segment 2: Tega Legacy Consumables -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-sm text-slate-900">Legacy Consumables</h3>
+                        <span class="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">~12% Consolidated Rev</span>
+                    </div>
+                    <div class="text-xs space-y-2 text-slate-600">
+                        <div class="flex justify-between"><span>Annualized Run-rate:</span> <span class="font-bold font-mono">~₹1,800 Cr</span></div>
+                        <div class="flex justify-between"><span>EBITDA Margin Base:</span> <span class="font-bold font-mono text-emerald-700">22.0% – 24.1%</span></div>
+                        <div class="flex justify-between"><span>Management CAGR Target:</span> <span class="font-bold font-mono text-emerald-600">15.0% YoY</span></div>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded text-[11px] text-slate-600">
+                        High-margin composite <em>DynaPrime</em> liners converting metallic liner segment in a $900M Total Addressable Market.
+                    </div>
+                </div>
+
+                <!-- Segment 3: Tega McNally Equipment -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center border-b border-slate-100 pb-2">
+                        <h3 class="font-bold text-sm text-slate-900">Equipment (Tega McNally)</h3>
+                        <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">~3% Consolidated Rev</span>
+                    </div>
+                    <div class="text-xs space-y-2 text-slate-600">
+                        <div class="flex justify-between"><span>Expected Growth:</span> <span class="font-bold font-mono">20.0% YoY</span></div>
+                        <div class="flex justify-between"><span>Execution Profile:</span> <span class="font-bold font-mono">Lumpy Order Book</span></div>
+                        <div class="flex justify-between"><span>Management Target:</span> <span class="font-bold font-mono">25.0% Guidance</span></div>
+                    </div>
+                    <div class="p-2.5 bg-slate-50 rounded text-[11px] text-slate-600">
+                        Discounted slightly to 20% in forward model to account for Q1 logistics and order execution friction.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capex & Expansion Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-900 text-white">
+                    <h3 class="font-bold text-sm">Strategic Organic Expansion & Capex Projects</h3>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase font-semibold">
+                                <th class="p-3">Project / Location</th>
+                                <th class="p-3">Capex ($)</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Commissioning</th>
+                                <th class="p-3">Peak Revenue Impact</th>
+                                <th class="p-3">EBITDA Contribution</th>
+                                <th class="p-3">Quarter of Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-800 font-mono">
+                            <tr class="bg-emerald-50/30">
+                                <td class="p-3 font-sans font-bold text-emerald-900">Chile Manufacturing Facility</td>
+                                <td class="p-3 font-bold">$25M – $30M</td>
+                                <td class="p-3 font-sans text-amber-700 font-semibold">Under Construction</td>
+                                <td class="p-3 font-sans">March 2027</td>
+                                <td class="p-3 font-bold text-emerald-700">~$60M Peak</td>
+                                <td class="p-3 font-bold text-emerald-700">~$13M Peak</td>
+                                <td class="p-3 font-sans text-blue-700 font-bold">Q1 FY28 (Q+4E)</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-sans font-medium">Tega Sustaining Capex</td>
+                                <td class="p-3">~$40M</td>
+                                <td class="p-3 font-sans text-emerald-600 font-semibold">Ongoing</td>
+                                <td class="p-3 font-sans">Continuous</td>
+                                <td class="p-3 font-sans text-slate-400">Neutral</td>
+                                <td class="p-3 font-sans text-slate-600">Operational Efficiency</td>
+                                <td class="p-3 font-sans text-slate-500">Ongoing</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-sans font-medium">Molycop Sustaining Capex</td>
+                                <td class="p-3">$28M – $30M</td>
+                                <td class="p-3 font-sans text-emerald-600 font-semibold">Ongoing</td>
+                                <td class="p-3 font-sans">Continuous</td>
+                                <td class="p-3 font-sans text-slate-400">Neutral</td>
+                                <td class="p-3 font-sans text-slate-600">Maintenance</td>
+                                <td class="p-3 font-sans text-slate-500">Ongoing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 5: CONCALL & SENTIMENT MATRIX ================= -->
+        <section id="concall-sentiment" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900">Earnings Call Forensics & Multi-Source Intelligence</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Management tone shift, concall matrix, and cross-platform sentiment analysis (X, LinkedIn, YouTube, ValuePickr).
+                </p>
+            </div>
+
+            <!-- Sentiment Scorecards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase">X / Twitter Sentiment</span>
+                        <div class="text-2xl font-black text-emerald-600 mt-1">+25 (Cautiously Bullish)</div>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Sample: ~450 posts | Bullish on scale, Bearish on debt</p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 text-emerald-700 rounded-full font-bold text-sm">55% Pos</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase">LinkedIn Intelligence</span>
+                        <div class="text-2xl font-black text-indigo-600 mt-1">+70 (Highly Positive)</div>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Hiring in Dubai subsidiary & Chile expansion</p>
+                    </div>
+                    <div class="p-3 bg-indigo-50 text-indigo-700 rounded-full font-bold text-sm">75% Pos</div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase">ValuePickr / Forums</span>
+                        <div class="text-2xl font-black text-amber-600 mt-1">Skeptical / Deep Dive</div>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Focus on &gt;200 day cash conversion cycle</p>
+                    </div>
+                    <div class="p-3 bg-amber-50 text-amber-700 rounded-full font-bold text-sm">Red Flag</div>
+                </div>
+            </div>
+
+            <!-- Management Commentary Tracker Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-sm">Management Guidance & Concall Tracker</h3>
+                    <span class="text-xs text-amber-400">Categorized by Evidentiary Weight</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase font-semibold">
+                                <th class="p-3">Date / Speaker</th>
+                                <th class="p-3">Statement / Guidance</th>
+                                <th class="p-3">Type</th>
+                                <th class="p-3">EBITDA / PAT Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-800">
+                            <tr>
+                                <td class="p-3 font-semibold">Aug 2026 — Mehul Mohanka (CEO)</td>
+                                <td class="p-3">Legacy consumables business will maintain a minimum 15% CAGR trajectory.</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Explicit Guidance</span></td>
+                                <td class="p-3 font-mono text-emerald-700 font-bold">Positive EBITDA Base</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Aug 2026 — Mehul Mohanka (CEO)</td>
+                                <td class="p-3">Consolidated EBITDA margin expected to stabilize around ~15% for FY27.</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Explicit Guidance</span></td>
+                                <td class="p-3 font-mono text-indigo-700 font-bold">Blended Margin Floor</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Aug 2026 — Patrick Cooley (CFO)</td>
+                                <td class="p-3">Molycop EBITDA margins to expand to 15% by year 5 from current 11.5–12%.</td>
+                                <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Management Aspiration</span></td>
+                                <td class="p-3 font-mono text-slate-600">Long-Term Expansion</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Aug 2026 — Concall</td>
+                                <td class="p-3">Targeted synergies of USD 20 million from cross-selling and cost optimization over 2–2.5 yrs.</td>
+                                <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Management Aspiration</span></td>
+                                <td class="p-3 font-mono text-emerald-700 font-bold">+₹168 Cr Annual EBITDA</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Aug 2026 — CNBC-TV18 Interview</td>
+                                <td class="p-3">Target Net Debt/EBITDA multiple to be reduced below 3.0x within 3 years.</td>
+                                <td class="p-3"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">Confirmed Roadmap</span></td>
+                                <td class="p-3 font-mono text-emerald-700 font-bold">Reduces Interest Cost</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= SECTION 6: INSTITUTIONAL Q&A & CATALYSTS ================= -->
+        <section id="qa-catalysts" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-xl font-bold text-slate-900">Institutional Earnings Intelligence Q&A</h2>
+                <p class="text-xs text-slate-500 mt-1">
+                    Direct evidence-backed answers addressing the 12 key institutional evaluation mandates.
+                </p>
+            </div>
+
+            <!-- 12 Key Questions Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">1. Expected Revenue Growth (Next 4Q)</span>
+                    <p class="text-slate-800 font-mono font-semibold">
+                        Q1: 974.0% | Q2: 996.7% | Q3: 782.3% | Q4: 161.1%
+                    </p>
+                    <p class="text-slate-500 text-[11px]">Driven mathematically by Molycop consolidation against pre-acquisition standalone base.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">2. Expected EBITDA Growth (Next 4Q)</span>
+                    <p class="text-slate-800 font-mono font-semibold">
+                        Q1: 813.0% | Q2: 1341.3% | Q3: 1100.0% | Q4: 841.8%
+                    </p>
+                    <p class="text-slate-500 text-[11px]">Next 4-quarter cumulative EBITDA forecast at ₹2,710 Crore (+988.3%).</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">3. Expected PAT Growth (Next 4Q)</span>
+                    <p class="text-slate-800 font-mono font-semibold">
+                        Q1: 252.2% | Q2: 873.6% | Q3: 447.6% | Q4: 299.0%
+                    </p>
+                    <p class="text-slate-500 text-[11px]">PAT turns profitable immediately from Q2 FY27 post reversal of one-off M&A charges.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5 bg-amber-50/40">
+                    <span class="font-bold text-amber-800 uppercase text-[10px]">4 & 5. Peak Growth Quarters</span>
+                    <p class="text-slate-900 font-mono font-bold">
+                        Highest EBITDA & PAT Growth: Q3 FY27 (Q+2E)
+                    </p>
+                    <p class="text-slate-600 text-[11px]">EBITDA +1341.3% and PAT +873.6% YoY, benefiting from extremely weak legacy Q3 FY26 base (₹46Cr EBITDA).</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">6. EBITDA Margin Trend</span>
+                    <p class="text-slate-800 font-semibold">
+                        Consolidated Dilution, then Organic Expansion (14.5% ➔ 15.5%)
+                    </p>
+                    <p class="text-slate-500 text-[11px]">Blended margins dilute from historical 22% due to lower-margin Molycop, but expand sequentially via synergies.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">7. PAT vs EBITDA Speed</span>
+                    <p class="text-slate-800 font-semibold">
+                        PAT Growth is SLOWER than EBITDA Growth
+                    </p>
+                    <p class="text-slate-500 text-[11px]">₹180-210 Cr/qtr interest burden on ₹9,700 Cr gross debt acts as a heavy anchor on net income scaling.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">8. Principal Growth Drivers</span>
+                    <p class="text-slate-800 font-semibold">
+                        Inorganic Scale + High-Chrome Shift + Mine-to-Mill Cross-Selling
+                    </p>
+                    <p class="text-slate-500 text-[11px]">Transitioning Molycop media from standard forged to high-chrome, and bundling DynaPrime liners.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5 bg-rose-50/40 border-rose-200">
+                    <span class="font-bold text-rose-800 uppercase text-[10px]">9. Primary Forecast Failure Risk</span>
+                    <p class="text-slate-900 font-bold">
+                        Working Capital Liquidity Trap
+                    </p>
+                    <p class="text-slate-600 text-[11px]">Cash conversion cycle &gt;200 days. If inventory/receivables bloat under Molycop, debt servicing could stall.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">10. Independent vs Consensus Stance</span>
+                    <p class="text-slate-800 font-semibold">
+                        More Conservative on EBITDA Margins, More Aggressive on PAT
+                    </p>
+                    <p class="text-slate-500 text-[11px]">We discount immediate $20M synergies, but model faster debt paydown via preferential proceeds.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">11. Earnings Momentum Direction</span>
+                    <p class="text-slate-800 font-semibold text-emerald-700 font-bold">
+                        ACCELERATING STRUCTURALLY
+                    </p>
+                    <p class="text-slate-500 text-[11px]">Exiting shadow of Q1 FY27 exceptional M&A costs into clean operational cash generation phase.</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1.5 md:col-span-2">
+                    <span class="font-bold text-indigo-600 uppercase text-[10px]">12. Primary Supporting Evidence Hierarchy</span>
+                    <p class="text-slate-800 font-semibold">
+                        Audited Q1 FY27 Filings + Exchange Disclosures + Credit Rating Rationale (CRISIL/ICRA)
+                    </p>
+                    <p class="text-slate-500 text-[11px]">Confirmed ₹190 Cr one-off costs, ₹1,500 Cr term loan structure, ₹95.4 Cr preferential allotment to Apollo Funds, and management guidance of 12-13% base Molycop margins.</p>
+                </div>
+            </div>
+
+            <!-- Gold Standard Annual Forecast Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-900 text-white flex justify-between items-center">
+                    <h3 class="font-bold text-sm">Gold-Standard Multi-Year Forecast Table (FY26 to FY30E)</h3>
+                    <span class="text-xs text-amber-400 font-mono">Reconciled Annualized Model</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200 uppercase font-semibold">
+                                <th class="p-3">Period</th>
+                                <th class="p-3">Revenue (₹Cr)</th>
+                                <th class="p-3">Revenue YoY</th>
+                                <th class="p-3">EBITDA (₹Cr)</th>
+                                <th class="p-3">EBITDA YoY</th>
+                                <th class="p-3">EBITDA Margin</th>
+                                <th class="p-3">PAT (₹Cr)</th>
+                                <th class="p-3">PAT YoY</th>
+                                <th class="p-3">PAT Margin</th>
+                                <th class="p-3">EPS (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-800 font-mono">
+                            <tr class="bg-slate-50">
+                                <td class="p-3 font-sans font-bold">FY26 Actual</td>
+                                <td class="p-3">1,773</td>
+                                <td class="p-3">8.2%</td>
+                                <td class="p-3">396</td>
+                                <td class="p-3">16.8%</td>
+                                <td class="p-3 font-bold">22.3%</td>
+                                <td class="p-3">142</td>
+                                <td class="p-3 text-rose-600">-29.0%</td>
+                                <td class="p-3">8.0%</td>
+                                <td class="p-3">20.14</td>
+                            </tr>
+                            <tr class="bg-blue-50/30">
+                                <td class="p-3 font-sans font-bold text-blue-900">FY27 A/E</td>
+                                <td class="p-3 font-bold">15,143</td>
+                                <td class="p-3 text-emerald-600 font-bold">754.0%</td>
+                                <td class="p-3 font-bold">2,087</td>
+                                <td class="p-3 text-emerald-600 font-bold">427.0%</td>
+                                <td class="p-3 font-bold">13.7%</td>
+                                <td class="p-3 font-bold">462</td>
+                                <td class="p-3 text-emerald-600 font-bold">225.3%</td>
+                                <td class="p-3">3.0%</td>
+                                <td class="p-3 font-bold">61.03</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-sans font-bold">FY28E (FY+1E)</td>
+                                <td class="p-3 font-bold">18,500</td>
+                                <td class="p-3 text-emerald-600">22.1%</td>
+                                <td class="p-3 font-bold text-indigo-700">2,867</td>
+                                <td class="p-3 text-emerald-600">37.3%</td>
+                                <td class="p-3 font-bold">15.5%</td>
+                                <td class="p-3 font-bold text-emerald-700">980</td>
+                                <td class="p-3 text-emerald-600 font-bold">112.1%</td>
+                                <td class="p-3">5.2%</td>
+                                <td class="p-3 font-bold">129.45</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-sans font-bold">FY29E (FY+2E)</td>
+                                <td class="p-3 font-bold">19,795</td>
+                                <td class="p-3 text-emerald-600">7.0%</td>
+                                <td class="p-3 font-bold text-indigo-700">3,266</td>
+                                <td class="p-3 text-emerald-600">13.9%</td>
+                                <td class="p-3 font-bold">16.5%</td>
+                                <td class="p-3 font-bold text-emerald-700">1,420</td>
+                                <td class="p-3 text-emerald-600">44.8%</td>
+                                <td class="p-3">7.1%</td>
+                                <td class="p-3 font-bold">187.58</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-sans font-bold">FY30E (FY+3E)</td>
+                                <td class="p-3 font-bold">21,180</td>
+                                <td class="p-3 text-emerald-600">7.0%</td>
+                                <td class="p-3 font-bold text-indigo-700">3,600</td>
+                                <td class="p-3 text-emerald-600">10.2%</td>
+                                <td class="p-3 font-bold text-emerald-700">17.0%</td>
+                                <td class="p-3 font-bold text-emerald-700">1,750</td>
+                                <td class="p-3 text-emerald-600">23.2%</td>
+                                <td class="p-3 font-bold text-emerald-700">8.2%</td>
+                                <td class="p-3 font-bold">231.17</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer Disclaimer -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 text-xs py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p class="font-semibold text-slate-300">TEGA Industries Institutional Forward Earnings Model & Intelligence Dashboard</p>
+            <p class="text-[11px] text-slate-500">
+                Independent research based on audited financial filings, exchange announcements, concall transcripts, and credit agency reports. This dashboard contains financial modeling and forward estimates for analytical purposes only. No buy/sell recommendations or price targets provided.
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Code -->
+    <script>
+        // Data Store for Scenarios
+        const forecastScenarios = {
+            base: {
+                name: "Base Case (60% Prob)",
+                banner: "<strong>Base Case Assumptions:</strong> Firm execution of ₹906 Cr legacy order book, 3-5% Molycop volume growth, Chilean plant commissioning in Mar 2027, and linear realization of $20M synergies starting Q3 FY27.",
+                bannerColor: "bg-blue-50 border-blue-200 text-blue-900",
+                probText: "60% Probability",
+                rev: [4350, 4420, 4650, 4500],
+                revYoY: ["974.0%", "996.7%", "782.3%", "161.1%"],
+                ebitda: [630, 663, 720, 697],
+                ebitdaYoY: ["813.0%", "1341.3%", "1100.0%", "841.8%"],
+                margins: ["14.5%", "15.0%", "15.5%", "15.5%"],
+                pat: [155, 185, 230, 215],
+                patYoY: ["252.2%", "873.6%", "447.6%", "299.0%"],
+                eps: ["20.46", "24.42", "30.37", "28.38"]
+            },
+            bear: {
+                name: "Bear Case (25% Prob)",
+                banner: "<strong>Bear Case Assumptions:</strong> Working capital liquidity crunch, extended high steel scrap prices lagging pass-through, and 6-month delay in Chile plant commissioning.",
+                bannerColor: "bg-rose-50 border-rose-200 text-rose-900",
+                probText: "25% Probability",
+                rev: [4100, 4200, 4400, 4300],
+                revYoY: ["912.3%", "942.2%", "734.9%", "149.5%"],
+                ebitda: [553, 588, 638, 623],
+                ebitdaYoY: ["701.4%", "1178.3%", "963.3%", "741.8%"],
+                margins: ["13.5%", "14.0%", "14.5%", "14.5%"],
+                pat: [110, 135, 170, 160],
+                patYoY: ["150.0%", "610.5%", "304.7%", "196.3%"],
+                eps: ["14.53", "17.83", "22.45", "21.13"]
+            },
+            bull: {
+                name: "Bull Case (15% Prob)",
+                banner: "<strong>Bull Case Assumptions:</strong> Rapid non-core Molycop asset monetization accelerating debt paydown, high-chrome capacity expansion accelerating, and full $20M synergy capture in year 1.",
+                bannerColor: "bg-emerald-50 border-emerald-200 text-emerald-900",
+                probText: "15% Probability",
+                rev: [4500, 4600, 4800, 4700],
+                revYoY: ["1011.1%", "1041.4%", "810.8%", "172.7%"],
+                ebitda: [697, 736, 792, 775],
+                ebitdaYoY: ["910.1%", "1500.0%", "1220.0%", "947.3%"],
+                margins: ["15.5%", "16.0%", "16.5%", "16.5%"],
+                pat: [195, 240, 290, 275],
+                patYoY: ["343.1%", "1163.1%", "590.4%", "410.2%"],
+                eps: ["25.75", "31.70", "38.30", "36.32"]
+            }
+        };
+
+        let currentScenario = 'base';
+        let chart1Instance = null;
+        let chart2Instance = null;
+
+        // Tab Navigation Logic
+        function switchTab(tabId) {
+            const tabs = ['exec-summary', 'forecast-dashboard', 'historical-trends', 'segment-drivers', 'concall-sentiment', 'qa-catalysts'];
+            tabs.forEach(t => {
+                const section = document.getElementById(t);
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tabId) {
+                    section.classList.remove('hidden');
+                    btn.classList.add('active');
+                } else {
+                    section.classList.add('hidden');
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Re-render charts if entering forecast dashboard
+            if (tabId === 'forecast-dashboard' && (!chart1Instance || !chart2Instance)) {
+                setTimeout(initCharts, 50);
+            }
+        }
+
+        // Scenario Switcher Logic
+        function updateScenario(scenarioKey) {
+            currentScenario = scenarioKey;
+            const data = forecastScenarios[scenarioKey];
+
+            // Update Buttons UI
+            ['bear', 'base', 'bull'].forEach(key => {
+                const btn = document.getElementById(`btn-scenario-${key}`);
+                if (key === scenarioKey) {
+                    btn.className = "px-3 py-1.5 rounded font-bold transition bg-slate-900 text-white shadow-sm";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded font-bold transition text-slate-600 hover:text-slate-900";
+                }
+            });
+
+            // Update Banner
+            const banner = document.getElementById('scenario-banner');
+            banner.className = `mt-4 p-3 border rounded-lg text-xs flex items-center justify-between ${data.bannerColor}`;
+            banner.innerHTML = `<div>${data.banner}</div><span class="text-xs bg-white/80 px-2 py-0.5 rounded font-bold ml-2 whitespace-nowrap">${data.probText}</span>`;
+
+            // Update Forecast Dashboard Table Cells
+            for (let i = 0; i < 4; i++) {
+                const qNum = i + 1;
+                document.getElementById(`val-rev-q${qNum}`).innerText = data.rev[i].toLocaleString();
+                document.getElementById(`val-revyoy-q${qNum}`).innerText = data.revYoY[i];
+                document.getElementById(`val-ebitda-q${qNum}`).innerText = data.ebitda[i].toLocaleString();
+                document.getElementById(`val-ebitdayoy-q${qNum}`).innerText = data.ebitdaYoY[i];
+                document.getElementById(`val-margin-q${qNum}`).innerText = data.margins[i];
+                document.getElementById(`val-pat-q${qNum}`).innerText = data.pat[i].toLocaleString();
+                document.getElementById(`val-patyoy-q${qNum}`).innerText = data.patYoY[i];
+                document.getElementById(`val-eps-q${qNum}`).innerText = data.eps[i];
+            }
+
+            // Update Charts
+            if (chart1Instance && chart2Instance) {
+                // Revenue Chart Data
+                chart1Instance.data.datasets[0].data = [353, 409, 542, 356, 405, 403, 527, 1723, data.rev[0], data.rev[1], data.rev[2], data.rev[3]];
+                chart1Instance.data.datasets[1].data = [47, 91, 156, 100, 69, 46, 60, 74, data.ebitda[0], data.ebitda[1], data.ebitda[2], data.ebitda[3]];
+                chart1Instance.update();
+
+                // Margin & PAT Chart Data
+                chart2Instance.data.datasets[0].data = [13.3, 22.2, 28.7, 28.0, 17.0, 11.4, 11.4, 4.3, parseFloat(data.margins[0]), parseFloat(data.margins[1]), parseFloat(data.margins[2]), parseFloat(data.margins[3])];
+                chart2Instance.data.datasets[1].data = [7, 54, 101, 35, 44, 19, 42, -108, data.pat[0], data.pat[1], data.pat[2], data.pat[3]];
+                chart2Instance.update();
+            }
+
+            calculateSensitivity();
+        }
+
+        // Interactive Sensitivity Calculator
+        function calculateSensitivity() {
+            const paydown = parseInt(document.getElementById('slider-debt-paydown').value);
+            const synergyPct = parseInt(document.getElementById('slider-synergy').value);
+
+            document.getElementById('lbl-debt-paydown').innerText = `₹${paydown} Cr`;
+            document.getElementById('lbl-synergy-pct').innerText = `${synergyPct}%`;
+
+            // Base Q4 PAT = 230 Cr
+            // Annual interest savings = paydown * 8.5%
+            // Quarterly interest saving = (paydown * 0.085) / 4
+            const interestSavings = (paydown * 0.085) / 4;
+            
+            // Synergy annual = 168 Cr * (synergyPct / 100)
+            // Quarterly synergy = (168 * (synergyPct/100)) / 4
+            const quarterlySynergyEbitda = (168 * (synergyPct / 100)) / 4;
+            const synergyPat = quarterlySynergyEbitda * 0.75; // 25% tax
+
+            const basePat = forecastScenarios[currentScenario].pat[2]; // Q4 FY27
+            const simulatedPat = basePat + interestSavings + synergyPat;
+            const simulatedEps = simulatedPat / 75.7; // ~75.7m shares
+
+            const diffEps = simulatedEps - parseFloat(forecastScenarios[currentScenario].eps[2]);
+
+            document.getElementById('out-simulated-pat').innerText = `₹${simulatedPat.toFixed(1)} Cr`;
+            document.getElementById('out-simulated-eps').innerText = `EPS: ₹${simulatedEps.toFixed(2)} (${diffEps >= 0 ? '+' : ''}₹${diffEps.toFixed(2)} vs ${currentScenario.toUpperCase()})`;
+        }
+
+        // Initialize Chart.js Graphs
+        function initCharts() {
+            const labels = ['Q2 FY25', 'Q3 FY25', 'Q4 FY25', 'Q1 FY26', 'Q2 FY26', 'Q3 FY26', 'Q4 FY26', 'Q1 FY27(A)', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E'];
+            const dataBase = forecastScenarios.base;
+
+            // Chart 1: Revenue & EBITDA
+            const ctx1 = document.getElementById('chartRevenueEbitda').getContext('2d');
+            chart1Instance = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Revenue (₹ Cr)',
+                            data: [353, 409, 542, 356, 405, 403, 527, 1723, dataBase.rev[0], dataBase.rev[1], dataBase.rev[2], dataBase.rev[3]],
+                            backgroundColor: 'rgba(30, 58, 138, 0.85)',
+                            borderColor: '#1e3a8a',
+                            borderWidth: 1,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'EBITDA (₹ Cr)',
+                            data: [47, 91, 156, 100, 69, 46, 60, 74, dataBase.ebitda[0], dataBase.ebitda[1], dataBase.ebitda[2], dataBase.ebitda[3]],
+                            backgroundColor: 'rgba(245, 158, 11, 0.9)',
+                            borderColor: '#d97706',
+                            borderWidth: 1,
+                            type: 'line',
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₹' + context.raw.toLocaleString() + ' Cr';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { font: { size: 10 } } },
+                        y: { 
+                            beginAtZero: true, 
+                            title: { display: true, text: '₹ Crore', font: { size: 11 } },
+                            ticks: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Margins & PAT
+            const ctx2 = document.getElementById('chartMarginsPat').getContext('2d');
+            chart2Instance = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'EBITDA Margin (%)',
+                            data: [13.3, 22.2, 28.7, 28.0, 17.0, 11.4, 11.4, 4.3, 14.5, 15.0, 15.5, 15.5],
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            yAxisID: 'yMargin'
+                        },
+                        {
+                            label: 'PAT (₹ Cr)',
+                            data: [7, 54, 101, 35, 44, 19, 42, -108, dataBase.pat[0], dataBase.pat[1], dataBase.pat[2], dataBase.pat[3]],
+                            backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                            borderColor: '#4338ca',
+                            borderWidth: 1,
+                            type: 'bar',
+                            yAxisID: 'yPat'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+                    },
+                    scales: {
+                        x: { ticks: { font: { size: 10 } } },
+                        yMargin: {
+                            type: 'linear',
+                            position: 'left',
+                            title: { display: true, text: 'EBITDA Margin (%)', font: { size: 11 } },
+                            ticks: { font: { size: 10 }, callback: v => v + '%' }
+                        },
+                        yPat: {
+                            type: 'linear',
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'PAT (₹ Cr)', font: { size: 11 } },
+                            ticks: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize default view on DOM load
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateSensitivity();
+        });
+    </script>
+</body>
+</html>

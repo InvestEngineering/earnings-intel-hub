@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricol Limited - Master Earnings Intelligence & Forecast Dashboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#2563eb',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                            900: '#172554',
+                        },
+                        accent: {
+                            emerald: '#10b981',
+                            amber: '#f59e0b',
+                            rose: '#f43f5e',
+                            indigo: '#6366f1'
+                        },
+                        neutralBg: '#f8fafc',
+                        cardBg: '#ffffff'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .tab-btn.active {
+            border-bottom-width: 3px;
+            border-color: #2563eb;
+            color: #1d4ed8;
+            font-weight: 600;
+            background-color: rgba(37, 99, 235, 0.05);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 2000px;
+            transition: max-height 0.5s ease-in;
+        }
+        /* Custom scrollbar for data tables */
+        .table-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .table-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .table-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Chosen Palette: Slate & Warm Neutrals with Indigo/Emerald Accents -->
+    <!-- Application Structure Plan: Designed as a 5-section executive financial intelligence portal (1. Overview & Q&A Intelligence, 2. Interactive 8-Quarter Forecast Studio, 3. Financial Driver & Scenario Simulator, 4. Strategic & Forensic Intelligence, 5. Catalyst & Risk Radar). This non-linear structure allows research analysts, institutional investors, and equity strategists to explore baseline projections, run custom scenario weightings, test TFT display realization impacts, and review concall forensics interactively. -->
+    <!-- Visualization & Content Choices:
+        - 8-Quarter Financial Trajectory -> Combo Bar/Line Chart (Chart.js) -> Interactive Quarter Hover & Series Toggle -> Canvas Chart.js.
+        - Margin Normalization & Trend -> Multi-line Chart (Chart.js) -> Toggle EBITDA % vs PAT % -> Canvas Chart.js.
+        - Bear/Base/Bull Scenario Analysis -> Interactive Dynamic Slider Calculator -> Real-time probability weighting of FY27 EBITDA/PAT -> JS DOM calculations.
+        - TFT Realization Impact -> Interactive Slider Simulator -> Models ASP transition from ₹800 mechanical to ₹3,500 TFT -> Dynamic revenue calculation.
+        - Guidance & Forensic Signals -> Searchable & Filterable Data Cards -> Filter by signal direction (Positive/Negative/Improving) -> JS DOM filtering.
+        - Consensus vs Independent Variance -> Comparison Cards & Dynamic Matrix -> Direct contrast of Axis Direct target vs Independent model -> HTML Grid.
+        CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-brand-600 text-white font-bold rounded-lg px-3 py-1.5 text-lg shadow-sm">
+                        PRICOL
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-slate-900 leading-tight">Pricol Limited (NSE: PRICOLLTD)</h1>
+                        <p class="text-xs text-slate-500 hidden sm:block">Master Multi-Source EBITDA & PAT Growth Forecast Dashboard</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                        Target Price: ₹935 (+21.8%)
+                    </span>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 hidden md:inline-flex">
+                        Rating: STRONG BUY
+                    </span>
+                </div>
+            </div>
+            
+            <!-- Navigation Tabs -->
+            <nav class="flex space-x-1 sm:space-x-4 border-t border-slate-100 overflow-x-auto table-scrollbar py-1">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active px-3 py-2 text-xs sm:text-sm font-medium rounded-t-md whitespace-nowrap transition-colors">
+                    🏢 Executive Overview & Q&A
+                </button>
+                <button onclick="switchTab('studio')" id="tab-studio" class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-t-md text-slate-600 hover:text-brand-600 whitespace-nowrap transition-colors">
+                    📊 8-Quarter Forecast Studio
+                </button>
+                <button onclick="switchTab('simulator')" id="tab-simulator" class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-t-md text-slate-600 hover:text-brand-600 whitespace-nowrap transition-colors">
+                    🧮 Scenario & Driver Simulator
+                </button>
+                <button onclick="switchTab('forensics')" id="tab-forensics" class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-t-md text-slate-600 hover:text-brand-600 whitespace-nowrap transition-colors">
+                    🔍 Concall & Strategic Forensics
+                </button>
+                <button onclick="switchTab('catalysts')" id="tab-catalysts" class="tab-btn px-3 py-2 text-xs sm:text-sm font-medium rounded-t-md text-slate-600 hover:text-brand-600 whitespace-nowrap transition-colors">
+                    ⚡ Catalysts & Risk Radar
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: EXECUTIVE OVERVIEW & KEY QUESTIONS  -->
+        <!-- ========================================== -->
+        <section id="sec-overview" class="space-y-6">
+            
+            <!-- Section Introductory Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">Executive Thesis & Strategic Inflection Overview</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Pricol Limited is undergoing a fundamental multi-year transformation, shifting from a legacy mechanical dashboard manufacturer into a premier supplier of high-margin Driver Information & Connected Vehicle Solutions (DICVS) and precision polymer components. This application translates complex multi-source earnings intelligence, 8-quarter financial models, concall forensic signals, and demerger catalysts into an interactive decision-support system. Explore the summary stats below, review the demerger value-unlocking logic, or dive into the core research Q&A module.
+                </p>
+            </div>
+
+            <!-- Key Financial KPI Summary Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">FY27E Revenue</span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">+20.7% YoY</span>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">₹4,783.6 Cr</div>
+                        <p class="text-xs text-slate-500 mt-1">vs ₹3,963.8 Cr in FY26</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">FY27E EBITDA</span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">12.16% Margin</span>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">₹581.6 Cr</div>
+                        <p class="text-xs text-slate-500 mt-1">+17.98% YoY Expansion</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">FY27E Net Profit</span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 font-bold">+27.0% YoY</span>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">₹318.5 Cr</div>
+                        <p class="text-xs text-slate-500 mt-1">EPS Target: ₹26.13</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">DICVS Demerger</span>
+                        <span class="text-xs px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-bold">1:1 Ratio</span>
+                    </div>
+                    <div class="mt-2">
+                        <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">61.17%</div>
+                        <p class="text-xs text-slate-500 mt-1">Turnover isolated to Pricol Autotech</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Core Thesis Pillars Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Pillar 1 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-blue-50 text-brand-600 flex items-center justify-center font-bold text-lg">
+                        01
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base">TFT Display Premiumisation</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Rapid migration from analogue/LCD dials (₹800 realization) to smart Thin-Film Transistor (TFT) displays (₹2,500–₹5,000 realization) in the two-wheeler ecosystem. Pricol commands a ~65% domestic market share.
+                    </p>
+                </div>
+
+                <!-- Pillar 2 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">
+                        02
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base">P3L Plastics Acquisition Scaling</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Inorganic consolidation of Pricol Precision Products (P3L - formerly Sundaram Auto Components) generated ₹923 Cr in FY26 at an attractive ~3.2x EV/EBITDA multiple, doubling non-auto polymer component capacity.
+                    </p>
+                </div>
+
+                <!-- Pillar 3 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg">
+                        03
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base">Demerger & Overhang Removal</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Approved 1:1 demerger of DICVS into "Pricol Autotech Ltd" unlocks software-defined vehicle multiples (PE 45-60x). Hostile competitor Minda Corp fully liquidated its 15.7% block to top institutional stalwarts.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Core Q&A Intelligence Accordion Section -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-slate-900">Key Earnings Intelligence Questions</h3>
+                        <p class="text-xs text-slate-500">Interactive answers synthesized directly from primary report telemetry & multi-vector models</p>
+                    </div>
+                    <span class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-medium">12 Core Questions</span>
+                </div>
+
+                <div class="space-y-3" id="qa-accordion-container">
+                    <!-- Q1 -->
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                        <button onclick="toggleAccordion('qa-1')" class="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 font-semibold text-slate-800 text-sm flex justify-between items-center transition-colors">
+                            <span>1. What is the expected Revenue growth for each of the next 8 quarters?</span>
+                            <span id="qa-1-icon" class="text-brand-600 font-bold">＋</span>
+                        </button>
+                        <div id="qa-1" class="accordion-content bg-white px-4 py-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                            The independent model projects consistent year-over-year top-line expansion: 
+                            <strong class="text-slate-800">Q2 FY27 (17.18%), Q3 FY27 (18.38%), Q4 FY27 (17.38%), Q1 FY28 (16.28%), Q2 FY28 (16.95%), Q3 FY28 (17.07%), Q4 FY28 (18.60%), and Q1 FY29 (19.05%)</strong>.
+                            Growth is anchored by two-wheeler premiumisation and the expansion of the P3L plastics unit.
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                        <button onclick="toggleAccordion('qa-2')" class="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 font-semibold text-slate-800 text-sm flex justify-between items-center transition-colors">
+                            <span>2. What is the expected EBITDA growth for each of the next 8 quarters?</span>
+                            <span id="qa-2-icon" class="text-brand-600 font-bold">＋</span>
+                        </button>
+                        <div id="qa-2" class="accordion-content bg-white px-4 py-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                            EBITDA growth is modeled to systematically outpace revenue due to operating leverage: 
+                            <strong class="text-slate-800">Q2 FY27 (20.00%), Q3 FY27 (26.05%), Q4 FY27 (25.06%), Q1 FY28 (26.32%), Q2 FY28 (22.80%), Q3 FY28 (20.85%), Q4 FY28 (21.41%), and Q1 FY29 (22.89%)</strong>.
+                        </div>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                        <button onclick="toggleAccordion('qa-3')" class="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 font-semibold text-slate-800 text-sm flex justify-between items-center transition-colors">
+                            <span>3. What is the expected PAT growth for each of the next 8 quarters?</span>
+                            <span id="qa-3-icon" class="text-brand-600 font-bold">＋</span>
+                        </button>
+                        <div id="qa-3" class="accordion-content bg-white px-4 py-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                            Net Profit (PAT) compounds rapidly across the horizon: 
+                            <strong class="text-slate-800">Q2 FY27 (19.53%), Q3 FY27 (30.00%), Q4 FY27 (25.75%), Q1 FY28 (29.96%), Q2 FY28 (26.01%), Q3 FY28 (24.40%), Q4 FY28 (23.31%), and Q1 FY29 (24.57%)</strong>.
+                        </div>
+                    </div>
+
+                    <!-- Q4 & Q5 -->
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                        <button onclick="toggleAccordion('qa-4')" class="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 font-semibold text-slate-800 text-sm flex justify-between items-center transition-colors">
+                            <span>4 & 5. Which quarters feature the peak YoY EBITDA and PAT growth?</span>
+                            <span id="qa-4-icon" class="text-brand-600 font-bold">＋</span>
+                        </button>
+                        <div id="qa-4" class="accordion-content bg-white px-4 py-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li><strong class="text-slate-800">Highest EBITDA Growth Quarter:</strong> <strong>Q1 FY28 (+26.32% YoY)</strong>, benefiting from a favorable base effect against Q1 FY27 and initial commercial SOP of disc brake lines.</li>
+                                <li><strong class="text-slate-800">Highest PAT Growth Quarter:</strong> <strong>Q3 FY27 (+30.00% YoY)</strong>, aligning with peak festive season volumes and full implementation of raw material price indexations.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Q6 & Q7 -->
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                        <button onclick="toggleAccordion('qa-6')" class="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 font-semibold text-slate-800 text-sm flex justify-between items-center transition-colors">
+                            <span>6 & 7. EBITDA/PAT Margin Trends & Why PAT Outpaces EBITDA Growth?</span>
+                            <span id="qa-6-icon" class="text-brand-600 font-bold">＋</span>
+                        </button>
+                        <div id="qa-6" class="accordion-content bg-white px-4 py-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100">
+                            <p class="mb-2"><strong>Margin Trajectory:</strong> EBITDA margins will expand sequentially from the transient Q1 FY27 low of 11.41% toward the management's steady-state guidance corridor of 12.5% to 13.0% by FY28.</p>
+                            <p><strong>PAT Outperformance Rationale:</strong> PAT grows faster than EBITDA because Pricol operates with a virtually zero-debt balance sheet (Net D/E 0.26x). Suppressed interest expenses allow operating leverage to cascade straight to the net income line, easily absorbing rising depreciation from the ₹700 Cr capex program.</p>
+                        </div>
+                    </div>
+
+                    <!-- Q8, Q9, Q10, Q11, Q12 -->
+                    <div class="border border-slate-200 rounded-lg overflow-hidden">
+                        <button onclick="toggleAccordion('qa-8')" class="w-full text-left px-4 py-3 bg-slate-50 hover:bg-slate-100 font-semibold text-slate-800 text-sm flex justify-between items-center transition-colors">
+                            <span>8 - 12. Strategic Drivers, Core Risks, Consensus Comparison & Momentum</span>
+                            <span id="qa-8-icon" class="text-brand-600 font-bold">＋</span>
+                        </button>
+                        <div id="qa-8" class="accordion-content bg-white px-4 py-3 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 space-y-2">
+                            <p><strong>Principal Drivers:</strong> TFT display adoption (ASP ₹800 ➔ ₹2,500-5,000), P3L polymer division scaling, and EV-agnostic product growth (BMS & e-cockpits).</p>
+                            <p><strong>Forecast Failure Risks:</strong> Unhedged inflation in specialized polymers/copper, pushback on OEM indexation pass-throughs, or severe execution delays in the ₹700 Cr capex program.</p>
+                            <p><strong>Consensus Comparison:</strong> The independent model aligns with management's ₹8,000 Cr revenue ambition by FY31 and validates Axis Direct's ₹935 target price, while anticipating faster EBITDA conversion in late FY27 due to SMT line automation.</p>
+                            <p><strong>Earnings Momentum:</strong> <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">VIOLENTLY ACCELERATING</span> as the firm transitions into a high-technology auto-electronics entity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: 8-QUARTER FORECAST STUDIO           -->
+        <!-- ========================================== -->
+        <section id="sec-studio" class="hidden space-y-6">
+            
+            <!-- Section Introductory Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">Interactive 8-Quarter & Annual Forecast Studio</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    This section provides interactive visualization and tabular modeling of Pricol's 8-quarter forward trajectory (Q2 FY27 through Q1 FY29) alongside 3-year annual projections. Use the metric toggle buttons to alter chart views, inspect sequential growth profiles, or switch between detailed quarterly and gold-standard cumulative summary views.
+                </p>
+            </div>
+
+            <!-- Chart Control Bar & Visual Container Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Revenue & EBITDA Trajectory Chart Card -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm sm:text-base">Quarterly Revenue & EBITDA Trajectory</h3>
+                            <p class="text-xs text-slate-500">Absolute ₹ Crore projections (Actual Q1 FY27 to Q1 FY29E)</p>
+                        </div>
+                        <div class="inline-flex rounded-md shadow-sm">
+                            <button onclick="updateChart1('all')" class="px-2 py-1 text-xs font-semibold bg-brand-50 text-brand-600 rounded-l border border-brand-200 hover:bg-brand-100">All</button>
+                            <button onclick="updateChart1('fy27')" class="px-2 py-1 text-xs font-semibold bg-white text-slate-600 border-t border-b border-slate-200 hover:bg-slate-50">FY27</button>
+                            <button onclick="updateChart1('fy28')" class="px-2 py-1 text-xs font-semibold bg-white text-slate-600 rounded-r border border-slate-200 hover:bg-slate-50">FY28</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="chart-revenue-ebitda"></canvas>
+                    </div>
+                </div>
+
+                <!-- Margin Expansion & Recovery Chart Card -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm sm:text-base">Margin Restoration Curve (%)</h3>
+                            <p class="text-xs text-slate-500">Sequential Mean-Reversion to 13.0% Guidance Target</p>
+                        </div>
+                        <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800">
+                            75% Repricing Q2
+                        </span>
+                    </div>
+
+                    <div class="chart-container">
+                        <canvas id="chart-margins"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Forecast Table Container -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base">Master 8-Quarter Forecast Dataset</h3>
+                        <p class="text-xs text-slate-500">Consolidated financial model encompassing Revenue, EBITDA, PAT, EPS, and Confidence metrics</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="setTableFilter('detailed')" id="btn-tbl-detailed" class="px-3 py-1.5 text-xs font-semibold bg-brand-600 text-white rounded-md shadow-sm">
+                            8-Quarter Detailed
+                        </button>
+                        <button onclick="setTableFilter('annual')" id="btn-tbl-annual" class="px-3 py-1.5 text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-md">
+                            Annual FY22-FY29E
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Responsive Data Table -->
+                <div class="overflow-x-auto table-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[11px] tracking-wider">
+                            <tr id="tbl-header-row">
+                                <th class="p-3">Period</th>
+                                <th class="p-3 text-right">Revenue (₹Cr)</th>
+                                <th class="p-3 text-right">YoY %</th>
+                                <th class="p-3 text-right">EBITDA (₹Cr)</th>
+                                <th class="p-3 text-right">EBITDA %</th>
+                                <th class="p-3 text-right">PAT (₹Cr)</th>
+                                <th class="p-3 text-right">PAT %</th>
+                                <th class="p-3 text-right">EPS (₹)</th>
+                                <th class="p-3 text-center">Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbl-forecast-body" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                            <!-- JS populated rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: SCENARIO & DRIVER SIMULATOR         -->
+        <!-- ========================================== -->
+        <section id="sec-simulator" class="hidden space-y-6">
+            
+            <!-- Section Introductory Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">Interactive Scenario Modeling & Driver Simulator</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Test the sensitivity of Pricol's financial forecasts by adjusting scenario weightings (Bear, Base, Bull) or simulating the top-line impact of the ongoing TFT display adoption curve. The mathematical engine calculates probability-weighted EBITDA and PAT outputs for FY27E in real-time.
+                </p>
+            </div>
+
+            <!-- Dynamic Scenario Calculator Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Probability Weighting Controls Card -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-5 lg:col-span-1">
+                    <div class="border-b border-slate-100 pb-3">
+                        <h3 class="font-bold text-slate-900 text-base">FY27 Scenario Weightings</h3>
+                        <p class="text-xs text-slate-500">Adjust probability percentages (Must sum to 100%)</p>
+                    </div>
+
+                    <!-- Bear Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-rose-600">Bear Case Probability</span>
+                            <span id="val-bear-prob">20%</span>
+                        </div>
+                        <input type="range" id="slider-bear" min="0" max="100" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-rose-600" oninput="runScenarioCalculation()">
+                        <p class="text-[11px] text-slate-400">Assumes indexation pushback & polymer cost spikes</p>
+                    </div>
+
+                    <!-- Base Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-brand-600">Base Case Probability</span>
+                            <span id="val-base-prob">60%</span>
+                        </div>
+                        <input type="range" id="slider-base" min="0" max="100" value="60" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-600" oninput="runScenarioCalculation()">
+                        <p class="text-[11px] text-slate-400">Steady 75% Q2 repricing & ~18% volume execution</p>
+                    </div>
+
+                    <!-- Bull Slider -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-emerald-600">Bull Case Probability</span>
+                            <span id="val-bull-prob">20%</span>
+                        </div>
+                        <input type="range" id="slider-bull" min="0" max="100" value="20" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600" oninput="runScenarioCalculation()">
+                        <p class="text-[11px] text-slate-400">Accelerated BMS commercialization & TFT adoption</p>
+                    </div>
+
+                    <div id="prob-warning" class="hidden text-xs text-rose-600 font-semibold p-2 bg-rose-50 rounded border border-rose-200 text-center">
+                        ⚠️ Probabilities must sum to 100%!
+                    </div>
+
+                    <button onclick="resetScenarioWeights()" class="w-full py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+                        Reset Default Base Weights (20 / 60 / 20)
+                    </button>
+                </div>
+
+                <!-- Real-Time Dynamic Result Output Box -->
+                <div class="bg-slate-900 text-white p-6 rounded-xl border border-slate-800 shadow-lg lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Calculated Forecast Output</span>
+                                <h3 class="text-xl font-bold text-white">FY27 Probability-Weighted Expectation</h3>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-brand-500/20 text-brand-300 border border-brand-500/30">
+                                Dynamic Model
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+                            <div class="bg-slate-800/70 p-4 rounded-xl border border-slate-700">
+                                <span class="text-xs text-slate-400 font-semibold">Weighted EBITDA (FY27E)</span>
+                                <div id="calc-ebitda" class="text-3xl font-extrabold text-emerald-400 mt-1">₹600.86 Cr</div>
+                                <div class="text-xs text-slate-400 mt-2 flex justify-between">
+                                    <span>Base: ₹614.2 Cr</span>
+                                    <span>Bear: ₹509.6 Cr</span>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800/70 p-4 rounded-xl border border-slate-700">
+                                <span class="text-xs text-slate-400 font-semibold">Weighted PAT (FY27E)</span>
+                                <div id="calc-pat" class="text-3xl font-extrabold text-brand-400 mt-1">₹329.53 Cr</div>
+                                <div class="text-xs text-slate-400 mt-2 flex justify-between">
+                                    <span>Base: ₹338.6 Cr</span>
+                                    <span>Bear: ₹262.9 Cr</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Realization Growth Simulator Box -->
+                    <div class="mt-6 pt-6 border-t border-slate-800 space-y-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs font-bold text-slate-300">TFT Display Mix Adoption Simulator</span>
+                            <span id="tft-mix-val" class="text-xs font-bold text-amber-400">45% TFT Mix</span>
+                        </div>
+                        <input type="range" id="slider-tft" min="10" max="90" value="45" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-amber-400" oninput="runTftSimulator()">
+                        <p id="tft-calc-note" class="text-xs text-slate-400">
+                            Simulated Blended Cluster Realization: <strong class="text-white">₹2,465 / unit</strong> (vs legacy baseline of ₹800/unit).
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Capex Project Allocation Matrix -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-slate-900 text-base">₹700 Crore Capital Expenditure Deployment Breakdown</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-slate-900 text-sm">DICVS E-Cockpit & TFT</span>
+                            <span class="text-xs font-extrabold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">~₹350 Cr</span>
+                        </div>
+                        <p class="text-xs text-slate-600">Phased commissioning across FY27-FY28. High-margin electronics assembly and SMT automated lines.</p>
+                        <div class="text-[11px] text-slate-500 font-medium">Margin Impact: <span class="text-emerald-600 font-bold">Highly Accretive</span></div>
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-slate-900 text-sm">P3L Polymer Machining</span>
+                            <span class="text-xs font-extrabold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">~₹250 Cr</span>
+                        </div>
+                        <p class="text-xs text-slate-600">Doubling polymer injection moulding capacity by late FY28 to serve external non-auto clients.</p>
+                        <div class="text-[11px] text-slate-500 font-medium">Revenue Impact: <span class="text-brand-600 font-bold">Doubles Run-Rate</span></div>
+                    </div>
+
+                    <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-slate-900 text-sm">Disc Brake / ABS Lines</span>
+                            <span class="text-xs font-extrabold text-brand-600 bg-brand-50 px-2 py-0.5 rounded">~₹100 Cr</span>
+                        </div>
+                        <p class="text-xs text-slate-600">Targeting 0.5M units/year capacity for Jan 2027 mandatory ABS regulatory implementation.</p>
+                        <div class="text-[11px] text-slate-500 font-medium">Status: <span class="text-amber-600 font-bold">Execution / Early FY28 SOP</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: FORENSICS & STRATEGIC INTELLIGENCE  -->
+        <!-- ========================================== -->
+        <section id="sec-forensics" class="hidden space-y-6">
+            
+            <!-- Section Introductory Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">Concall Forensic Signals & Social Channel Intelligence</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    This module decodes qualitative, narrative, and social data points extracted from earnings conference calls, executive TV interviews, LinkedIn hiring footprints, and peer performance comparisons. Filter executive statements by sentiment or review Pricol's relative market positioning.
+                </p>
+            </div>
+
+            <!-- Signal Filter & Concall Statement Grid -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
+                    <h3 class="font-bold text-slate-900 text-base">Management Guidance & Concall Telemetry</h3>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-slate-500">Filter:</span>
+                        <button onclick="filterGuidance('all')" class="px-2.5 py-1 text-xs font-semibold rounded bg-slate-200 text-slate-800">All</button>
+                        <button onclick="filterGuidance('positive')" class="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-100 text-emerald-800">Positive</button>
+                        <button onclick="filterGuidance('cautious')" class="px-2.5 py-1 text-xs font-semibold rounded bg-amber-100 text-amber-800">Cautious</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="guidance-cards-container">
+                    <!-- Cards injected via JS -->
+                </div>
+            </div>
+
+            <!-- Social Sentiment & Channel Intelligence Gauges -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- X / Twitter -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase">X / Twitter Sentiment</span>
+                        <span class="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">+68 Score</span>
+                    </div>
+                    <div class="text-2xl font-extrabold text-slate-900">75% Bullish</div>
+                    <p class="text-xs text-slate-600">Sampled ~500 posts. Narrative dominated by 1:1 demerger share entitlement and Minda Corp stake buyout.</p>
+                </div>
+
+                <!-- LinkedIn -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase">LinkedIn Engineering Footprint</span>
+                        <span class="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-800">+86 Score</span>
+                    </div>
+                    <div class="text-2xl font-extrabold text-slate-900">88% Positive</div>
+                    <p class="text-xs text-slate-600">Aggressive talent acquisition in hardware engineering, embedded software & functional safety in Coimbatore & Pune.</p>
+                </div>
+
+                <!-- YouTube / Media -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase">Executive Media Interviews</span>
+                        <span class="px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800">CMD Confident</span>
+                    </div>
+                    <div class="text-2xl font-extrabold text-slate-900">₹8,000 Cr Target</div>
+                    <p class="text-xs text-slate-600">CMD Vikram Mohan re-confirmed ₹3,600 Cr organic order book visibility and confirmed only ₹120 Cr faces ICE obsolescence risk.</p>
+                </div>
+            </div>
+
+            <!-- Competitor & Consensus Comparison Matrix -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <h3 class="font-bold text-slate-900 text-base">Competitor Landscape & Valuation Multiples</h3>
+                
+                <div class="overflow-x-auto table-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Company</th>
+                                <th class="p-3">Primary Focus</th>
+                                <th class="p-3 text-right">P/E Multiple</th>
+                                <th class="p-3 text-right">EBITDA Margin</th>
+                                <th class="p-3">Strategic Relationship / Dynamic</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-slate-700">
+                            <tr class="bg-blue-50/40 font-semibold">
+                                <td class="p-3 text-brand-700">Pricol Limited</td>
+                                <td class="p-3">DICVS, Instrument Clusters, Polymers</td>
+                                <td class="p-3 text-right">~34x</td>
+                                <td class="p-3 text-right">12.16% - 13.0%</td>
+                                <td class="p-3 text-emerald-700">Dominant ~65% 2W cluster market share; 1:1 demerger catalyst.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Uno Minda</td>
+                                <td class="p-3">Diversified Auto Components & Electronics</td>
+                                <td class="p-3 text-right text-rose-600 font-bold">~57x</td>
+                                <td class="p-3 text-right">~11.5%</td>
+                                <td class="p-3">Commands market premium as pure-play auto tech; Pricol valuation target post-demerger.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Minda Corporation</td>
+                                <td class="p-3">Security Systems, Dashboards</td>
+                                <td class="p-3 text-right">~38x</td>
+                                <td class="p-3 text-right">~10.8%</td>
+                                <td class="p-3">Liquidated 15.7% hostile Pricol stake for ₹660 Cr to Goldman/Nomura/Fidelity. Overhang cleared.</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-semibold">Nippon Seiki</td>
+                                <td class="p-3">Global Instrument Clusters</td>
+                                <td class="p-3 text-right">Global Peer</td>
+                                <td class="p-3 text-right">~8.5%</td>
+                                <td class="p-3">Global leader; Pricol successfully defends Indian market as world's 2nd largest producer.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: CATALYSTS & RISK RADAR              -->
+        <!-- ========================================== -->
+        <section id="sec-catalysts" class="hidden space-y-6">
+            
+            <!-- Section Introductory Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-2">
+                <h2 class="text-xl font-bold text-slate-900">Quarterly Catalyst Roadmap & Risk Matrix</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    A timeline of critical operational catalysts and potential macroeconomic headwinds expected across the 8-quarter forecasting window. This radar provides risk-adjusted milestones for tracking forward thesis execution.
+                </p>
+            </div>
+
+            <!-- Catalyst & Risk Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- EBITDA Catalysts Card -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 text-base">Key EBITDA Catalysts</h3>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded">Margin Drivers</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-lg border-l-4 border-emerald-500 bg-slate-50 text-xs space-y-1">
+                            <div class="flex justify-between font-bold text-slate-900">
+                                <span>OEM Price Indexation Pass-Through</span>
+                                <span class="text-emerald-600">Q2 FY27</span>
+                            </div>
+                            <p class="text-slate-600">Management confirmed 75% of revenue triggers contractual indexation clauses in Q2, delivering an immediate +40 to +60 bps margin recovery.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg border-l-4 border-emerald-500 bg-slate-50 text-xs space-y-1">
+                            <div class="flex justify-between font-bold text-slate-900">
+                                <span>TFT Display Premiumisation Surge</span>
+                                <span class="text-emerald-600">Ongoing</span>
+                            </div>
+                            <p class="text-slate-600">Shift from ₹800 mechanical dials to ₹2,500–₹5,000 digital displays drives structural gross margin expansion (+100 to +150 bps).</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg border-l-4 border-emerald-500 bg-slate-50 text-xs space-y-1">
+                            <div class="flex justify-between font-bold text-slate-900">
+                                <span>BMS PowerSafe Joint Venture</span>
+                                <span class="text-emerald-600">FY28 Commercial</span>
+                            </div>
+                            <p class="text-slate-600">Deep localization of Battery Management Systems introduces high-margin software revenues for EV fleets.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EBITDA & PAT Risks Card -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 text-base">Key Downside Risks</h3>
+                        <span class="text-xs bg-rose-100 text-rose-800 font-bold px-2.5 py-0.5 rounded">Headwind Radar</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-lg border-l-4 border-rose-500 bg-slate-50 text-xs space-y-1">
+                            <div class="flex justify-between font-bold text-slate-900">
+                                <span>Specialized Polymer & Copper Volatility</span>
+                                <span class="text-rose-600">Short-Term Risk</span>
+                            </div>
+                            <p class="text-slate-600">Spikes in ocean freight rates and HDPE polymer costs temporarily compress margins prior to quarterly contract resetting.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg border-l-4 border-rose-500 bg-slate-50 text-xs space-y-1">
+                            <div class="flex justify-between font-bold text-slate-900">
+                                <span>Depreciation Spike from ₹700 Cr Capex</span>
+                                <span class="text-rose-600">H2 FY28 Impact</span>
+                            </div>
+                            <p class="text-slate-600">Aggressive capitalization of new polymer and e-cockpit lines will add -₹15 Cr to -₹25 Cr accounting D&A drag, though offset by EBITDA volume.</p>
+                        </div>
+
+                        <div class="p-3 rounded-lg border-l-4 border-rose-500 bg-slate-50 text-xs space-y-1">
+                            <div class="flex justify-between font-bold text-slate-900">
+                                <span>Global Semiconductor Chip Scarcity</span>
+                                <span class="text-rose-600">Supply Chain</span>
+                            </div>
+                            <p class="text-slate-600">AI data center silicon demand creates transient procurement friction for automotive-grade microcontrollers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Source Hierarchy & Quality Audit Trail -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                <h3 class="font-bold text-slate-900 text-base">Source Reliability Hierarchy & Data Integrity Audit</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+                    <div class="p-3 rounded border border-slate-200 bg-slate-50">
+                        <span class="font-bold text-brand-700 block">Tier 1: High Fidelity</span>
+                        Audited FY26 Financials, Official Exchange Filings (DICVS Scheme), Q1 FY27 Press Release.
+                    </div>
+                    <div class="p-3 rounded border border-slate-200 bg-slate-50">
+                        <span class="font-bold text-brand-700 block">Tier 2: Direct Mgmt</span>
+                        Q1 FY27 Concall Transcripts (CMD Vikram Mohan), CRISIL / Ind-Ra Rating Reports (AA-).
+                    </div>
+                    <div class="p-3 rounded border border-slate-200 bg-slate-50">
+                        <span class="font-bold text-brand-700 block">Tier 3: Institutional</span>
+                        Axis Direct Initiation Report (₹935 Target), Minda Corp Bulk Deal Exchange Filings.
+                    </div>
+                    <div class="p-3 rounded border border-slate-200 bg-slate-50">
+                        <span class="font-bold text-brand-700 block">Tier 4/5: Alt Intelligence</span>
+                        LinkedIn Talent Analytics, Executive TV Broadcasts, ValuePickr Forum Calculations.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 mt-8 py-4">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs text-slate-500">
+            Pricol Limited Earnings Intelligence Dashboard • Interactive Single-Page Application • Source Data Verified September 2026
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // DATA ARRAYS FROM SOURCE REPORT
+        const forecastData = [
+            { period: "Q1 FY27 (A)", rev: 1083.58, revYoY: 23.46, ebitda: 123.69, ebitdaMargin: 11.41, pat: 67.02, patMargin: 6.18, eps: 5.50, conf: "Actual" },
+            { period: "Q2 FY27E", rev: 1180.00, revYoY: 17.18, ebitda: 141.60, ebitdaMargin: 12.00, pat: 76.50, patMargin: 6.48, eps: 6.28, conf: "High" },
+            { period: "Q3 FY27E", rev: 1230.00, revYoY: 18.38, ebitda: 152.52, ebitdaMargin: 12.40, pat: 83.20, patMargin: 6.76, eps: 6.83, conf: "High" },
+            { period: "Q4 FY27E", rev: 1290.00, revYoY: 17.38, ebitda: 163.83, ebitdaMargin: 12.70, pat: 91.80, patMargin: 7.12, eps: 7.53, conf: "Medium" },
+            { period: "Q1 FY28E", rev: 1260.00, revYoY: 16.28, ebitda: 156.24, ebitdaMargin: 12.40, pat: 87.10, patMargin: 6.91, eps: 7.15, conf: "Medium" },
+            { period: "Q2 FY28E", rev: 1380.00, revYoY: 16.95, ebitda: 173.88, ebitdaMargin: 12.60, pat: 96.40, patMargin: 6.99, eps: 7.91, conf: "Medium" },
+            { period: "Q3 FY28E", rev: 1440.00, revYoY: 17.07, ebitda: 184.32, ebitdaMargin: 12.80, pat: 103.50, patMargin: 7.19, eps: 8.49, conf: "Medium" },
+            { period: "Q4 FY28E", rev: 1530.00, revYoY: 18.60, ebitda: 198.90, ebitdaMargin: 13.00, pat: 113.20, patMargin: 7.40, eps: 9.29, conf: "Low" },
+            { period: "Q1 FY29E", rev: 1500.00, revYoY: 19.05, ebitda: 192.00, ebitdaMargin: 12.80, pat: 108.50, patMargin: 7.23, eps: 8.90, conf: "Low" }
+        ];
+
+        const annualData = [
+            { period: "FY22 (A)", rev: 1544.69, revYoY: 9.31, ebitda: 183.00, ebitdaMargin: 11.85, pat: 51.00, patMargin: 3.30, eps: 4.19, conf: "Actual" },
+            { period: "FY23 (A)", rev: 1958.56, revYoY: 26.79, ebitda: 229.00, ebitdaMargin: 11.69, pat: 125.00, patMargin: 6.38, eps: 10.23, conf: "Actual" },
+            { period: "FY24 (A)", rev: 2271.78, revYoY: 15.99, ebitda: 285.00, ebitdaMargin: 12.55, pat: 141.00, patMargin: 6.21, eps: 11.54, conf: "Actual" },
+            { period: "FY25 (A)", rev: 2691.92, revYoY: 18.49, ebitda: 313.00, ebitdaMargin: 11.63, pat: 167.00, patMargin: 6.20, eps: 13.70, conf: "Actual" },
+            { period: "FY26 (A)", rev: 3963.85, revYoY: 47.25, ebitda: 493.00, ebitdaMargin: 12.44, pat: 250.80, patMargin: 6.33, eps: 20.57, conf: "Actual" },
+            { period: "FY27E", rev: 4783.58, revYoY: 20.68, ebitda: 581.64, ebitdaMargin: 12.16, pat: 318.52, patMargin: 6.66, eps: 26.13, conf: "High" },
+            { period: "FY28E", rev: 5610.00, revYoY: 17.28, ebitda: 713.34, ebitdaMargin: 12.72, pat: 399.20, patMargin: 7.12, eps: 32.75, conf: "Medium" },
+            { period: "FY29E", rev: 6650.00, revYoY: 18.54, ebitda: 857.85, ebitdaMargin: 12.90, pat: 485.00, patMargin: 7.29, eps: 39.79, conf: "Low" }
+        ];
+
+        const guidanceItems = [
+            { speaker: "Vikram Mohan (CMD)", date: "Jul 2026", statement: "75% of revenue is due for price indexation in Q2 FY27, with the remainder in Q3.", type: "positive", impact: "Immediate margin restoration to >12.0% in Q2" },
+            { speaker: "Vikram Mohan (CMD)", date: "Jul 2026", statement: "Steady-state EBITDA margin target corridor maintained at 12.5% to 13.0%.", type: "positive", impact: "Establishes long-term margin baseline" },
+            { speaker: "P.M. Ganesh (CEO)", date: "Jul 2026", statement: "Capital expenditure cycle of ₹700 crore underway across divisions.", type: "positive", impact: "Secures capacity for ₹8,000 Cr revenue target" },
+            { speaker: "Board of Directors", date: "Jun 2026", statement: "Formal approval granted for 1:1 demerger of DICVS into Pricol Autotech Ltd.", type: "positive", impact: "Unlocks pure-play auto tech valuation multiples" },
+            { speaker: "Concall Telemetry", date: "Jul 2026", statement: "Ocean freight rate spikes and polymer price inflation created Q1 margin lag.", type: "cautious", impact: "Transient 50-67 bps margin compression in Q1" }
+        ];
+
+        // CHART INSTANCES
+        let chartRevEbitda = null;
+        let chartMargins = null;
+
+        // INITIALIZATION
+        document.addEventListener("DOMContentLoaded", function() {
+            renderForecastTable(forecastData);
+            initCharts();
+            renderGuidanceCards(guidanceItems);
+            runScenarioCalculation();
+            runTftSimulator();
+        });
+
+        // TAB SWITCHING LOGIC
+        function switchTab(tabId) {
+            const tabs = ['overview', 'studio', 'simulator', 'forensics', 'catalysts'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const sec = document.getElementById(`sec-${t}`);
+                if (t === tabId) {
+                    btn.classList.add('active');
+                    btn.classList.remove('text-slate-600');
+                    sec.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-slate-600');
+                    sec.classList.add('hidden');
+                }
+            });
+        }
+
+        // ACCORDION LOGIC
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(`${id}-icon`);
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.textContent = '＋';
+            } else {
+                content.classList.add('open');
+                icon.textContent = '－';
+            }
+        }
+
+        // TABLE RENDER LOGIC
+        function renderForecastTable(data) {
+            const tbody = document.getElementById('tbl-forecast-body');
+            tbody.innerHTML = '';
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors border-b border-slate-100";
+
+                let confBadge = '';
+                if(row.conf === 'Actual') confBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-700">Actual</span>';
+                else if(row.conf === 'High') confBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">High</span>';
+                else if(row.conf === 'Medium') confBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">Medium</span>';
+                else confBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">Low</span>';
+
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-900">${row.period}</td>
+                    <td class="p-3 text-right font-bold text-slate-800">₹${row.rev.toFixed(2)}</td>
+                    <td class="p-3 text-right text-emerald-600 font-semibold">+${row.revYoY.toFixed(2)}%</td>
+                    <td class="p-3 text-right font-bold text-slate-800">₹${row.ebitda.toFixed(2)}</td>
+                    <td class="p-3 text-right font-semibold text-brand-600">${row.ebitdaMargin.toFixed(2)}%</td>
+                    <td class="p-3 text-right font-bold text-slate-800">₹${row.pat.toFixed(2)}</td>
+                    <td class="p-3 text-right text-slate-600">${row.patMargin.toFixed(2)}%</td>
+                    <td class="p-3 text-right font-bold text-slate-900">₹${row.eps.toFixed(2)}</td>
+                    <td class="p-3 text-center">${confBadge}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function setTableFilter(type) {
+            const btnDetailed = document.getElementById('btn-tbl-detailed');
+            const btnAnnual = document.getElementById('btn-tbl-annual');
+
+            if(type === 'detailed') {
+                btnDetailed.className = "px-3 py-1.5 text-xs font-semibold bg-brand-600 text-white rounded-md shadow-sm";
+                btnAnnual.className = "px-3 py-1.5 text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-md";
+                renderForecastTable(forecastData);
+            } else {
+                btnAnnual.className = "px-3 py-1.5 text-xs font-semibold bg-brand-600 text-white rounded-md shadow-sm";
+                btnDetailed.className = "px-3 py-1.5 text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-md";
+                renderForecastTable(annualData);
+            }
+        }
+
+        // CHART.JS INITIALIZATION
+        function initCharts() {
+            // Chart 1: Revenue & EBITDA
+            const ctx1 = document.getElementById('chart-revenue-ebitda').getContext('2d');
+            chartRevEbitda = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: forecastData.map(d => d.period),
+                    datasets: [
+                        {
+                            label: 'Revenue (₹Cr)',
+                            data: forecastData.map(d => d.rev),
+                            backgroundColor: 'rgba(37, 99, 235, 0.75)',
+                            borderColor: '#2563eb',
+                            borderWidth: 1,
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'EBITDA (₹Cr)',
+                            data: forecastData.map(d => d.ebitda),
+                            type: 'line',
+                            borderColor: '#10b981',
+                            backgroundColor: '#10b981',
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            pointHoverRadius: 6,
+                            yAxisID: 'y'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ₹' + context.raw + ' Cr';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        y: { 
+                            title: { display: true, text: '₹ Crore', font: { size: 11 } },
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+
+            // Chart 2: Margins
+            const ctx2 = document.getElementById('chart-margins').getContext('2d');
+            chartMargins = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: forecastData.map(d => d.period),
+                    datasets: [
+                        {
+                            label: 'EBITDA Margin (%)',
+                            data: forecastData.map(d => d.ebitdaMargin),
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            borderWidth: 2.5,
+                            fill: true,
+                            tension: 0.2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'PAT Margin (%)',
+                            data: forecastData.map(d => d.patMargin),
+                            borderColor: '#6366f1',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            tension: 0.2,
+                            pointRadius: 3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.raw + '%';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                        y: { 
+                            title: { display: true, text: 'Percentage (%)', font: { size: 11 } },
+                            min: 4,
+                            max: 15,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart1(filter) {
+            let filtered = [...forecastData];
+            if(filter === 'fy27') filtered = forecastData.slice(0, 4);
+            else if(filter === 'fy28') filtered = forecastData.slice(4, 8);
+
+            chartRevEbitda.data.labels = filtered.map(d => d.period);
+            chartRevEbitda.data.datasets[0].data = filtered.map(d => d.rev);
+            chartRevEbitda.data.datasets[1].data = filtered.map(d => d.ebitda);
+            chartRevEbitda.update();
+        }
+
+        // SCENARIO CALCULATOR
+        function runScenarioCalculation() {
+            const bearProb = parseFloat(document.getElementById('slider-bear').value);
+            const baseProb = parseFloat(document.getElementById('slider-base').value);
+            const bullProb = parseFloat(document.getElementById('slider-bull').value);
+
+            document.getElementById('val-bear-prob').textContent = bearProb + '%';
+            document.getElementById('val-base-prob').textContent = baseProb + '%';
+            document.getElementById('val-bull-prob').textContent = bullProb + '%';
+
+            const total = bearProb + baseProb + bullProb;
+            const warning = document.getElementById('prob-warning');
+            if(total !== 100) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+
+            // FY27 Totals from Report (Section 24)
+            // Bear: EBITDA 509.64 Cr, PAT 262.86 Cr
+            // Base: EBITDA 614.19 Cr, PAT 338.60 Cr
+            // Bull: EBITDA 652.08 Cr, PAT 368.98 Cr
+
+            const weightedEbitda = (509.64 * (bearProb / 100)) + (614.19 * (baseProb / 100)) + (652.08 * (bullProb / 100));
+            const weightedPat = (262.86 * (bearProb / 100)) + (338.60 * (baseProb / 100)) + (368.98 * (bullProb / 100));
+
+            document.getElementById('calc-ebitda').textContent = '₹' + weightedEbitda.toFixed(2) + ' Cr';
+            document.getElementById('calc-pat').textContent = '₹' + weightedPat.toFixed(2) + ' Cr';
+        }
+
+        function resetScenarioWeights() {
+            document.getElementById('slider-bear').value = 20;
+            document.getElementById('slider-base').value = 60;
+            document.getElementById('slider-bull').value = 20;
+            runScenarioCalculation();
+        }
+
+        // TFT REALIZATION SIMULATOR
+        function runTftSimulator() {
+            const mix = parseInt(document.getElementById('slider-tft').value);
+            document.getElementById('tft-mix-val').textContent = mix + '% TFT Mix';
+
+            // Mechanical ASP = ₹800, TFT ASP = ₹4,500
+            const blendedRealization = Math.round(((100 - mix) / 100 * 800) + ((mix / 100) * 4500));
+            document.getElementById('tft-calc-note').innerHTML = `
+                Simulated Blended Cluster Realization: <strong class="text-white">₹${blendedRealization.toLocaleString()} / unit</strong> (vs legacy mechanical baseline of ₹800/unit).
+            `;
+        }
+
+        // RENDER GUIDANCE CARDS
+        function renderGuidanceCards(items) {
+            const container = document.getElementById('guidance-cards-container');
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                const isPos = item.type === 'positive';
+                card.className = `p-4 rounded-xl border ${isPos ? 'border-emerald-200 bg-emerald-50/30' : 'border-amber-200 bg-amber-50/30'} space-y-2`;
+                card.innerHTML = `
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold ${isPos ? 'text-emerald-800' : 'text-amber-800'}">${item.speaker}</span>
+                        <span class="text-slate-400 font-medium">${item.date}</span>
+                    </div>
+                    <p class="text-xs sm:text-sm text-slate-800 font-medium">"${item.statement}"</p>
+                    <div class="text-[11px] text-slate-600 font-semibold pt-1 border-t border-slate-200/60">
+                        Forecast Impact: <span class="${isPos ? 'text-emerald-700' : 'text-amber-700'}">${item.impact}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterGuidance(type) {
+            if(type === 'all') renderGuidanceCards(guidanceItems);
+            else {
+                const filtered = guidanceItems.filter(i => i.type === type);
+                renderGuidanceCards(filtered);
+            }
+        }
+    </script>
+</body>
+</html>
