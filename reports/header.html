@@ -1,0 +1,134 @@
+<div class="report-header">
+  <div class="report-header-inner">
+    <div class="report-topbar">
+      <div class="report-brand">
+        <div class="report-logo">▲</div>
+        <div>
+          <h1 data-stock-name>Stock Name</h1>
+          <p>Earnings Intelligence Reports</p>
+        </div>
+      </div>
+      <a class="report-back" href="../../index.html">Back to dashboard</a>
+    </div>
+
+    <nav class="report-tabs" aria-label="Report tabs">
+      <a
+        class="report-tab"
+        data-page="annual_prediction.html"
+        data-label="Annual Prediction"
+        href="annual_prediction.html"
+        >Annual Prediction</a
+      >
+      <a
+        class="report-tab"
+        data-page="ebitda_prediction_online.html"
+        data-label="EBITDA Prediction Online"
+        href="ebitda_prediction_online.html"
+        >EBITDA Prediction Online</a
+      >
+      <a
+        class="report-tab"
+        data-page="social_media_prediction.html"
+        data-label="Social Media Prediction"
+        href="social_media_prediction.html"
+        >Social Media Prediction</a
+      >
+    </nav>
+  </div>
+</div>
+<style>
+  .report-header {
+    background: #0f172a;
+    border-bottom: 1px solid #1e293b;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    position: sticky;
+    top: 0;
+    z-index: 20;
+  }
+  .report-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 18px 20px 14px;
+  }
+  .report-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .report-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .report-logo {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+    font-weight: 700;
+  }
+  .report-brand h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #f8fafc;
+  }
+  .report-brand p {
+    margin: 2px 0 0;
+    color: #94a3b8;
+    font-size: 0.72rem;
+  }
+  .report-back {
+    color: #f8fafc;
+    text-decoration: none;
+    border: 1px solid #334155;
+    background: rgba(15, 23, 42, 0.8);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .report-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .report-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, 0.8);
+    color: #cbd5e1;
+    text-decoration: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    transition: all 0.15s ease;
+  }
+  .report-tab.active {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+  }
+  @media (max-width: 640px) {
+    .report-topbar {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .report-back {
+      width: 100%;
+      text-align: center;
+    }
+  }
+</style>

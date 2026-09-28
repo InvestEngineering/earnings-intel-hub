@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iifl | social_media_prediction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              950: '#020617'
+            },
+            amber: {
+              400: '#fbbf24',
+              500: '#f59e0b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+  /* header CSS moved to reports/header.html */
+</style>
+
+  <div id="reportHeader"></div>
+  <script>
+    (function () {
+      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
+      const parts = location.pathname.split('/');
+      const stockFolder = parts[parts.length-2] || '';
+      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      fetch('../header.html')
+        .then(function (res) { return res.text(); })
+        .then(function (html) {
+          const host = document.getElementById('reportHeader');
+          if (!host) return;
+          host.innerHTML = html;
+          // set active tab
+          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
+          if (activeTab) activeTab.classList.add('active');
+          // humanize and title-case tabs
+          host.querySelectorAll('.report-tab').forEach(function(t){
+            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
+            const words = label.split(/\s+/).filter(Boolean).map(function(w){
+              if (/^ebitda$/i.test(w)) return 'EBITDA';
+              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+            });
+            if (words.length) t.textContent = words.join(' ');
+          });
+          // set stock title if present in header
+          const title = host.querySelector('[data-stock-name]');
+          if (title) title.textContent = stockName || 'Stock Name';
+        })
+        .catch(function () {});
+    })();
+  </script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased">
+  
+
+  <main class="report-shell">
+    <section class="report-card">
+      <span class="report-meta">social media prediction</span>
+      <h2>Iifl</h2>
+      <p>This section contains the social media prediction report for Iifl. Update this file with the stock-specific analysis whenever the report is ready.</p>
+      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
+    </section>
+  </main>
+</body>
+</html>
