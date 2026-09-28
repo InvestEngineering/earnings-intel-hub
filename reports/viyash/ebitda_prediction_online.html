@@ -1,75 +1,1071 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Viyash | ebitda_prediction_online</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617'
-            },
-            amber: {
-              400: '#fbbf24',
-              500: '#f59e0b'
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viyash Scientific (NSE: VIYASH) — Earnings Intelligence & Forecast Workstation</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                        emeraldCustom: {
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                        },
+                        amberCustom: {
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
-  <style>
-  /* header CSS moved to reports/header.html */
-</style>
-
-  <div id="reportHeader"></div>
-  <script>
-    (function () {
-      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
-      const parts = location.pathname.split('/');
-      const stockFolder = parts[parts.length-2] || '';
-      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      fetch('../header.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-          const host = document.getElementById('reportHeader');
-          if (!host) return;
-          host.innerHTML = html;
-          // set active tab
-          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
-          if (activeTab) activeTab.classList.add('active');
-          // humanize and title-case tabs
-          host.querySelectorAll('.report-tab').forEach(function(t){
-            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
-            const words = label.split(/\s+/).filter(Boolean).map(function(w){
-              if (/^ebitda$/i.test(w)) return 'EBITDA';
-              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            });
-            if (words.length) t.textContent = words.join(' ');
-          });
-          // set stock title if present in header
-          const title = host.querySelector('[data-stock-name]');
-          if (title) title.textContent = stockName || 'Stock Name';
-        })
-        .catch(function () {});
-    })();
-  </script>
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .tab-btn.active {
+            border-bottom-color: #0284c7;
+            color: #0284c7;
+            font-weight: 700;
+            background-color: #f0f7ff;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased">
-  
+<!-- Chosen Palette: Warm Neutral & Institutional Sage (Slate, Emerald, Amber, Stone) -->
+<!-- Application Structure Plan: Designed as a dynamic financial intelligence workstation. It breaks down the dense report into 8 focused operational tabs: Executive Overview, 8-Quarter Interactive Forecast & Scenario Engine, P&L Inflection Mechanics (highlighting the ESOP cliff), Consensus vs Independent Divergence, Segmental Revenue Build, Concall Forensics, Competitor Matrix, and an Interactive Q&A Knowledge Bank. This non-linear layout allows investors and analysts to rapidly isolate thesis catalysts, test sensitivity parameters, and analyze multi-quarter financial dynamics. -->
+<!-- Visualization & Content Choices: 
+- 8-Quarter Forecast: Multi-axis Chart.js canvas showing Revenue, EBITDA, and PAT with scenario dynamic updates (Base/Bull/Bear).
+- P&L Inflection Mechanics: Stacked bar / line Chart.js canvas demonstrating the ESOP charge cliff dropping from ₹150Cr in FY27 to ₹30Cr in FY28 alongside D&A step-downs.
+- Consensus vs Independent Divergence: Comparison bar chart highlighting the street's miss on FY28 PAT.
+- Historical Turnaround: Area/Line chart showing EBITDA margin expansion from -3.3% in FY23 to 22.8% in FY28E.
+- Segment Build: Interactive breakdown of Formulations, API, and BioForLife M&A revenues.
+- Concall Forensics & Q&A: Dynamic filterable cards and interactive query engine.
+- Confirmation: NO SVG graphics used. NO Mermaid JS used. Canvas used for Chart.js. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brand-100 selection:text-brand-900 min-h-screen flex flex-col">
 
-  <main class="report-shell">
-    <section class="report-card">
-      <span class="report-meta">ebitda prediction online</span>
-      <h2>Viyash</h2>
-      <p>This section contains the ebitda prediction online report for Viyash. Update this file with the stock-specific analysis whenever the report is ready.</p>
-      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
-    </section>
-  </main>
+    <!-- Top Header & Navigation -->
+    <header class="bg-slate-900 text-white sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center py-4 border-b border-slate-800 gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-brand-500 text-white p-2.5 rounded-lg font-black text-xl tracking-wider">
+                        VIYASH
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                            Viyash Scientific Ltd <span class="text-xs bg-slate-800 text-emerald-400 font-semibold px-2 py-0.5 rounded border border-emerald-500/30">NSE: VIYASH</span>
+                        </h1>
+                        <p class="text-xs text-slate-400">Master EBITDA & PAT Growth Forecast | Earnings Intelligence Workstation</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-3 text-xs flex-wrap">
+                    <div class="bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700">
+                        <span class="text-slate-400 block">Q1 FY27 Revenue</span>
+                        <span class="text-white font-bold text-sm">₹946.36 Cr <span class="text-emerald-400 text-xs">(+19.5% YoY)</span></span>
+                    </div>
+                    <div class="bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700">
+                        <span class="text-slate-400 block">Q1 Adj. EBITDA</span>
+                        <span class="text-white font-bold text-sm">₹204.70 Cr <span class="text-emerald-400 text-xs">(21.6% Margin)</span></span>
+                    </div>
+                    <div class="bg-slate-800 px-3 py-1.5 rounded-md border border-slate-700">
+                        <span class="text-slate-400 block">Net Debt / EBITDA</span>
+                        <span class="text-white font-bold text-sm">0.1x <span class="text-emerald-400 text-xs">(₹86 Cr Net Debt)</span></span>
+                    </div>
+                    <div class="bg-emerald-950 px-3 py-1.5 rounded-md border border-emerald-800 text-emerald-300">
+                        <span class="block text-[10px] uppercase font-bold text-emerald-400">FY28E PAT Inflection</span>
+                        <span class="font-extrabold text-sm">₹547 Cr (+52.2%)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation Bar -->
+            <nav class="flex space-x-1 overflow-x-auto py-2 text-xs font-medium no-scrollbar border-t border-slate-800/60" id="main-tabs">
+                <button onclick="switchTab('tab-exec')" class="tab-btn active px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    📌 Executive Thesis
+                </button>
+                <button onclick="switchTab('tab-forecast')" class="tab-btn px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    📈 8-Quarter Forecast & Scenarios
+                </button>
+                <button onclick="switchTab('tab-pl-mechanics')" class="tab-btn px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    ⚙️ P&L Mechanics & ESOP Cliff
+                </button>
+                <button onclick="switchTab('tab-consensus')" class="tab-btn px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    🎯 Consensus vs Independent Gap
+                </button>
+                <button onclick="switchTab('tab-segments')" class="tab-btn px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    🧩 Segment Drivers & M&A
+                </button>
+                <button onclick="switchTab('tab-concall')" class="tab-btn px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    🎙️ Concall & Guidance Tracker
+                </button>
+                <button onclick="switchTab('tab-peers')" class="tab-btn px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    🏢 Peers & Macro Environment
+                </button>
+                <button onclick="switchTab('tab-qa')" class="tab-btn px-3.5 py-2 rounded-t-md text-slate-300 hover:text-white transition whitespace-nowrap">
+                    🔍 Strategic Q&A Explorer
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Body -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- SECTION 1: EXECUTIVE THESIS -->
+        <section id="tab-exec" class="tab-content space-y-6">
+            <!-- Introductory Context Banner -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-2">Executive Summary: Amalgamation, Restructuring & Inflection</h2>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Viyash Scientific Ltd (NSE: VIYASH), formed via the landmark November 2025 amalgamation of Viyash Life Sciences and SeQuent Scientific, has transformed into a fully backward-integrated pharmaceutical enterprise spanning both animal and human health. The Q1 FY27 results confirm a powerful operational turning point. Driven by a 33% YoY surge in global formulations and 220 bps gross margin expansion, adjusted EBITDA expanded by 59.2% YoY to ₹204.70 Cr. With net debt falling to ₹86 Cr (0.1x EBITDA), the company is pivoting into scaled execution, margin expansion, and accelerated cash flow generation.
+                </p>
+            </div>
+
+            <!-- Key Thesis Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-brand-500 transition">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-brand-600 bg-brand-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Catalyst 1</span>
+                        <span class="text-xs text-slate-400 font-mono">Q3 FY27 Onward</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base mb-2">BioForLife Italia M&A</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        The pending €16.976M acquisition provides immediate access to 80% of Italian veterinary clinics. It establishes a direct distribution springboard into Europe's lucrative companion animal market, adding €9M+ baseline revenue scaling into FY28.
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-500 transition">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Catalyst 2</span>
+                        <span class="text-xs text-slate-400 font-mono">Q2 FY27 Immediate</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base mb-2">API Segment Record Quarter</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Following transient June destocking, management explicitly guided Q2 FY27 to be the strongest API quarter in corporate history. Backed by USFDA clearance for the Vizag facility, high-margin API exports are accelerating.
+                    </p>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-amber-500 transition">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full uppercase tracking-wider">Catalyst 3</span>
+                        <span class="text-xs text-slate-400 font-mono">Q1 FY28 Alpha</span>
+                    </div>
+                    <h3 class="font-bold text-slate-900 text-base mb-2">Non-Cash ESOP & D&A Cliff</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Non-cash ESOP charges drop from ~₹150 Cr in FY27 to ₹25-30 Cr in FY28. Coupled with expiring legacy intangible amortizations (~₹60 Cr benefit), pre-tax PAT will surge by +52.2% independent of sales growth.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Historical Turnaround & Forecast Trajectory Chart -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex flex-col md:flex-row justify-between md:items-center gap-2">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900">Historical Metamorphosis & Multi-Year Projection (FY22 – FY29E)</h3>
+                        <p class="text-xs text-slate-500">Visualization of Revenue, EBITDA, and Net Profit turnaround post-amalgamation</p>
+                    </div>
+                    <div class="flex items-center gap-4 text-xs font-semibold">
+                        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-slate-400 inline-block"></span> Revenue (₹ Cr)</span>
+                        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-brand-500 inline-block"></span> EBITDA (₹ Cr)</span>
+                        <span class="inline-flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> PAT (₹ Cr)</span>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="historicalChart"></canvas>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-3 border-t border-slate-100 text-center">
+                    <div class="bg-slate-50 p-3 rounded-lg">
+                        <span class="text-[11px] text-slate-500 block uppercase font-medium">3-Yr Revenue CAGR</span>
+                        <span class="text-base font-bold text-slate-900">15.04%</span>
+                        <span class="text-[10px] text-slate-400 block">FY25 - FY28E</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg">
+                        <span class="text-[11px] text-slate-500 block uppercase font-medium">3-Yr PAT CAGR</span>
+                        <span class="text-base font-bold text-emerald-600">52.24%</span>
+                        <span class="text-[10px] text-slate-400 block">FY25 - FY28E</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg">
+                        <span class="text-[11px] text-slate-500 block uppercase font-medium">Peak EBITDA Margin</span>
+                        <span class="text-base font-bold text-brand-600">23.00%</span>
+                        <span class="text-[10px] text-slate-400 block">FY29E Projection</span>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-lg">
+                        <span class="text-[11px] text-slate-500 block uppercase font-medium">FY28E EPS</span>
+                        <span class="text-base font-bold text-slate-900">₹10.42</span>
+                        <span class="text-[10px] text-slate-400 block">vs ₹4.84 in FY26</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: 8-QUARTER FORECAST & SCENARIOS -->
+        <section id="tab-forecast" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">8-Quarter Forward Forecast Dashboard (Q2 FY27E – Q1 FY29E)</h2>
+                        <p class="text-xs text-slate-500">Interactive quarterly trajectory with dynamic Bear / Base / Bull scenario testing</p>
+                    </div>
+
+                    <!-- Scenario Switcher Buttons -->
+                    <div class="flex items-center bg-slate-100 p-1 rounded-lg text-xs font-semibold">
+                        <span class="text-slate-500 px-2 py-1">Scenario:</span>
+                        <button onclick="setScenario('bear')" id="scen-bear" class="px-3 py-1 rounded-md text-slate-700 hover:bg-white transition">Bear</button>
+                        <button onclick="setScenario('base')" id="scen-base" class="px-3 py-1 rounded-md bg-white text-brand-600 shadow-sm transition">Base (60%)</button>
+                        <button onclick="setScenario('bull')" id="scen-bull" class="px-3 py-1 rounded-md text-slate-700 hover:bg-white transition">Bull</button>
+                    </div>
+                </div>
+
+                <div class="chart-container mb-6">
+                    <canvas id="quarterlyForecastChart"></canvas>
+                </div>
+
+                <!-- Interactive Data Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left text-slate-700 border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-semibold">
+                                <th class="p-2.5 rounded-tl-lg">Metric</th>
+                                <th class="p-2.5 bg-slate-700">Q1 FY27 (A)</th>
+                                <th class="p-2.5">Q2 FY27E</th>
+                                <th class="p-2.5">Q3 FY27E</th>
+                                <th class="p-2.5">Q4 FY27E</th>
+                                <th class="p-2.5">Q1 FY28E</th>
+                                <th class="p-2.5">Q2 FY28E</th>
+                                <th class="p-2.5">Q3 FY28E</th>
+                                <th class="p-2.5">Q4 FY28E</th>
+                                <th class="p-2.5 rounded-tr-lg">Q1 FY29E</th>
+                            </tr>
+                        </thead>
+                        <tbody id="forecast-table-body" class="divide-y divide-slate-200 bg-white">
+                            <!-- Dynamic Content Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: P&L MECHANICS & ESOP CLIFF -->
+        <section id="tab-pl-mechanics" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-2">The P&L Translation Engine: Unpacking the Non-Cash ESOP Cliff</h2>
+                <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                    While top-line revenue expands at ~15% CAGR, Net Profit (PAT) is set to surge by +52.2% in FY28. This decoupling is driven by two specific accounting step-downs below the EBITDA line: (1) The expiration of composite scheme non-cash ESOP charges dropping from ₹150 Cr to ₹30 Cr annually, and (2) The complete amortization of legacy acquisition intangibles in H2 FY27.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800">Quarterly Non-Operating Cost Deductions (₹ Cr)</h3>
+                        <div class="chart-container">
+                            <canvas id="esopDnaChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800">Quarterly PAT & Margin Expansion Trajectory</h3>
+                        <div class="chart-container">
+                            <canvas id="patMarginChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Breakdown Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div class="text-xs font-bold text-slate-500 uppercase">1. ESOP Amortization Cliff</div>
+                        <div class="text-xl font-extrabold text-slate-900 my-1">₹120 Cr Pre-Tax Gain</div>
+                        <p class="text-xs text-slate-600">
+                            FY27 non-cash ESOP cost of ~₹150 Cr drops to ₹25-30 Cr in FY28 (~₹7.5 Cr/qtr). This directly flows into net earnings without requiring sales growth.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div class="text-xs font-bold text-slate-500 uppercase">2. Intangibles D&A Expiration</div>
+                        <div class="text-xl font-extrabold text-slate-900 my-1">~₹60 Cr Annual Saving</div>
+                        <p class="text-xs text-slate-600">
+                            Amortization schedules for legacy pre-merger acquisitions conclude in late FY27, reducing quarterly D&A from ₹62 Cr in Q2 FY27 to ~₹46 Cr in FY28.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div class="text-xs font-bold text-slate-500 uppercase">3. Interest Burden Elimination</div>
+                        <div class="text-xl font-extrabold text-slate-900 my-1">Net Debt ₹86 Cr</div>
+                        <p class="text-xs text-slate-600">
+                            Deleveraging from ₹375 Cr to ₹86 Cr reduces quarterly finance costs to ~₹6.5-8.0 Cr, shielding earnings from interest rate headwinds.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: CONSENSUS VS INDEPENDENT GAP -->
+        <section id="tab-consensus" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="mb-6">
+                    <h2 class="text-lg font-bold text-slate-900">Consensus vs. Independent Model: Identifying the Street's Blind Spot</h2>
+                    <p class="text-sm text-slate-600 leading-relaxed">
+                        Street brokerages (MNCL, Joindre, ICICI Direct) correctly model flat-to-expanding EBITDA margins (~21.5%). However, generic consensus algorithms straight-line historical pre-tax structures, failing to reflect the ₹120 Cr ESOP drop-off and D&A step-down. This creates a massive divergence in FY28 PAT projections.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-3">Quarterly PAT Comparison: Street Consensus vs. Independent Model</h3>
+                        <div class="chart-container">
+                            <canvas id="consensusGapChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800">FY28 Street Miss Summary</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 text-slate-700 font-bold border-b">
+                                        <th class="p-2.5">Metric</th>
+                                        <th class="p-2.5">Broker Consensus</th>
+                                        <th class="p-2.5">Independent Model</th>
+                                        <th class="p-2.5">Divergence / Delta</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200">
+                                    <tr>
+                                        <td class="p-2.5 font-medium">FY27E Revenue</td>
+                                        <td class="p-2.5">₹3,950 Cr</td>
+                                        <td class="p-2.5 font-semibold">₹4,011 Cr</td>
+                                        <td class="p-2.5 text-emerald-600 font-bold">+1.5%</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-medium">FY27E EBITDA</td>
+                                        <td class="p-2.5">₹830 Cr</td>
+                                        <td class="p-2.5 font-semibold">₹870 Cr</td>
+                                        <td class="p-2.5 text-emerald-600 font-bold">+4.8%</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-medium">FY27E PAT</td>
+                                        <td class="p-2.5">₹315 Cr</td>
+                                        <td class="p-2.5 font-semibold">₹359 Cr</td>
+                                        <td class="p-2.5 text-emerald-600 font-bold">+13.9%</td>
+                                    </tr>
+                                    <tr class="bg-emerald-50/50">
+                                        <td class="p-2.5 font-bold text-slate-900">FY28E PAT</td>
+                                        <td class="p-2.5 font-bold text-slate-700">₹395 Cr</td>
+                                        <td class="p-2.5 font-bold text-emerald-700">₹547 Cr</td>
+                                        <td class="p-2.5 text-emerald-600 font-bold text-sm">+38.5% ★</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 font-medium">FY28E EPS</td>
+                                        <td class="p-2.5">₹7.52</td>
+                                        <td class="p-2.5 font-semibold">₹10.42</td>
+                                        <td class="p-2.5 text-emerald-600 font-bold">+38.5%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="p-4 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-900">
+                            <strong>Market Insight:</strong> The block deal of 10.88% equity by Carlyle entities (CA Harbor/Hull) created short-term retail noise on social media. However, marquee mutual funds (Kotak, Bandhan, Edelweiss) absorbed the entire stake at ₹263-270 levels, recognizing the upcoming earnings re-rating.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: SEGMENT DRIVERS & M&A -->
+        <section id="tab-segments" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-2">Segmental Revenue Drivers & In-Organic Growth Engine</h2>
+                <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                    Revenue expansion is powered by three core pillars: (1) Formulations scaling in regulated US (+45% YoY) and Emerging Markets (+36% YoY), (2) API business rebounding strongly in Q2 FY27 post transient destocking, and (3) The integration of BioForLife Italia adding high-margin companion animal therapy distribution in Europe.
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 mb-3">Segmental Revenue Build (₹ Cr)</h3>
+                        <div class="chart-container">
+                            <canvas id="segmentChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-bold text-slate-800">Segment Catalyst Deep Dive</h3>
+                        
+                        <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-xs text-brand-700">1. Global Formulations (Human & Animal)</span>
+                                <span class="text-[10px] bg-brand-100 text-brand-800 px-2 py-0.5 rounded font-bold">+29.5% FY27E YoY</span>
+                            </div>
+                            <p class="text-xs text-slate-600">
+                                Driven by 60% growth in US formulation lines and 36% in Emerging Markets. Internal captive API integration protects gross margins at ~54-55%.
+                            </p>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-xs text-emerald-700">2. Active Pharmaceutical Ingredients (API)</span>
+                                <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">+13.5% FY27E YoY</span>
+                            </div>
+                            <p class="text-xs text-slate-600">
+                                Management guided Q2 FY27 as the strongest API quarter in company history following June destocking. Animal health API segment expected to grow >20%.
+                            </p>
+                        </div>
+
+                        <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200 space-y-1">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-xs text-amber-700">3. BioForLife Italia (M&A Expansion)</span>
+                                <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">€16.98M Deal Size</span>
+                            </div>
+                            <p class="text-xs text-slate-600">
+                                Instant access to 80% of Italian veterinary clinics. Adds ₹400 Cr revenue in FY27E and ₹750 Cr in FY28E as internal product pipelines feed into the platform.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 6: CONCALL & GUIDANCE TRACKER -->
+        <section id="tab-concall" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-2">Concall Forensic Analysis & Management Guidance Matrix</h2>
+                <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                    A forensic review of recent Q4 FY26 and Q1 FY27 earnings call commentary confirms management transitioning from a defensive restructuring posture toward aggressive market-share capture.
+                </p>
+
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800 text-white font-semibold">
+                                <th class="p-2.5">Driver / Operational Vector</th>
+                                <th class="p-2.5">Q1 FY27 Commentary</th>
+                                <th class="p-2.5">Q4 FY26 Commentary</th>
+                                <th class="p-2.5">Direction</th>
+                                <th class="p-2.5">P&L Impact</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 bg-white">
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">Formulation Demand</td>
+                                <td class="p-2.5">Accelerating rapidly in US (+45%) & EM (+36%).</td>
+                                <td class="p-2.5">Strong, aiming for 15% CAGR.</td>
+                                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Improving</span></td>
+                                <td class="p-2.5 text-slate-600">High Revenue & Margin</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">API Demand Rebound</td>
+                                <td class="p-2.5">Sluggish June destocking, sharp Q2 record rebound confirmed.</td>
+                                <td class="p-2.5">Stable growth expected.</td>
+                                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Rebounding</span></td>
+                                <td class="p-2.5 text-slate-600">High Revenue Catalyst</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">Gross Margin Synergies</td>
+                                <td class="p-2.5">Gross margins expanded 220 bps to 54.1% via backward integration.</td>
+                                <td class="p-2.5">Synergies yielding ₹125-150 Cr.</td>
+                                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">Improving</span></td>
+                                <td class="p-2.5 text-slate-600">+220 bps Margin Expansion</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">CapEx / Facilities</td>
+                                <td class="p-2.5">Vizag FDA cleared; High-potent oncology labs commissioning Q3.</td>
+                                <td class="p-2.5">Vizag clearance ongoing.</td>
+                                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">On Track</span></td>
+                                <td class="p-2.5 text-slate-600">₹250-300 Cr Annual CapEx</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">ESOP Cost Guidance</td>
+                                <td class="p-2.5">Confirmed ~₹150 Cr in FY27, normalizing to ₹25-30 Cr in FY28.</td>
+                                <td class="p-2.5">Elevated during merger phase.</td>
+                                <td class="p-2.5"><span class="bg-brand-100 text-brand-800 px-2 py-0.5 rounded font-bold">Highly Positive</span></td>
+                                <td class="p-2.5 text-emerald-600 font-bold">Major PAT Uplift in FY28</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Strategic Long Term Target -->
+                <div class="p-4 bg-slate-900 text-white rounded-xl flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <span class="text-xs text-brand-400 uppercase font-bold tracking-wider">Vision 2032 Aspiration</span>
+                        <h3 class="text-lg font-bold">$1 Billion Revenue & $250 Million EBITDA</h3>
+                        <p class="text-xs text-slate-400">Management's long-term roadmap targets 25%+ ROCE with sustained ~15% organic CAGR.</p>
+                    </div>
+                    <div class="bg-brand-600 hover:bg-brand-500 px-4 py-2 rounded-lg font-bold text-xs cursor-pointer transition">
+                        Target CAGR: ~15.2%
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 7: PEERS & MACRO -->
+        <section id="tab-peers" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h2 class="text-lg font-bold text-slate-900 mb-2">Peer Group Benchmarking & Macro Winds</h2>
+                <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                    Viyash Scientific combines the high-margin formulation distribution of a Marksans Pharma with the API chemical depth of Laurus Labs, specifically positioned in the high-barrier animal health market.
+                </p>
+
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-xs text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-800 font-bold border-b">
+                                <th class="p-2.5">Company Name</th>
+                                <th class="p-2.5">Primary Focus</th>
+                                <th class="p-2.5">Revenue YoY Growth</th>
+                                <th class="p-2.5">EBITDA Margin</th>
+                                <th class="p-2.5">P/E Multiple</th>
+                                <th class="p-2.5">Key Differentiator</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">Divi's Laboratories</td>
+                                <td class="p-2.5">API / CDMO Scale</td>
+                                <td class="p-2.5">~14.0%</td>
+                                <td class="p-2.5 font-semibold">28.0% - 30.0%</td>
+                                <td class="p-2.5">~83x</td>
+                                <td class="p-2.5 text-slate-600">Massive scale, lower top-line speed</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">Laurus Labs</td>
+                                <td class="p-2.5">ARV API / Synthesis</td>
+                                <td class="p-2.5">~11.5%</td>
+                                <td class="p-2.5 font-semibold">18.5% - 20.0%</td>
+                                <td class="p-2.5">~97x</td>
+                                <td class="p-2.5 text-slate-600">High capital intensity</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-bold text-slate-900">Marksans Pharma</td>
+                                <td class="p-2.5">Formulations FDF</td>
+                                <td class="p-2.5">~16.0%</td>
+                                <td class="p-2.5 font-semibold">20.0% - 21.0%</td>
+                                <td class="p-2.5">~45x</td>
+                                <td class="p-2.5 text-slate-600">Strong ROE (~20%)</td>
+                            </tr>
+                            <tr class="bg-brand-50/50 font-bold">
+                                <td class="p-2.5 text-brand-900">Viyash Scientific</td>
+                                <td class="p-2.5 text-brand-800">Integrated Human + Animal Health</td>
+                                <td class="p-2.5 text-brand-800">19.5% (Q1) / 17.3% (FY27E)</td>
+                                <td class="p-2.5 text-brand-800">21.6% (Expanding to 22.8%)</td>
+                                <td class="p-2.5 text-brand-800">In Inflection Phase</td>
+                                <td class="p-2.5 text-brand-900">Oligopolistic Animal Health Moat + ESOP PAT Inflection</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Macro Tailwinds Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="text-xs font-bold text-brand-600 uppercase">1. EU Regulation 2019/6</span>
+                        <h4 class="font-bold text-slate-900 text-xs my-1">Antimicrobial Resistance Tightening</h4>
+                        <p class="text-xs text-slate-600">Strict bans on prophylactic antibiotic use favor Viyash's VICH-compliant, EU-GMP-certified infrastructure over unorganized players.</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="text-xs font-bold text-emerald-600 uppercase">2. China +1 Strategy</span>
+                        <h4 class="font-bold text-slate-900 text-xs my-1">Global Animal Health Outsourcing</h4>
+                        <p class="text-xs text-slate-600">Zoetis, Elanco, and Merck are actively shifting API and formulation sourcing to reliable, compliant Indian CDMO partners.</p>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="text-xs font-bold text-amber-600 uppercase">3. Companion Animal Pet Care</span>
+                        <h4 class="font-bold text-slate-900 text-xs my-1">$151B+ Global Market Expansion</h4>
+                        <p class="text-xs text-slate-600">Shift toward chronic therapeutics and pain management drives high-margin premium demand across US & EU markets.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 8: STRATEGIC Q&A EXPLORER -->
+        <section id="tab-qa" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">Strategic Q&A & Research Intelligence Explorer</h2>
+                        <p class="text-xs text-slate-500">Query the source report's core analytical findings and verification model</p>
+                    </div>
+                    <input type="text" id="qa-search" onkeyup="filterQA()" placeholder="Search questions or keywords..." class="px-3.5 py-2 border border-slate-300 rounded-lg text-xs w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-brand-500">
+                </div>
+
+                <div class="space-y-3" id="qa-container">
+                    <!-- Dynamic Accordions -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-6 text-xs border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+            <p>Viyash Scientific Ltd (NSE: VIYASH) — Financial Intelligence Workstation & Multi-Quarter Forward Model</p>
+            <p class="text-slate-500 text-[11px]">Source Data: Financial Results, Investor Presentations, Earnings Call Transcripts, and Independent Forecast Models.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Financial Dataset Base
+        const rawQuarterlyData = [
+            { q: 'Q1 FY27 (A)', rev: 946.36, ebitda: 204.70, ebitdaMargin: 21.63, pat: 79.29, patMargin: 8.38, eps: 1.51, esop: 25.0, dna: 62.0, revGrowth: 19.54, ebitdaGrowth: 59.20, patGrowth: 114.90 },
+            { q: 'Q2 FY27E', rev: 985.00, ebitda: 212.00, ebitdaMargin: 21.52, pat: 85.00, patMargin: 8.63, eps: 1.62, esop: 40.0, dna: 62.0, revGrowth: 15.88, ebitdaGrowth: 22.54, patGrowth: 16.44 },
+            { q: 'Q3 FY27E', rev: 1010.00, ebitda: 218.00, ebitdaMargin: 21.58, pat: 90.00, patMargin: 8.91, eps: 1.71, esop: 40.0, dna: 47.0, revGrowth: 17.66, ebitdaGrowth: 23.86, patGrowth: 83.67 },
+            { q: 'Q4 FY27E', rev: 1070.00, ebitda: 235.00, ebitdaMargin: 21.96, pat: 105.00, patMargin: 9.81, eps: 2.00, esop: 45.0, dna: 45.0, revGrowth: 16.30, ebitdaGrowth: 27.72, patGrowth: 58.13 },
+            { q: 'Q1 FY28E', rev: 1095.00, ebitda: 242.00, ebitdaMargin: 22.10, pat: 122.00, patMargin: 11.14, eps: 2.33, esop: 7.5, dna: 46.0, revGrowth: 15.71, ebitdaGrowth: 18.22, patGrowth: 53.86 },
+            { q: 'Q2 FY28E', rev: 1130.00, ebitda: 250.00, ebitdaMargin: 22.12, pat: 130.00, patMargin: 11.50, eps: 2.48, esop: 7.5, dna: 47.0, revGrowth: 14.72, ebitdaGrowth: 17.92, patGrowth: 52.94 },
+            { q: 'Q3 FY28E', rev: 1170.00, ebitda: 263.00, ebitdaMargin: 22.48, pat: 140.00, patMargin: 11.97, eps: 2.67, esop: 7.5, dna: 48.0, revGrowth: 15.84, ebitdaGrowth: 20.64, patGrowth: 55.56 },
+            { q: 'Q4 FY28E', rev: 1220.00, ebitda: 278.00, ebitdaMargin: 22.79, pat: 155.00, patMargin: 12.70, eps: 2.95, esop: 7.5, dna: 49.0, revGrowth: 14.02, ebitdaGrowth: 18.30, patGrowth: 47.62 },
+            { q: 'Q1 FY29E', rev: 1260.00, ebitda: 287.00, ebitdaMargin: 22.78, pat: 162.00, patMargin: 12.86, eps: 3.09, esop: 7.5, dna: 50.0, revGrowth: 15.07, ebitdaGrowth: 18.60, patGrowth: 32.79 }
+        ];
+
+        // Scenario Multipliers
+        const scenarioData = {
+            base: rawQuarterlyData,
+            bear: rawQuarterlyData.map(d => d.q.includes('Actual') ? d : ({
+                ...d,
+                rev: Number((d.rev * 0.94).toFixed(2)),
+                ebitda: Number((d.ebitda * 0.88).toFixed(2)),
+                pat: Number((d.pat * 0.80).toFixed(2)),
+                ebitdaMargin: Number((d.ebitdaMargin * 0.94).toFixed(2)),
+                patMargin: Number((d.patMargin * 0.85).toFixed(2))
+            })),
+            bull: rawQuarterlyData.map(d => d.q.includes('Actual') ? d : ({
+                ...d,
+                rev: Number((d.rev * 1.04).toFixed(2)),
+                ebitda: Number((d.ebitda * 1.08).toFixed(2)),
+                pat: Number((d.pat * 1.12).toFixed(2)),
+                ebitdaMargin: Number((d.ebitdaMargin * 1.04).toFixed(2)),
+                patMargin: Number((d.patMargin * 1.08).toFixed(2))
+            }))
+        };
+
+        let currentScenario = 'base';
+        let forecastChart, historicalChart, esopDnaChart, patMarginChart, consensusGapChart, segmentChart;
+
+        // Navigation Switcher
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.remove('hidden');
+            event.currentTarget.classList.add('active');
+
+            // Resize charts on view switch
+            window.dispatchEvent(new Event('resize'));
+        }
+
+        // Scenario Switcher Logic
+        function setScenario(scen) {
+            currentScenario = scen;
+            ['bear', 'base', 'bull'].forEach(s => {
+                const btn = document.getElementById(`scen-${s}`);
+                if(s === scen) {
+                    btn.className = "px-3 py-1 rounded-md bg-white text-brand-600 shadow-sm transition font-bold";
+                } else {
+                    btn.className = "px-3 py-1 rounded-md text-slate-700 hover:bg-white transition";
+                }
+            });
+
+            updateForecastView();
+        }
+
+        function updateForecastView() {
+            const data = scenarioData[currentScenario];
+            
+            // Update Table
+            const tbody = document.getElementById('forecast-table-body');
+            tbody.innerHTML = `
+                <tr class="hover:bg-slate-50">
+                    <td class="p-2.5 font-bold text-slate-900 border-r">Revenue (₹ Cr)</td>
+                    ${data.map(d => `<td class="p-2.5 font-semibold">${d.rev.toFixed(1)}</td>`).join('')}
+                </tr>
+                <tr class="hover:bg-slate-50 text-slate-600">
+                    <td class="p-2.5 font-medium border-r">Revenue YoY %</td>
+                    ${data.map(d => `<td class="p-2.5">${d.revGrowth.toFixed(1)}%</td>`).join('')}
+                </tr>
+                <tr class="hover:bg-slate-50">
+                    <td class="p-2.5 font-bold text-brand-700 border-r">EBITDA (₹ Cr)</td>
+                    ${data.map(d => `<td class="p-2.5 font-bold text-brand-700">${d.ebitda.toFixed(1)}</td>`).join('')}
+                </tr>
+                <tr class="hover:bg-slate-50 text-slate-600">
+                    <td class="p-2.5 font-medium border-r">EBITDA Margin %</td>
+                    ${data.map(d => `<td class="p-2.5 font-medium">${d.ebitdaMargin.toFixed(1)}%</td>`).join('')}
+                </tr>
+                <tr class="hover:bg-emerald-50/60 bg-emerald-50/20">
+                    <td class="p-2.5 font-bold text-emerald-800 border-r">PAT (₹ Cr)</td>
+                    ${data.map(d => `<td class="p-2.5 font-extrabold text-emerald-700">${d.pat.toFixed(1)}</td>`).join('')}
+                </tr>
+                <tr class="hover:bg-slate-50 text-slate-600">
+                    <td class="p-2.5 font-medium border-r">PAT YoY %</td>
+                    ${data.map(d => `<td class="p-2.5 font-semibold text-emerald-600">+${d.patGrowth.toFixed(1)}%</td>`).join('')}
+                </tr>
+                <tr class="hover:bg-slate-50">
+                    <td class="p-2.5 font-bold text-slate-900 border-r">EPS (₹)</td>
+                    ${data.map(d => `<td class="p-2.5 font-bold">${d.eps.toFixed(2)}</td>`).join('')}
+                </tr>
+            `;
+
+            // Update Chart
+            if(forecastChart) {
+                forecastChart.data.datasets[0].data = data.map(d => d.rev);
+                forecastChart.data.datasets[1].data = data.map(d => d.ebitda);
+                forecastChart.data.datasets[2].data = data.map(d => d.pat);
+                forecastChart.update();
+            }
+        }
+
+        // Initialize All Charts on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initHistoricalChart();
+            initQuarterlyForecastChart();
+            initEsopDnaChart();
+            initPatMarginChart();
+            initConsensusGapChart();
+            initSegmentChart();
+            initQASection();
+            updateForecastView();
+        });
+
+        function initHistoricalChart() {
+            const ctx = document.getElementById('historicalChart').getContext('2d');
+            historicalChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['FY22', 'FY23', 'FY24', 'FY25', 'FY26 (A)', 'FY27 (E)', 'FY28 (E)', 'FY29 (E)'],
+                    datasets: [
+                        {
+                            label: 'Revenue (₹ Cr)',
+                            data: [1413, 1421, 1370, 3007, 3420, 4011, 4615, 5300],
+                            backgroundColor: '#cbd5e1',
+                            order: 2
+                        },
+                        {
+                            label: 'EBITDA (₹ Cr)',
+                            data: [120.2, -46.4, 55.0, 338.2, 651.8, 870.0, 1033.0, 1219.0],
+                            backgroundColor: '#0284c7',
+                            order: 2
+                        },
+                        {
+                            label: 'PAT (₹ Cr)',
+                            data: [41.0, -121.2, -35.9, 23.2, 225.0, 359.3, 547.0, 680.0],
+                            backgroundColor: '#10b981',
+                            type: 'line',
+                            borderColor: '#059669',
+                            borderWidth: 3,
+                            fill: false,
+                            tension: 0.3,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { beginAtZero: false, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function initQuarterlyForecastChart() {
+            const ctx = document.getElementById('quarterlyForecastChart').getContext('2d');
+            forecastChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: rawQuarterlyData.map(d => d.q),
+                    datasets: [
+                        {
+                            label: 'Revenue (₹ Cr)',
+                            data: rawQuarterlyData.map(d => d.rev),
+                            backgroundColor: '#e2e8f0',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'EBITDA (₹ Cr)',
+                            data: rawQuarterlyData.map(d => d.ebitda),
+                            backgroundColor: '#0284c7',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'PAT (₹ Cr)',
+                            data: rawQuarterlyData.map(d => d.pat),
+                            backgroundColor: '#10b981',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ₹${context.raw} Cr`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function initEsopDnaChart() {
+            const ctx = document.getElementById('esopDnaChart').getContext('2d');
+            esopDnaChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1 FY27', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E', 'Q2 FY28E', 'Q3 FY28E', 'Q4 FY28E'],
+                    datasets: [
+                        {
+                            label: 'Non-Cash ESOP Charges (₹ Cr)',
+                            data: [25, 40, 40, 45, 7.5, 7.5, 7.5, 7.5],
+                            backgroundColor: '#f59e0b'
+                        },
+                        {
+                            label: 'D&A Intangible Amortization (₹ Cr)',
+                            data: [62, 62, 47, 45, 46, 47, 48, 49],
+                            backgroundColor: '#94a3b8'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#f1f5f9' } }
+                    }
+                }
+            });
+        }
+
+        function initPatMarginChart() {
+            const ctx = document.getElementById('patMarginChart').getContext('2d');
+            patMarginChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Q1 FY27', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E', 'Q2 FY28E', 'Q3 FY28E', 'Q4 FY28E'],
+                    datasets: [
+                        {
+                            label: 'PAT Margin %',
+                            data: [8.38, 8.63, 8.91, 9.81, 11.14, 11.50, 11.97, 12.70],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        },
+                        {
+                            label: 'EBITDA Margin %',
+                            data: [21.63, 21.52, 21.58, 21.96, 22.10, 22.12, 22.48, 22.79],
+                            borderColor: '#0284c7',
+                            borderDash: [5, 5],
+                            fill: false,
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y1: {
+                            type: 'linear',
+                            position: 'left',
+                            ticks: { callback: v => v + '%' },
+                            grid: { color: '#f1f5f9' }
+                        },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function initConsensusGapChart() {
+            const ctx = document.getElementById('consensusGapChart').getContext('2d');
+            consensusGapChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E', 'Q2 FY28E', 'Q3 FY28E', 'Q4 FY28E'],
+                    datasets: [
+                        {
+                            label: 'Broker Consensus PAT (₹ Cr)',
+                            data: [80, 82, 90, 95, 98, 102, 110],
+                            backgroundColor: '#cbd5e1'
+                        },
+                        {
+                            label: 'Independent Model PAT (₹ Cr)',
+                            data: [85, 90, 105, 122, 130, 140, 155],
+                            backgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function initSegmentChart() {
+            const ctx = document.getElementById('segmentChart').getContext('2d');
+            segmentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['FY26 (A)', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E', 'FY27E Total', 'FY28E Total'],
+                    datasets: [
+                        {
+                            label: 'Formulations (Human & Animal)',
+                            data: [1865, 575, 590, 610, 625, 2330, 2720],
+                            backgroundColor: '#0284c7'
+                        },
+                        {
+                            label: 'API Segment',
+                            data: [1490, 400, 405, 445, 455, 1633, 1820],
+                            backgroundColor: '#059669'
+                        },
+                        {
+                            label: 'BioForLife (M&A Add)',
+                            data: [0, 10, 15, 15, 15, 40, 75],
+                            backgroundColor: '#d97706'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        x: { stacked: true, grid: { display: false } },
+                        y: { stacked: true, beginAtZero: true, grid: { color: '#f1f5f9' } }
+                    }
+                }
+            });
+        }
+
+        // Q&A Explorer Logic
+        const qaList = [
+            { q: "What is the expected Revenue growth for each of the next 8 quarters?", a: "Revenue is projected to grow YoY by 15.88% (Q2 FY27), 17.66% (Q3 FY27), 16.30% (Q4 FY27), 15.71% (Q1 FY28), 14.72% (Q2 FY28), 15.84% (Q3 FY28), 14.02% (Q4 FY28), and 15.07% (Q1 FY29)." },
+            { q: "What is the expected EBITDA growth for each of the next 8 quarters?", a: "EBITDA is expected to grow YoY by 22.54% (Q2 FY27), 23.86% (Q3 FY27), 27.72% (Q4 FY27), 18.22% (Q1 FY28), 17.92% (Q2 FY28), 20.64% (Q3 FY28), 18.30% (Q4 FY28), and 18.60% (Q1 FY29)." },
+            { q: "What is the expected PAT growth for each of the next 8 quarters?", a: "PAT is expected to surge YoY by 16.44% (Q2 FY27), 83.67% (Q3 FY27), 58.13% (Q4 FY27), 53.86% (Q1 FY28), 52.94% (Q2 FY28), 55.56% (Q3 FY28), 47.62% (Q4 FY28), and 32.79% (Q1 FY29)." },
+            { q: "Which quarter has the highest expected EBITDA growth?", a: "Q4 FY27E exhibits the highest expected EBITDA growth at 27.72% YoY, driven by peak capacity utilization from the newly commissioned Vizag facility, operating leverage in formulations, and full BioForLife integration." },
+            { q: "Which quarter has the highest expected PAT growth?", a: "Q3 FY27E has the highest expected PAT growth at 83.67% YoY, driven organically by the commencement of the depreciation step-down schedule as legacy acquisition intangibles are fully amortized." },
+            { q: "Is EBITDA margin expected to expand or contract?", a: "EBITDA margin is expected to expand structurally. Having achieved 21.6% in Q1 FY27, margins stabilize between 21.5-22.0% in FY27 before moving toward 22.5-23.0% in FY28 via captive API utilization." },
+            { q: "Is PAT growth faster or slower than EBITDA growth, and why?", a: "PAT growth is significantly FASTER than EBITDA growth (+52.2% vs +18.7% in FY28). This leverage is driven by net debt falling to 0.1x (cutting interest costs) and non-cash ESOP charges dropping from ~₹150 Cr in FY27 to ₹25-30 Cr in FY28." },
+            { q: "What are the primary drivers of expected earnings growth?", a: "1) BioForLife Italia acquisition (direct access to 80% of Italian vet clinics), 2) Formulations scaling (+45% US growth), 3) Structural step-down in non-cash ESOP and D&A expenses, and 4) EU Regulation 2019/6 regulatory moats." },
+            { q: "What could cause the forecast to fail?", a: "Failures could stem from: 1) Delays in BioForLife integration, 2) Adverse USFDA/EU-GMP inspection outcomes (e.g. Form 483 / Import Alerts), or 3) Severe generic price erosion in US/EU markets outpacing gross margin gains." },
+            { q: "How does the independent forecast compare with management guidance and broker consensus?", a: "Top-line and EBITDA align closely with management guidance and broker consensus. However, the independent forecast is significantly more aggressive on FY28 PAT (₹547 Cr vs consensus ~₹395 Cr) because brokers miss the mathematical ESOP/D&A drop-off." }
+        ];
+
+        function initQASection() {
+            renderQA(qaList);
+        }
+
+        function renderQA(list) {
+            const container = document.getElementById('qa-container');
+            container.innerHTML = list.map((item, idx) => `
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-white">
+                    <button onclick="toggleAccordion(${idx})" class="w-full text-left p-3.5 bg-slate-50 hover:bg-slate-100 flex justify-between items-center transition">
+                        <span class="font-bold text-xs text-slate-800">${item.q}</span>
+                        <span id="accordion-icon-${idx}" class="text-xs text-slate-400 font-mono">+</span>
+                    </button>
+                    <div id="accordion-body-${idx}" class="hidden p-3.5 text-xs text-slate-600 border-t border-slate-100 leading-relaxed bg-white">
+                        ${item.a}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleAccordion(idx) {
+            const body = document.getElementById(`accordion-body-${idx}`);
+            const icon = document.getElementById(`accordion-icon-${idx}`);
+            if (body.classList.contains('hidden')) {
+                body.classList.remove('hidden');
+                icon.textContent = '–';
+            } else {
+                body.classList.add('hidden');
+                icon.textContent = '+';
+            }
+        }
+
+        function filterQA() {
+            const q = document.getElementById('qa-search').value.toLowerCase();
+            const filtered = qaList.filter(item => 
+                item.q.toLowerCase().includes(q) || item.a.toLowerCase().includes(q)
+            );
+            renderQA(filtered);
+        }
+    </script>
 </body>
 </html>
