@@ -54,11 +54,7 @@ async function loadReports() {
       },
       {
         file: "reports/wockhardt_interactive_earnings_intelligence_hub_8Q.html",
-        title: "Wockhardt (earnings hub)",
-      },
-      {
-        file: "reports/wockhardt_interactive_financial_dashboard.html",
-        title: "Wockhardt (financial dashboard)",
+        title: "Wockhardt",
       },
     ];
     applyFilters();
@@ -90,13 +86,6 @@ function getCompactTitle(title) {
     .replace(/\s*\([^)]*\)\s*$/g, "")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function getFileLabel(file) {
-  return file
-    .replace(/^reports\//, "")
-    .replace(/\.html?$/i, "")
-    .replace(/_/g, " ");
 }
 
 function render(list) {

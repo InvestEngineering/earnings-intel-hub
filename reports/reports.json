@@ -1,97 +1,89 @@
 [
   {
-    "file": "reports/aarti_pharmalabs_earnings_intelligence_spa.html",
-    "title": "Aarti Pharmalabs (AARTIPHARM) - Earnings Intelligence & Forecast Dashboard",
-    "slug": "aarti-pharmalabs-aartipharm-earnings-intelligence-forecast-dashboard",
+    "file": "reports/ebitda_prediction_online/aarti_pharmalabs_earnings_intelligence_spa.html",
+    "title": "Aarti Pharmalabs",
+    "slug": "aarti-pharmalabs",
     "description": "Aarti Pharmalabs Ltd",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/borosil_renewables_earnings_intelligence_dashboard.html",
-    "title": "Borosil Renewables (BORORENEW) - Forward Earnings Intelligence Dashboard",
-    "slug": "borosil-renewables-bororenew-forward-earnings-intelligence-dashboard",
+    "file": "reports/ebitda_prediction_online/borosil_renewables_earnings_intelligence_dashboard.html",
+    "title": "Borosil Renewables",
+    "slug": "borosil-renewables",
     "description": "Institutional Earnings Intelligence & 4-Quarter Forward Forecast Model",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/cgpower_earnings_intelligence_spa.html",
-    "title": "CG Power (CGPOWER) - Master Earnings Intelligence & Forward Forecast Dashboard",
-    "slug": "cg-power-cgpower-master-earnings-intelligence-forward-forecast-dashboard",
+    "file": "reports/ebitda_prediction_online/cgpower_earnings_intelligence_spa.html",
+    "title": "CG Power",
+    "slug": "cg-power",
     "description": "CG Power & Industrial Solutions Ltd",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/eureka_forbes_earnings_intelligence_dashboard.html",
-    "title": "Eureka Forbes (EUREKAFORB) - Master Financial Forecast & Earnings Intelligence",
-    "slug": "eureka-forbes-eurekaforb-master-financial-forecast-earnings-intelligence",
+    "file": "reports/ebitda_prediction_online/eureka_forbes_earnings_intelligence_dashboard.html",
+    "title": "Eureka Forbes",
+    "slug": "eureka-forbes",
     "description": "Eureka Forbes Ltd: Earnings Intelligence & Forecast",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/fedbank_financial_services_forecast_app.html",
-    "title": "FEDFINA - 8-Quarter Financial Forecast & Earnings Intelligence",
-    "slug": "fedfina-8-quarter-financial-forecast-earnings-intelligence",
+    "file": "reports/ebitda_prediction_online/fedbank_financial_services_forecast_app.html",
+    "title": "Fedbank Financial Services",
+    "slug": "fedfina",
     "description": "Fedbank Financial Services Ltd",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/happy_forgings_dashboard.html",
-    "title": "Happy Forgings (HAPPYFORGE) | Institutional Earnings Intelligence & Forward Model",
-    "slug": "happy-forgings-happyforge-institutional-earnings-intelligence-forward-model",
+    "file": "reports/ebitda_prediction_online/happy_forgings_dashboard.html",
+    "title": "Happy Forgings",
+    "slug": "happy-forgings",
     "description": "Happy Forgings Limited",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/jana_sfb_earnings_forecast_intelligence_hub.html",
-    "title": "Jana SFB - Forward Earnings Intelligence & Financial Model",
-    "slug": "jana-sfb-forward-earnings-intelligence-financial-model",
+    "file": "reports/ebitda_prediction_online/jana_sfb_earnings_forecast_intelligence_hub.html",
+    "title": "Jana SFB",
+    "slug": "jana-sfb",
     "description": "Earnings Intelligence & Forward Forecast",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/northern_arc_earnings_interactive_forecast.html",
-    "title": "Northern Arc Capital - Institutional Earnings Forecast & Intelligence SPA",
-    "slug": "northern-arc-capital-institutional-earnings-forecast-intelligence-spa",
+    "file": "reports/ebitda_prediction_online/northern_arc_earnings_interactive_forecast.html",
+    "title": "Northern Arc Capital",
+    "slug": "northern-arc-capital",
     "description": "Northern Arc Capital Ltd",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/pricol_earnings_intelligence_app.html",
-    "title": "Pricol Limited - Master Earnings Intelligence & Forecast Dashboard",
-    "slug": "pricol-limited-master-earnings-intelligence-forecast-dashboard",
+    "file": "reports/ebitda_prediction_online/pricol_earnings_intelligence_app.html",
+    "title": "Pricol Limited",
+    "slug": "pricol-limited",
     "description": "Pricol Limited (NSE: PRICOLLTD)",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/tega_industries_earnings_forecast_dashboard_html.html",
-    "title": "TEGA Industries — Earnings Intelligence & Forward Forecast Dashboard",
-    "slug": "tega-industries-earnings-intelligence-forward-forecast-dashboard",
+    "file": "reports/ebitda_prediction_online/tega_industries_earnings_forecast_dashboard_html.html",
+    "title": "TEGA Industries",
+    "slug": "tega-industries",
     "description": "TEGA Industries Ltd",
     "image": null,
     "tags": []
   },
   {
-    "file": "reports/wockhardt_interactive_earnings_intelligence_hub_8Q.html",
-    "title": "Wockhardt Ltd - Earnings Intelligence & Forecast Portal",
-    "slug": "wockhardt-ltd-earnings-intelligence-forecast-portal",
+    "file": "reports/ebitda_prediction_online/wockhardt_interactive_earnings_intelligence_hub_8Q.html",
+    "title": "Wockhardt Ltd",
+    "slug": "wockhardt-ltd",
     "description": "Executive Summary & Transformation Intelligence",
-    "image": null,
-    "tags": []
-  },
-  {
-    "file": "reports/wockhardt_interactive_financial_dashboard.html",
-    "title": "Wockhardt Ltd (WOCKPHARMA) - Multi-Source Earnings Intelligence & Forecast Model",
-    "slug": "wockhardt-ltd-wockpharma-multi-source-earnings-intelligence-forecast-model",
-    "description": "Wockhardt Ltd — Earnings Model & Research SPA",
     "image": null,
     "tags": []
   }

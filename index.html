@@ -1,61 +1,1547 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Earnings Intelligence Hub</title>
-    <meta
-      name="description"
-      content="Navigate earnings forecast HTML dashboards and store prompts for each report."
-    />
-    <link rel="stylesheet" href="assets/css/style.css" />
-  </head>
-  <body>
-    <header class="site-header">
-      <div class="container">
-        <div>
-          <h1>Earnings Intelligence Hub</h1>
-          <p class="lead">
-            Open any interactive earnings HTML. Designed for usability and
-            GitHub Pages deployment.
-          </p>
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Equity Portfolio Allocation Dashboard</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        slate: {
+                            850: '#111827',
+                            900: '#0f172a',
+                            950: '#020617',
+                        },
+                        amber: {
+                            400: '#fbbf24',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                        },
+                        emerald: {
+                            400: '#34d399',
+                            500: '#10b981',
+                            600: '#059669',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="config/site-config.js"></script>
+
+    <style>
+        /* Custom scrollbar for dark theme */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .no-print { display: none !important; }
+            body { background: #ffffff !important; color: #000000 !important; }
+            .bg-slate-900, .bg-slate-800, .bg-slate-950 { background: #ffffff !important; color: #000000 !important; border: 1px solid #ccc !important; }
+            .text-white, .text-slate-200, .text-slate-300 { color: #000000 !important; }
+            .chart-container { max-width: 100% !important; height: auto !important; }
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-slate-900 border-b border-slate-800 sticky top-0 z-30 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 font-bold text-xl">
+                    &#x25B2;
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                        Indian Equity Portfolio Intelligence
+                        <span class="text-xs font-normal px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">Q1FY27 Cutoff</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">AI-Powered Fundamental Allocation & Risk Management Framework</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 no-print">
+                <button onclick="exportCSV()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded border border-slate-700 transition duration-150 flex items-center gap-1">
+                    &#x2913; Export CSV
+                </button>
+                <button onclick="window.print()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded border border-slate-700 transition duration-150 flex items-center gap-1">
+                    &#x2399; Print Report
+                </button>
+                <a href="#watchlistSection" class="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs font-medium rounded border border-amber-500/30 transition duration-150">
+                    Watchlist (7)
+                </a>
+            </div>
         </div>
-      </div>
     </header>
 
-    <main class="container">
-      <section class="controls" aria-label="Report controls">
-        <div class="control-row">
-          <label for="search">Search reports</label>
-          <input
-            id="search"
-            placeholder="Search by name or keyword"
-            aria-label="Search reports"
-          />
-        </div>
-        <div class="control-row">
-          <label for="sort">Sort</label>
-          <select id="sort" aria-label="Sort reports">
-            <option value="alpha">Alphabetical</option>
-            <option value="nameDesc">Reverse</option>
-          </select>
-        </div>
-      </section>
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-      <section id="cards" class="cards" aria-live="polite">
-        <!-- cards rendered by JS -->
-      </section>
+        <!-- Executive Summary & Metric Cards -->
+        <section class="space-y-4">
+            <div class="bg-slate-900/80 rounded-xl p-5 border border-slate-800 backdrop-blur">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4 mb-4">
+                    <div>
+                        <h2 class="text-base font-semibold text-slate-200">Executive Summary & Strategy Architecture</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">
+                            This research model evaluates 25 Indian equities across 10 sectors using audited filings, Q1FY27 disclosures, and credit rating updates. 
+                            Allocations enforce capital preservation, explicit concentration caps, and fundamental earnings visibility over high P/E multiples.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-slate-400 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800">
+                        <span>Research Date: <strong>Sept 2026</strong></span>
+                        <span>&#x2022;</span>
+                        <span>Horizon: <strong>24-36 Months</strong></span>
+                    </div>
+                </div>
+
+                <!-- KPI Cards Grid -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80">
+                        <span class="text-2xs uppercase tracking-wider text-slate-500 font-semibold block">Universe Size</span>
+                        <span class="text-xl font-bold text-slate-100 mt-1 block" id="kpiTotalCount">25 Stocks</span>
+                        <span class="text-xs text-emerald-400 mt-0.5 block">17 Allocated / 8 Watch</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80">
+                        <span class="text-2xs uppercase tracking-wider text-slate-500 font-semibold block">Max Single Holding</span>
+                        <span class="text-xl font-bold text-amber-400 mt-1 block" id="kpiMaxHolding">9.5%</span>
+                        <span class="text-xs text-slate-400 mt-0.5 block truncate" id="kpiMaxHoldingName">BHEL (Capital Goods)</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80">
+                        <span class="text-2xs uppercase tracking-wider text-slate-500 font-semibold block">Largest Sector</span>
+                        <span class="text-xl font-bold text-indigo-400 mt-1 block" id="kpiMaxSector">28.5%</span>
+                        <span class="text-xs text-slate-400 mt-0.5 block">Financial Services</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80">
+                        <span class="text-2xs uppercase tracking-wider text-slate-500 font-semibold block">Model Portfolio Beta</span>
+                        <span class="text-xl font-bold text-emerald-400 mt-1 block">0.88</span>
+                        <span class="text-xs text-slate-400 mt-0.5 block">Risk-Controlled</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80">
+                        <span class="text-2xs uppercase tracking-wider text-slate-500 font-semibold block">Avg Fundamental Score</span>
+                        <span class="text-xl font-bold text-slate-100 mt-1 block">75.4 / 100</span>
+                        <span class="text-xs text-emerald-400 mt-0.5 block">High Quality Baseline</span>
+                    </div>
+
+                    <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/80">
+                        <span class="text-2xs uppercase tracking-wider text-slate-500 font-semibold block">Dry Powder / Cash</span>
+                        <span class="text-xl font-bold text-amber-400 mt-1 block">10.0%</span>
+                        <span class="text-xs text-slate-400 mt-0.5 block">Tactical Reserve</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Strategy Control Panel & Interactive Scenarios -->
+        <section class="bg-slate-900 rounded-xl p-5 border border-slate-800 space-y-4 no-print">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                        <span>&#x2699;</span> Portfolio Strategy & Allocation Rules Control Panel
+                    </h3>
+                    <p class="text-xs text-slate-400">Select pre-built sensitivity scenarios or dynamically adjust position constraints.</p>
+                </div>
+                
+                <!-- Scenario Toggle Buttons -->
+                <div class="flex items-center p-1 bg-slate-950 rounded-lg border border-slate-800 text-xs">
+                    <button onclick="setScenario('base')" id="btnScenBase" class="px-3 py-1.5 rounded font-medium transition text-amber-400 bg-slate-800 shadow">
+                        Base Balanced (Model)
+                    </button>
+                    <button onclick="setScenario('conservative')" id="btnScenCons" class="px-3 py-1.5 rounded font-medium transition text-slate-400 hover:text-slate-200">
+                        Conservative / Defensive
+                    </button>
+                    <button onclick="setScenario('growth')" id="btnScenGrowth" class="px-3 py-1.5 rounded font-medium transition text-slate-400 hover:text-slate-200">
+                        Growth / Momentum
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamic Sliders -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs">
+                        <label for="sliderStockCap" class="text-slate-300 font-medium">Max Single Stock Constraint:</label>
+                        <span id="valStockCap" class="text-amber-400 font-bold">9.5%</span>
+                    </div>
+                    <input type="range" id="sliderStockCap" min="5.0" max="15.0" step="0.5" value="9.5" oninput="updateCustomConstraints()" class="w-full accent-amber-500 bg-slate-950 h-2 rounded cursor-pointer">
+                    <p class="text-3xs text-slate-500">Prevents single stock volatility from dominating portfolio variance.</p>
+                </div>
+
+                <div class="space-y-1.5">
+                    <div class="flex justify-between text-xs">
+                        <label for="sliderSectorCap" class="text-slate-300 font-medium">Max Sector Constraint:</label>
+                        <span id="valSectorCap" class="text-indigo-400 font-bold">30.0%</span>
+                    </div>
+                    <input type="range" id="sliderSectorCap" min="15.0" max="40.0" step="1.0" value="30.0" oninput="updateCustomConstraints()" class="w-full accent-indigo-500 bg-slate-950 h-2 rounded cursor-pointer">
+                    <p class="text-3xs text-slate-500">Limits systemic exposure to broader industry shocks.</p>
+                </div>
+
+                <div class="flex items-end justify-between md:justify-end gap-2">
+                    <button onclick="resetConstraints()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded border border-slate-700 transition">
+                        Reset Defaults
+                    </button>
+                    <div class="text-right">
+                        <span class="text-3xs uppercase tracking-wider text-slate-500 block">Scenario Horizon</span>
+                        <span class="text-xs text-slate-300 font-medium" id="scenarioDesc">Balanced Risk-Adjusted Baseline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Grid Section -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            
+            <!-- Donut Allocation Chart -->
+            <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-200">Portfolio Allocation Profile</h3>
+                        <p class="text-xs text-slate-400">Interactive distribution across active holdings and cash reserve</p>
+                    </div>
+                    <div class="flex items-center bg-slate-950 rounded p-1 text-2xs border border-slate-800">
+                        <button onclick="toggleChartMode('company')" id="btnChartComp" class="px-2 py-1 rounded text-amber-400 font-medium bg-slate-800">Company View</button>
+                        <button onclick="toggleChartMode('sector')" id="btnChartSect" class="px-2 py-1 rounded text-slate-400 hover:text-slate-200">Sector View</button>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="allocationChart"></canvas>
+                </div>
+                <div id="chartLegendText" class="text-2xs text-slate-400 text-center italic mt-1">
+                    Hover or click segments to highlight allocation weights and risk ratings.
+                </div>
+            </div>
+
+            <!-- Score vs Weight Bar Chart -->
+            <div class="bg-slate-900 rounded-xl p-5 border border-slate-800 space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-200">Fundamental Score vs Suggested Weight</h3>
+                        <p class="text-xs text-slate-400">Demonstrating valuation discount / constraint penalty adjustments</p>
+                    </div>
+                    <span class="text-2xs px-2 py-1 bg-slate-950 text-emerald-400 rounded border border-slate-800">Top 10 Holdings</span>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="scoreVsWeightChart"></canvas>
+                </div>
+                <div class="text-2xs text-slate-400 text-center italic mt-1">
+                    Note: A higher fundamental score is penalized if valuation multiples are demanding (e.g. Wockhardt P/E 106x).
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Company Comparison Data Table Section -->
+        <section class="bg-slate-900 rounded-xl border border-slate-800 space-y-4 p-5">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                <div>
+                    <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">
+                        Company-Level Fundamental Analysis & Comparative Matrix
+                    </h3>
+                    <p class="text-xs text-slate-400 mt-0.5">Filter, search, and sort across all evaluated entities. Click "Defend Allocation %" for deep forensic breakdown.</p>
+                </div>
+
+                <!-- Filters and Search -->
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search stock or ticker..." class="bg-slate-950 border border-slate-800 text-slate-200 text-xs rounded-lg px-3 py-1.5 pl-8 w-44 focus:outline-none focus:border-amber-500">
+                        <span class="absolute left-2.5 top-1.5 text-slate-500 text-xs">&#x1F50D;</span>
+                    </div>
+
+                    <!-- Sector Filter -->
+                    <select id="sectorFilter" onchange="filterTable()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                        <option value="">All Sectors</option>
+                        <option value="Capital Goods">Capital Goods</option>
+                        <option value="Financial Services">Financial Services / NBFC</option>
+                        <option value="Banking">Banking</option>
+                        <option value="Pharmaceuticals">Pharmaceuticals & Biotech</option>
+                        <option value="Auto Ancillary">Auto Ancillary / Energy</option>
+                        <option value="Metals & Mining">Metals & Mining</option>
+                        <option value="Textiles">Textiles & Apparels</option>
+                    </select>
+
+                    <!-- Risk Filter -->
+                    <select id="riskFilter" onchange="filterTable()" class="bg-slate-950 border border-slate-800 text-slate-300 text-xs rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-amber-500">
+                        <option value="">All Risk Levels</option>
+                        <option value="Low">Low Risk</option>
+                        <option value="Moderate">Moderate Risk</option>
+                        <option value="High">High Risk</option>
+                    </select>
+
+                    <button onclick="resetFilters()" class="text-2xs text-amber-400 hover:underline px-1">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="overflow-x-auto rounded-lg border border-slate-800">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-950 text-slate-400 uppercase text-3xs tracking-wider border-b border-slate-800">
+                            <th scope="col" class="py-3 px-3 cursor-pointer hover:text-white" onclick="sortTable('name')">Company & Sector &#x21D5;</th>
+                            <th scope="col" class="py-3 px-2 text-center cursor-pointer hover:text-white" onclick="sortTable('score')">Score &#x21D5;</th>
+                            <th scope="col" class="py-3 px-2 text-center cursor-pointer hover:text-white" onclick="sortTable('pe')">P/E Multiple &#x21D5;</th>
+                            <th scope="col" class="py-3 px-2 text-center">Valuation View</th>
+                            <th scope="col" class="py-3 px-2 text-center">Risk Level</th>
+                            <th scope="col" class="py-3 px-3 text-right cursor-pointer hover:text-white" onclick="sortTable('weight')">Active Weight &#x21D5;</th>
+                            <th scope="col" class="py-3 px-3 text-center">Core Thesis & Catalyst</th>
+                            <th scope="col" class="py-3 px-3 text-center">Allocation Audit</th>
+                        </tr>
+                    </thead>
+                    <tbody id="companyTableBody" class="divide-y divide-slate-800/60 bg-slate-900/40">
+                        <!-- Dynamic JavaScript Rows Built Here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="flex items-center justify-between text-2xs text-slate-400 px-1 pt-1">
+                <span id="tableMatchCount">Showing 17 active allocations + 1 cash reserve</span>
+                <span>Click column headers to sort. Click "Defend Allocation %" for step-by-step logic.</span>
+            </div>
+        </section>
+
+        <!-- Risk Heatmap & Monitoring Matrix -->
+        <section class="bg-slate-900 rounded-xl p-5 border border-slate-800 space-y-4">
+            <div class="border-b border-slate-800 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-base font-bold text-slate-200">Portfolio Risk Heatmap & Due Diligence Matrix</h3>
+                    <p class="text-xs text-slate-400">Monitoring idiosyncratic vulnerabilities, trade policy friction, and execution triggers</p>
+                </div>
+                <span class="text-2xs bg-amber-500/10 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded">
+                    Active Surveillance
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                
+                <!-- Execution Risk Card -->
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-400">Wockhardt Ltd</span>
+                        <span class="px-2 py-0.5 rounded text-3xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">HIGH SEVERITY</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-200">Execution & Commercialization Risk</p>
+                    <p class="text-2xs text-slate-400">
+                        Failure to out-license Zaynich (WCK 5222) post-approval or realize projected $1.5B peak sales could depress elevated 106x P/E multiple.
+                    </p>
+                    <div class="pt-2 border-t border-slate-800/80 flex justify-between text-3xs text-slate-500">
+                        <span>Trigger: Quarterly EU/US filings</span>
+                        <span class="text-slate-400">Weight: 7.0%</span>
+                    </div>
+                </div>
+
+                <!-- Valuation Risk Card -->
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-400">BHEL</span>
+                        <span class="px-2 py-0.5 rounded text-3xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">HIGH SEVERITY</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-200">Valuation & Execution Vulnerability</p>
+                    <p class="text-2xs text-slate-400">
+                        Trading at 59.5x trailing earnings; stock fully prices in execution of INR 1.33 lakh crore order book without margin slippage.
+                    </p>
+                    <div class="pt-2 border-t border-slate-800/80 flex justify-between text-3xs text-slate-500">
+                        <span>Trigger: Quarterly EBITDA margin &lt; 12%</span>
+                        <span class="text-slate-400">Weight: 9.5%</span>
+                    </div>
+                </div>
+
+                <!-- Macro & Trade Risk Card -->
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-amber-400">Gokaldas Exports</span>
+                        <span class="px-2 py-0.5 rounded text-3xs font-bold bg-red-500/20 text-red-400 border border-red-500/30">HIGH SEVERITY</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-200">Macro Tariffs & Foreign Destocking</p>
+                    <p class="text-2xs text-slate-400">
+                        Heavy 77.9% dependence on US retailers. Reciprocal tariffs and African AGOA renewal delays compressed Q2 PAT by 71.3%.
+                    </p>
+                    <div class="pt-2 border-t border-slate-800/80 flex justify-between text-3xs text-slate-500">
+                        <span>Trigger: US apparel import volumes</span>
+                        <span class="text-slate-400">Weight: 3.5%</span>
+                    </div>
+                </div>
+
+                <!-- Regulatory Risk Card -->
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-300">IIFL Finance / RBL Bank</span>
+                        <span class="px-2 py-0.5 rounded text-3xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">MEDIUM SEVERITY</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-200">Regulatory Macro-Prudential Friction</p>
+                    <p class="text-2xs text-slate-400">
+                        RBI policy shifts regarding risk weights on unsecured lending or LTV norms on gold loans require continuous balance sheet monitoring.
+                    </p>
+                    <div class="pt-2 border-t border-slate-800/80 flex justify-between text-3xs text-slate-500">
+                        <span>Trigger: RBI circular updates</span>
+                        <span class="text-slate-400">Weight: 12.0% Combined</span>
+                    </div>
+                </div>
+
+                <!-- Capex Drag Risk Card -->
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-300">Exide Industries</span>
+                        <span class="px-2 py-0.5 rounded text-3xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">MEDIUM SEVERITY</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-200">Capital Intensity & FCF Suppression</p>
+                    <p class="text-2xs text-slate-400">
+                        INR 95 billion outlay for Telangana gigafactory will depress FCF yield until Phase 1 (2 GWh) commissioning in June 2027.
+                    </p>
+                    <div class="pt-2 border-t border-slate-800/80 flex justify-between text-3xs text-slate-500">
+                        <span>Trigger: Commercial trial cell output</span>
+                        <span class="text-slate-400">Weight: 6.0%</span>
+                    </div>
+                </div>
+
+                <!-- Earnings Quality Card -->
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-slate-300">VST Tillers Tractors</span>
+                        <span class="px-2 py-0.5 rounded text-3xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">MEDIUM SEVERITY</span>
+                    </div>
+                    <p class="text-xs font-medium text-slate-200">Non-Operating Income Reliance</p>
+                    <p class="text-2xs text-slate-400">
+                        Q1FY27 bottom-line surge included INR 26.15 Cr non-core fair value gains, masking underlying operational revenue drop of 4.58%.
+                    </p>
+                    <div class="pt-2 border-t border-slate-800/80 flex justify-between text-3xs text-slate-500">
+                        <span>Trigger: Core PBT stripping non-operating gain</span>
+                        <span class="text-slate-400">Weight: 3.0%</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Watchlist & Excluded Equities Section -->
+        <section id="watchlistSection" class="bg-slate-900 rounded-xl p-5 border border-slate-800 space-y-4">
+            <div class="border-b border-slate-800 pb-3 flex items-center justify-between">
+                <div>
+                    <h3 class="text-base font-bold text-slate-200">Watchlist & Excluded Equities (0.0% Allocation)</h3>
+                    <p class="text-xs text-slate-400">Companies failing fundamental margin of safety or valuation eligibility thresholds</p>
+                </div>
+                <span class="text-2xs font-semibold px-2.5 py-1 bg-slate-950 text-slate-400 rounded border border-slate-800">
+                    7 Watchlist / Re-entry Triggers Defined
+                </span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Shipping Corp of India (SCI)</span>
+                        <span class="text-red-400">0.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">Value unlock tied to SCILAL land demerger; core shipping hit by Red Sea route disruption.</p>
+                    <span class="text-3xs text-amber-400 font-medium block pt-1">Re-entry Trigger: Route normalization & land demerger execution</span>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Eureka Forbes</span>
+                        <span class="text-red-400">0.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">Advent turnaround improving margins, but fierce competition & sluggish rural demand persist.</p>
+                    <span class="text-3xs text-amber-400 font-medium block pt-1">Re-entry Trigger: 2 consecutive quarters of &gt;12% volume growth</span>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Borosil Renewables</span>
+                        <span class="text-red-400">0.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">Solar glass margins severely undercut by Chinese dumping prior to anti-dumping duty clarity.</p>
+                    <span class="text-3xs text-amber-400 font-medium block pt-1">Re-entry Trigger: Duty protection & gross margin expansion</span>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Styrenix Performance</span>
+                        <span class="text-red-400">0.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">High ABS polymer pricing volatility and lack of raw material integration moat.</p>
+                    <span class="text-3xs text-amber-400 font-medium block pt-1">Re-entry Trigger: Spreads stabilization above historical averages</span>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Skipper Ltd</span>
+                        <span class="text-red-400">0.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">T&D tower order book robust, but working capital cycle stretches cash conversion.</p>
+                    <span class="text-3xs text-amber-400 font-medium block pt-1">Re-entry Trigger: Receivable days drop below 90 days</span>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Pearl Global</span>
+                        <span class="text-red-400">0.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">Apparel exporter facing identical trade headwinds as Gokaldas without scale moat.</p>
+                    <span class="text-3xs text-amber-400 font-medium block pt-1">Re-entry Trigger: US retailer destocking cycle end</span>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Tega / Sansera / Happy Forgings</span>
+                        <span class="text-red-400">0.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">Solid fundamental businesses, but elevated forward P/E multiples offer zero margin of safety.</p>
+                    <span class="text-3xs text-amber-400 font-medium block pt-1">Re-entry Trigger: Valuation contraction of 20-25%</span>
+                </div>
+
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800/70 space-y-1">
+                    <div class="flex justify-between text-xs font-bold text-slate-300">
+                        <span>Cash Reserve</span>
+                        <span class="text-emerald-400">10.0%</span>
+                    </div>
+                    <p class="text-3xs text-slate-400">Retained as dry powder to exploit market dislocations or re-allocate to watchlist triggers.</p>
+                    <span class="text-3xs text-emerald-400 font-medium block pt-1">Status: Active Liquidity</span>
+                </div>
+            </div>
+        </section>
+
     </main>
 
-    <footer class="site-footer">
-      <div class="container">
-        <small
-          >Ready for GitHub Pages. Store report notes in the
-          <a href="prompts/">prompts/</a> folder.</small
-        >
-      </div>
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-slate-500 space-y-1 no-print">
+        <p>AI-Powered Equity Portfolio Allocation Model & Research Dashboard &#x2022; Cutoff September 2026</p>
+        <p class="text-3xs text-slate-600">Disclaimer: Model allocations represent analytical equity research suggestions and do not constitute personalized financial advice.</p>
     </footer>
 
-    <script src="assets/js/main.js"></script>
-  </body>
+    <!-- DEFEND ALLOCATION SLIDE-OVER MODAL -->
+    <div id="defendModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex justify-end transition-opacity duration-200">
+        <div class="w-full max-w-2xl bg-slate-900 border-l border-slate-800 h-full overflow-y-auto p-6 space-y-6 shadow-2xl flex flex-col justify-between">
+            
+            <div class="space-y-6">
+                <!-- Modal Header -->
+                <div class="flex items-start justify-between border-b border-slate-800 pb-4">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span id="modalTicker" class="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono text-2xs border border-amber-500/30">BHEL</span>
+                            <span id="modalSector" class="text-xs text-slate-400">Capital Goods</span>
+                        </div>
+                        <h2 id="modalTitle" class="text-xl font-bold text-white mt-1">Why Does Bharat Heavy Electricals Receive 9.5%?</h2>
+                        <p class="text-xs text-slate-400">Step-by-step fundamental justification, counterfactual analysis, and mathematical trace.</p>
+                    </div>
+                    <button onclick="closeModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1 bg-slate-800 rounded">
+                        &times;
+                    </button>
+                </div>
+
+                <!-- Modal KPI Summary Bar -->
+                <div class="grid grid-cols-4 gap-2 bg-slate-950 p-3 rounded-lg border border-slate-800 text-center text-xs">
+                    <div>
+                        <span class="text-3xs uppercase text-slate-500 block">Suggested Weight</span>
+                        <span id="modalWeight" class="text-base font-bold text-amber-400">9.5%</span>
+                    </div>
+                    <div>
+                        <span class="text-3xs uppercase text-slate-500 block">Base Score</span>
+                        <span id="modalScore" class="text-base font-bold text-slate-200">80 / 100</span>
+                    </div>
+                    <div>
+                        <span class="text-3xs uppercase text-slate-500 block">P/E Multiple</span>
+                        <span id="modalPE" class="text-base font-bold text-slate-200">59.5x</span>
+                    </div>
+                    <div>
+                        <span class="text-3xs uppercase text-slate-500 block">Risk Rating</span>
+                        <span id="modalRisk" class="text-base font-bold text-amber-400">Moderate</span>
+                    </div>
+                </div>
+
+                <!-- Tabbed Content Section -->
+                <div class="space-y-4">
+                    
+                    <!-- Tab Buttons -->
+                    <div class="flex border-b border-slate-800 text-xs">
+                        <button onclick="switchTab('tabThesis')" id="btnTabThesis" class="px-3 py-2 border-b-2 border-amber-500 text-amber-400 font-medium">
+                            1. Allocation Defense
+                        </button>
+                        <button onclick="switchTab('tabCounter')" id="btnTabCounter" class="px-3 py-2 text-slate-400 hover:text-slate-200 font-medium">
+                            2. Counterfactuals
+                        </button>
+                        <button onclick="switchTab('tabTrace')" id="btnTabTrace" class="px-3 py-2 text-slate-400 hover:text-slate-200 font-medium">
+                            3. Calculation Trace
+                        </button>
+                        <button onclick="switchTab('tabEvidence')" id="btnTabEvidence" class="px-3 py-2 text-slate-400 hover:text-slate-200 font-medium">
+                            4. Sources & Filings
+                        </button>
+                    </div>
+
+                    <!-- TAB 1: RATIONALE -->
+                    <div id="tabThesis" class="space-y-3 text-xs text-slate-300">
+                        <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                            <h4 class="font-bold text-amber-400">Core Positive Drivers (+):</h4>
+                            <p id="modalPositives" class="leading-relaxed">
+                                Unprecedented order book of INR 1,33,549 crore provides multi-year revenue visibility. Dominant market position in thermal (54%) and nuclear (60%) utility installations. Pivot back to net profit in Q1FY27 (INR 376 Cr) and CRISIL rating upgrade to AA/Stable.
+                            </p>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                            <h4 class="font-bold text-red-400">Limiting Risk Factors (-):</h4>
+                            <p id="modalNegatives" class="leading-relaxed">
+                                Demanding trailing P/E of 59.5x leaves no room for execution errors or raw material inflation. Low historical ROCE (9.14%) reflects past capital intensity drag.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: COUNTERFACTUALS -->
+                    <div id="tabCounter" class="hidden space-y-3 text-xs text-slate-300">
+                        <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                            <h4 class="font-bold text-slate-100">Why Not Increase to 12.0% - 15.0%?</h4>
+                            <p id="modalWhyNotMore" class="leading-relaxed">
+                                Capped strictly by the model's single-stock limit (9.5%) and valuation penalty. P/E of 59.5x requires flawless execution of backlog.
+                            </p>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                            <h4 class="font-bold text-slate-100">Why Not Reduce to 4.0%?</h4>
+                            <p id="modalWhyNotLess" class="leading-relaxed">
+                                Reducing weight would ignore India's multi-year 40-50 GW thermal capacity addition cycle where BHEL holds near-monopolistic bidding success.
+                            </p>
+                        </div>
+                        <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1">
+                            <h4 class="font-bold text-slate-100">Why Included Over Watchlist (0.0%)?</h4>
+                            <p id="modalWhyNotZero" class="leading-relaxed">
+                                Verifiable CRISIL credit upgrade and massive order book confirm turnaround from historical loss-making phase.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: CALCULATION TRACE -->
+                    <div id="tabTrace" class="hidden space-y-3 text-xs text-slate-300">
+                        <div class="bg-slate-950 p-4 rounded border border-slate-800 space-y-2 font-mono">
+                            <div class="flex justify-between border-b border-slate-800 pb-1">
+                                <span>Base Fundamental Quality Score:</span>
+                                <span id="traceBaseScore" class="text-white">82 / 100</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800 pb-1 text-emerald-400">
+                                <span>+ Order Book & Sector Dominance Premium:</span>
+                                <span>+12 pts</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800 pb-1 text-red-400">
+                                <span>- Valuation Penalty (High P/E):</span>
+                                <span>-10 pts</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-800 pb-1 text-red-400">
+                                <span>- Capital Intensity & ROCE Drag:</span>
+                                <span>-4 pts</span>
+                            </div>
+                            <div class="flex justify-between font-bold text-amber-400 pt-1">
+                                <span>Adjusted Model Score:</span>
+                                <span id="traceFinalScore">80 / 100</span>
+                            </div>
+                            <div class="text-3xs text-slate-500 pt-2 font-sans border-t border-slate-800">
+                                Unconstrained Weight: 11.2% &#x2192; Applied Single-Stock Cap: 9.5% &#x2192; Final Normalized Weight: <strong>9.5%</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: SOURCES -->
+                    <div id="tabEvidence" class="hidden space-y-2 text-xs text-slate-300">
+                        <div class="bg-slate-950 p-3 rounded border border-slate-800 space-y-1.5">
+                            <h4 class="font-bold text-amber-400">Verified Evidence & Citations:</h4>
+                            <ul id="modalSourcesList" class="list-disc list-inside space-y-1 text-slate-400">
+                                <li>Q1FY27 Financial Disclosure: Revenue INR 7,697.72 Cr (+40.29% YoY), Net Profit INR 376.71 Cr.</li>
+                                <li>CRISIL Rating Report: Long-term bank facilities upgraded to AA/Stable.</li>
+                                <li>Order Book Disclosure: Standing order book at INR 1,33,549 Cr as of FY26 filing.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="border-t border-slate-800 pt-4 flex items-center justify-between no-print">
+                <span class="text-2xs text-slate-500">Audited Portfolio Research Model</span>
+                <button onclick="closeModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs rounded transition">
+                    Done / Back to Dashboard
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // Master Data Array for Portfolio Universe
+        const portfolioData = [
+            {
+                id: 'bharat-electronics',
+                name: 'Bharat Heavy Electricals Ltd',
+                ticker: 'BHEL',
+                sector: 'Capital Goods',
+                cmp: 'INR 416.00',
+                mcap: 'INR 1,46,055 Cr',
+                pe: 59.5,
+                score: 80,
+                growthScore: 88,
+                valuationView: 'Premium',
+                riskLevel: 'Moderate',
+                baseWeight: 9.5,
+                consWeight: 4.8,
+                growthWeight: 14.0,
+                thesis: 'INR 1.33L Cr order book; thermal capex revival',
+                positives: 'Unprecedented order book of INR 1,33,549 crore provides multi-year revenue visibility. Dominant market position in thermal (54%) and nuclear (60%) utility installations. Q1FY27 PAT reached INR 376.71 Cr with CRISIL rating upgrade to AA/Stable.',
+                negatives: 'Trading at 59.5x trailing earnings; capital intensity drag on historical ROCE (9.14%). Requires flawless execution of backlog.',
+                whyNotMore: 'Capped strictly by the maximum single-stock constraint (9.5%) and heavy valuation penalty at 59.5x P/E.',
+                whyNotLess: 'Reducing allocation ignores India\'s 40-50 GW thermal capacity expansion cycle where BHEL commands 50%+ win rates.',
+                whyNotZero: 'Turnaround confirmed by Q1FY27 net profit and CRISIL credit upgrade to AA/Stable.',
+                traceBase: 82,
+                traceFinal: 80,
+                sources: [
+                    'Q1FY27 Disclosure: Net profit INR 376.71 Cr, Sales +40.29% YoY to INR 7,697.72 Cr.',
+                    'CRISIL Rating: Long-term bank facilities upgraded to AA/Stable.',
+                    'Order Backlog: Verified at INR 1,33,549 Cr as of latest exchange filing.'
+                ]
+            },
+            {
+                id: 'northern-arc',
+                name: 'Northern Arc Capital Ltd',
+                ticker: 'NORTHARC',
+                sector: 'Financial Services',
+                cmp: 'INR 300.00',
+                mcap: 'INR 4,860 Cr',
+                pe: 11.0,
+                score: 90,
+                growthScore: 92,
+                valuationView: 'Attractive',
+                riskLevel: 'Low',
+                baseWeight: 8.5,
+                consWeight: 9.5,
+                growthWeight: 8.0,
+                thesis: '45% PAT growth; D2C expansion; pristine 0.5% NNPA',
+                positives: 'Q1FY27 Net profit surged 45.8% to INR 114.10 Cr. Pristine asset quality with GNPA at 1.0% and Net NPA at 0.5%. Capital adequacy ratio strong at 22.7%. Deep valuation margin of safety at 11.0x P/E.',
+                negatives: 'Inherent shadow-banking liquidity risks in semi-secured D2C lending segments.',
+                whyNotMore: 'Sector concentration limits for non-bank financials prevent pushing allocation above 8.5%.',
+                whyNotLess: 'Highest growth-to-valuation multiple ratio in the financial universe with 43.2% 5-year profit CAGR.',
+                whyNotZero: 'Demonstrates exceptional underwriting quality and high return on capital.',
+                traceBase: 85,
+                traceFinal: 90,
+                sources: [
+                    'Q1FY27 Disclosure: Net profit INR 114.10 Cr (+45.82% YoY), AUM INR 16,855 Cr (+26% YoY).',
+                    'Asset Quality Filing: GNPA 1.0%, Net NPA 0.5%, Capital Adequacy 22.7%.'
+                ]
+            },
+            {
+                id: 'wockhardt-pharma',
+                name: 'Wockhardt Ltd',
+                ticker: 'WOCKPHARMA',
+                sector: 'Pharmaceuticals',
+                cmp: 'INR 2,329.80',
+                mcap: 'INR 37,855 Cr',
+                pe: 106.3,
+                score: 70,
+                growthScore: 95,
+                valuationView: 'Speculative',
+                riskLevel: 'High',
+                baseWeight: 7.0,
+                consWeight: 3.5,
+                growthWeight: 10.0,
+                thesis: 'WCK 5222 96.8% trial success; $1.5B peak sales potential',
+                positives: 'Zaynich (WCK 5222) global Phase III trial achieved 96.8% clinical cure rate in cUTI, outperforming meropenem. DCGI approval and US FDA Fast Track status pave way for $1.5B peak sales.',
+                negatives: 'Extreme valuation multiple at 106.3x trailing P/E; elevated promoter pledging (14.68%) and residual debt.',
+                whyNotMore: 'High clinical commercialization risk and extreme P/E multiple restrict allocation.',
+                whyNotLess: 'Reducing allocation dilutes exposure to a potentially transformative anti-infective drug asset.',
+                whyNotZero: 'Return to operating profitability (INR 199 Cr PAT in FY26) mitigates near-term insolvency risks.',
+                traceBase: 65,
+                traceFinal: 70,
+                sources: [
+                    'Clinical Trial Result: Zaynich Phase III cUTI cure rate 96.8% vs meropenem 68.4%.',
+                    'DCGI Regulatory Approval: May 2026 commercialization clearance.'
+                ]
+            },
+            {
+                id: 'rbl-bank',
+                name: 'RBL Bank Ltd',
+                ticker: 'RBLBANK',
+                sector: 'Banking',
+                cmp: 'INR 412.75',
+                mcap: 'INR 64,194 Cr',
+                pe: 17.2,
+                score: 79,
+                growthScore: 86,
+                valuationView: 'Fair',
+                riskLevel: 'Moderate',
+                baseWeight: 6.5,
+                consWeight: 7.0,
+                growthWeight: 6.5,
+                thesis: '132% PAT growth; GNPA drop to 1.51%; Emirates NBD backing',
+                positives: 'Q1FY27 standalone net profit surged 132.4% YoY to INR 1,074.96 Cr. GNPA contracted to 1.51%, Net NPA to 0.44%. Lucrative NIM of 5.96%. Institutional backing from Emirates NBD equity allotment.',
+                negatives: 'Cost-to-income ratio remains high at 56.76%; exposure to unsecured credit card risk.',
+                whyNotMore: 'Elevated operating expenses and retail credit card cyclicality constrain weight.',
+                whyNotLess: 'Steepest earnings acceleration trajectory among analyzed mid-tier private banks.',
+                whyNotZero: 'Moody\'s Baa2 rating and ICRA AA- (Stable) validate balance sheet turnaround.',
+                traceBase: 72,
+                traceFinal: 79,
+                sources: [
+                    'Q1FY27 Financial Results: Net profit INR 1,074.96 Cr (+132.4% YoY), NIM 5.96%.',
+                    'Moody\'s Rating Agency: Baa2 international rating confirmed.'
+                ]
+            },
+            {
+                id: 'exide',
+                name: 'Exide Industries Ltd',
+                ticker: 'EXIDEIND',
+                sector: 'Auto Ancillary',
+                cmp: 'INR 520.00',
+                mcap: 'Large Cap',
+                pe: 38.5,
+                score: 74,
+                growthScore: 80,
+                valuationView: 'Fair',
+                riskLevel: 'Moderate',
+                baseWeight: 6.0,
+                consWeight: 5.5,
+                growthWeight: 9.0,
+                thesis: '16GWh Lithium-ion gigafactory phase 1 commissioning 2027',
+                positives: 'INR 95 billion Telangana gigafactory execution in partnership with SVOLT. 2 GWh phase 1 commissioning scheduled for June 2027; 5 GWh BESS facility targeted for Q4-FY27.',
+                negatives: 'Heavy ongoing capex depresses near-term free cash flow yield and ROCE.',
+                whyNotMore: 'Commercial revenue from battery cell production remains 12+ months away.',
+                whyNotLess: 'Acts as the premier pure-play domestic proxy for India\'s EV battery transition.',
+                whyNotZero: 'Legacy lead-acid business generates steady cash flow to fund gigafactory capex.',
+                traceBase: 75,
+                traceFinal: 74,
+                sources: [
+                    'Corporate Disclosure: Telangana Giga Corridor timeline confirmed (2 GWh June 2027).',
+                    'Commercial Progress: 1 GWh BESS deployed across Indian telecom sites.'
+                ]
+            },
+            {
+                id: 'viyash',
+                name: 'Viyash Scientific Ltd',
+                ticker: 'VIYASH',
+                sector: 'Pharmaceuticals',
+                cmp: 'INR 245.65',
+                mcap: 'INR 8,800 Cr',
+                pe: 105.4,
+                score: 83,
+                growthScore: 89,
+                valuationView: 'Fair',
+                riskLevel: 'Low',
+                baseWeight: 6.0,
+                consWeight: 6.5,
+                growthWeight: 6.0,
+                thesis: '18.9% OPM; Carlyle backing; 40% CDMO growth visibility',
+                positives: 'Integration with Sequent Scientific backed by Carlyle Group. Q1FY27 PAT surged 115.17% YoY to INR 79.29 Cr. Operating margin expanded to 18.9%. India Ratings upgraded facilities to IND AA-.',
+                negatives: 'Trailing P/E multiple is elevated at 105x; ROE currently depressed due to expanded merger equity base.',
+                whyNotMore: 'Trailing P/E requires ongoing 30%+ PAT growth to justify current valuation.',
+                whyNotLess: 'Low debt-to-EBITDA (0.9x) and resilient animal health API moat warrant core holding.',
+                whyNotZero: 'Carlyle sponsorship and CDMO expansion insulate company from generic pricing pressure.',
+                traceBase: 80,
+                traceFinal: 83,
+                sources: [
+                    'Q1FY27 Earnings: PAT INR 79.29 Cr (+115.17% YoY), OPM 18.9%.',
+                    'India Ratings: Long-term debt upgraded to IND AA-.'
+                ]
+            },
+            {
+                id: 'iifl',
+                name: 'IIFL Finance Ltd',
+                ticker: 'IIFL',
+                sector: 'Financial Services',
+                cmp: 'INR 633.30',
+                mcap: 'INR 26,357 Cr',
+                pe: 12.3,
+                score: 83,
+                growthScore: 85,
+                valuationView: 'Attractive',
+                riskLevel: 'Moderate',
+                baseWeight: 5.5,
+                consWeight: 6.0,
+                growthWeight: 5.5,
+                thesis: 'Gold loan ban lifted; deep value at 12.3x P/E; AA rating',
+                positives: 'RBI lifted operational embargo on high-margin gold loan business. Consolidated AUM stands at INR 98,336 Cr across 4,761 branches. CRISIL reaffirmed AA/Stable credit rating.',
+                negatives: 'Residual reputational overhang from regulatory scrutiny; requires Tier 1 capital buffer.',
+                whyNotMore: 'Regulatory risk penalties limit exposure until full gold loan branch metrics normalize.',
+                whyNotLess: 'Valuation dislocation at 12.3x P/E presents a compelling turnaround risk-reward.',
+                whyNotZero: 'Lifting of RBI embargo directly restores core operating profitability engine.',
+                traceBase: 76,
+                traceFinal: 83,
+                sources: [
+                    'RBI Regulatory Notice: Lifting of embargo on gold loan operations.',
+                    'CRISIL Credit Rating: Reaffirmed AA/Stable on long-term debt.'
+                ]
+            },
+            {
+                id: 'sandur',
+                name: 'Sandur Manganese & Iron Ores',
+                ticker: 'SANDUMA',
+                sector: 'Metals & Mining',
+                cmp: 'INR 183.11',
+                mcap: 'INR 8,901 Cr',
+                pe: 12.7,
+                score: 76,
+                growthScore: 72,
+                valuationView: 'Attractive',
+                riskLevel: 'Moderate',
+                baseWeight: 5.0,
+                consWeight: 7.0,
+                growthWeight: 4.0,
+                thesis: '40% captive margins; 26% ROCE; conservative valuation',
+                positives: 'Captive raw material advantage yields outstanding 40% operating margins in mining. Outstanding ROCE of 26.23%. Conservative P/E multiple of 12.7x offers strong downside buffer.',
+                negatives: 'Subject to metal price cyclicality, Karnataka state mining royalties, and environmental caps.',
+                whyNotMore: 'Sector concentration guidelines limit exposure to pure-play commodity extraction.',
+                whyNotLess: 'Captive cost advantage ensures positive free cash flows even during commodity downcycles.',
+                whyNotZero: 'Industry-leading 26.2% ROCE and pristine balance sheet.',
+                traceBase: 86,
+                traceFinal: 76,
+                sources: [
+                    'Financial Filings: ROCE 26.23%, Operating Margin ~40%.',
+                    'Valuation Metric: P/E 12.70x relative to historical metal peers.'
+                ]
+            },
+            {
+                id: 'pricol',
+                name: 'Pricol Ltd',
+                ticker: 'PRICOL',
+                sector: 'Auto Ancillary',
+                cmp: 'INR 478.45',
+                mcap: 'INR 9,293 Cr',
+                pe: 42.7,
+                score: 77,
+                growthScore: 84,
+                valuationView: 'Premium',
+                riskLevel: 'Moderate',
+                baseWeight: 4.0,
+                consWeight: 3.5,
+                growthWeight: 4.5,
+                thesis: 'TFT/LCD premiumization driving 53% net profit growth',
+                positives: 'Benefiting from 2W/4W driver display premiumization (TFT/LCD clusters). Q1FY27 PAT rose 53.66% to INR 63.69 Cr. Healthy ROCE of 17.85%.',
+                negatives: 'Demanding P/E of 42.7x leaves little room for cyclical dips in domestic two-wheeler sales.',
+                whyNotMore: 'High valuation multiple constrains position size.',
+                whyNotLess: 'Captures structural shift toward electronic instrument clusters across top OEMs.',
+                whyNotZero: '53.6% net profit acceleration validates underlying technology shift.',
+                traceBase: 78,
+                traceFinal: 77,
+                sources: [
+                    'Q1FY27 Filing: Net profit INR 63.69 Cr (+53.66% YoY).',
+                    'Financial Metrics: ROCE 17.85%.'
+                ]
+            },
+            {
+                id: 'motilal-oswal',
+                name: 'Motilal Oswal Financial Services',
+                ticker: 'MOTILALOFS',
+                sector: 'Financial Services',
+                cmp: 'INR 650.00',
+                mcap: 'Mid Cap',
+                pe: 18.5,
+                score: 75,
+                growthScore: 82,
+                valuationView: 'Premium',
+                riskLevel: 'High',
+                baseWeight: 4.0,
+                consWeight: 2.0,
+                growthWeight: 5.0,
+                thesis: 'Financialization proxy; exceptional operating leverage',
+                positives: 'Direct play on retail equity market participation and capital market inflows. Strong PAT growth backed by wealth management and AMC fee expansion.',
+                negatives: 'Highly cyclical revenues vulnerable to capital market downturns and daily trading volume contraction.',
+                whyNotMore: 'High correlation with broad market volatility mandates a capped position.',
+                whyNotLess: 'Capital market financialization provides multi-year tailwinds for wealth management assets.',
+                whyNotZero: 'Operating leverage drives outsized profit surges during bull market cycles.',
+                traceBase: 77,
+                traceFinal: 75,
+                sources: ['Q4FY26 Audited Results: PAT INR 2,360 Cr (+16% YoY).']
+            },
+            {
+                id: 'fedbank',
+                name: 'Fedbank Financial Services',
+                ticker: 'FEDFINA',
+                sector: 'Financial Services',
+                cmp: 'INR 140.00',
+                mcap: 'Small Cap',
+                pe: 15.0,
+                score: 74,
+                growthScore: 76,
+                valuationView: 'Fair',
+                riskLevel: 'Low',
+                baseWeight: 3.5,
+                consWeight: 4.0,
+                growthWeight: 3.5,
+                thesis: 'Reasonable 15x P/E; steady loan book expansion',
+                positives: 'Backed by Federal Bank heritage; reasonable valuation at 15.0x P/E with steady loan book expansion.',
+                negatives: 'ROCE (9.18%) lags higher-performing NBFC peers like Northern Arc.',
+                whyNotMore: 'Lower return metrics prevent taking a top-tier allocation.',
+                whyNotLess: 'Provides stable, low-volatility shadow-banking exposure.',
+                whyNotZero: 'Strong institutional backing and clean balance sheet.',
+                traceBase: 74,
+                traceFinal: 74,
+                sources: ['Q1FY27 Investor Presentation: P/E 15.0x, ROCE 9.18%.']
+            },
+            {
+                id: 'gokaldas',
+                name: 'Gokaldas Exports Ltd',
+                ticker: 'GOKEX',
+                sector: 'Textiles',
+                cmp: 'INR 847.00',
+                mcap: 'INR 6,214 Cr',
+                pe: 21.0,
+                score: 48,
+                growthScore: 55,
+                valuationView: 'Fair',
+                riskLevel: 'High',
+                baseWeight: 3.5,
+                consWeight: 1.5,
+                growthWeight: 4.0,
+                thesis: 'Value play; anticipating H2FY27 US inventory normalization',
+                positives: 'Vertical integration via BTPL acquisition and long-term tariff advantages in Ethiopian/Kenyan facilities under AGOA.',
+                negatives: 'Q2 PAT plummeted 71.3% to INR 8 Cr due to AGOA renewal uncertainty and $97 Cr US tariff absorption.',
+                whyNotMore: 'Acute near-term margin compression and 77.9% US revenue concentration.',
+                whyNotLess: 'Value-buy placeholder positioned for H2FY27 US retailer inventory restocking cycle.',
+                whyNotZero: 'Capacity utilization upside from 50L to 70L meters once trade bottlenecks resolve.',
+                traceBase: 70,
+                traceFinal: 48,
+                sources: ['Q2 Disclosures: PAT INR 8 Cr (-71.3% YoY), EBITDA Margin contracted 167 bps.']
+            },
+            {
+                id: 'shilpa',
+                name: 'Shilpa Medicare Ltd',
+                ticker: 'SHILPAMED',
+                sector: 'Pharmaceuticals',
+                cmp: 'INR 1,021.15',
+                mcap: 'INR 19,799 Cr',
+                pe: 69.6,
+                score: 70,
+                growthScore: 78,
+                valuationView: 'Premium',
+                riskLevel: 'High',
+                baseWeight: 3.5,
+                consWeight: 2.0,
+                growthWeight: 4.0,
+                thesis: 'Margin expansion to 22%; pivot to CDMO and biologics',
+                positives: 'Q1FY27 PAT reached INR 101 Cr with sequential margin expansion to 22%; expanding CDMO & biologics revenue.',
+                negatives: 'Legacy oncology API revenue shrinking; elevated 69.6x P/E with low ROE (8.99%).',
+                whyNotMore: 'Valuation multiple is demanding while core oncology API faces transitional friction.',
+                whyNotLess: 'Biologics and polymer suite commercialization provides visible upside.',
+                whyNotZero: 'Sequential PAT margin recovery to 22% indicates operational turnaround.',
+                traceBase: 72,
+                traceFinal: 70,
+                sources: ['Q1FY27 Disclosure: PAT INR 101 Cr, PAT margin expanded to 22%.']
+            },
+            {
+                id: 'jana-sfb',
+                name: 'Jana Small Finance Bank',
+                ticker: 'JANASFB',
+                sector: 'Banking',
+                cmp: 'INR 450.00',
+                mcap: 'Small Cap',
+                pe: 12.8,
+                score: 71,
+                growthScore: 75,
+                valuationView: 'Fair',
+                riskLevel: 'Moderate',
+                baseWeight: 3.0,
+                consWeight: 3.5,
+                growthWeight: 3.0,
+                thesis: 'GNPA improvement; reasonable entry multiple',
+                positives: 'Improving asset quality with GNPA down to 2.10%; reasonable P/E multiple of 12.8x.',
+                negatives: 'Cost of deposits for small finance banks remains structurally higher than universal banks.',
+                whyNotMore: 'Deposit liability cost headwinds constrain weight relative to RBL Bank.',
+                whyNotLess: 'Attractive entry multiple in high-yield micro-secured lending.',
+                whyNotZero: 'Consistent sequential drop in non-performing assets.',
+                traceBase: 71,
+                traceFinal: 71,
+                sources: ['Q1FY27 Filing: GNPA 2.10%, P/E 12.8x.']
+            },
+            {
+                id: 'vst-industries',
+                name: 'VST Tillers Tractors Ltd',
+                ticker: 'VSTTILLERS',
+                sector: 'Auto Ancillary',
+                cmp: 'INR 4,320.31',
+                mcap: 'INR 3,725 Cr',
+                pe: 35.1,
+                score: 57,
+                growthScore: 50,
+                valuationView: 'Premium',
+                riskLevel: 'Moderate',
+                baseWeight: 3.0,
+                consWeight: 3.5,
+                growthWeight: 2.0,
+                thesis: 'Zero debt; capped by reliance on non-core investment income',
+                positives: 'Fortress balance sheet with zero structural debt; strong market share in niche power tillers.',
+                negatives: 'Q1FY27 PAT beat (INR 48.43 Cr) was artificially boosted by INR 26.15 Cr non-operating fair value gains.',
+                whyNotMore: 'Operational revenue dropped 4.58% sequentially; quality of earnings penalty applied.',
+                whyNotLess: 'Zero debt balance sheet provides total safety during agricultural downcycles.',
+                whyNotZero: 'Niche market monopoly in farm mechanization tillers.',
+                traceBase: 74,
+                traceFinal: 57,
+                sources: ['Q1FY27 Disclosure: Revenue INR 313.40 Cr (-4.58% QoQ), Fair value gain INR 26.15 Cr.']
+            },
+            {
+                id: 'beml',
+                name: 'BEML Ltd',
+                ticker: 'BEML',
+                sector: 'Capital Goods',
+                cmp: 'INR 3,800.00',
+                mcap: 'Mid Cap',
+                pe: 52.0,
+                score: 68,
+                growthScore: 72,
+                valuationView: 'Premium',
+                riskLevel: 'Moderate',
+                baseWeight: 1.5,
+                consWeight: 1.0,
+                growthWeight: 2.0,
+                thesis: 'Defense indigenization proxy; constrained by receivable days',
+                positives: 'Key beneficiary of defense indigenization and metro rail coach orders.',
+                negatives: 'Extended working capital cycle and high government receivable days.',
+                whyNotMore: 'Working capital drag and high P/E multiple restrict weight to 1.5%.',
+                whyNotLess: 'Strategic defense order pipeline warrants baseline inclusion.',
+                whyNotZero: 'Confirmed order backlog in rail & defense.',
+                traceBase: 70,
+                traceFinal: 68,
+                sources: ['FY26 Filings: Defense order backlog disclosures.']
+            },
+            {
+                id: 'cash',
+                name: 'Cash / Tactical Reserve',
+                ticker: 'CASH',
+                sector: 'Cash Reserve',
+                cmp: 'N/A',
+                mcap: 'N/A',
+                pe: 0,
+                score: 100,
+                growthScore: 0,
+                valuationView: 'Neutral',
+                riskLevel: 'Low',
+                baseWeight: 10.0,
+                consWeight: 15.0,
+                growthWeight: 5.0,
+                thesis: 'Retained as dry powder for market corrections or watchlist entry',
+                positives: 'Provides instant liquidity to exploit market dislocations or fund watchlist stocks.',
+                negatives: 'Slight drag on returns during roaring bull markets.',
+                whyNotMore: 'Higher cash drags overall equity portfolio return.',
+                whyNotLess: 'Necessary liquidity cushion for risk management.',
+                whyNotZero: 'Protects capital against sudden systemic shocks.',
+                traceBase: 100,
+                traceFinal: 100,
+                sources: ['Portfolio Strategy Directive: 10.0% mandatory liquidity allocation.']
+            }
+        ];
+
+        const companyPageMap = window.companyPages || {};
+
+        function getCompanyPageUrl(companyId) {
+            if (!companyId) return '#';
+            if (companyPageMap[companyId]) return companyPageMap[companyId];
+            const defaultSlug = String(companyId).trim();
+            return `reports/${defaultSlug}/annual_prediction.html`;
+        }
+
+        // Global Chart Instances & State
+        let allocationChartInstance = null;
+        let scoreChartInstance = null;
+        let currentChartMode = 'company';
+        let currentScenario = 'base';
+        let activeFilteredData = [...portfolioData];
+
+        // Initialize Dashboard on DOM Load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable(portfolioData);
+            initCharts();
+            updateKPIs();
+        });
+
+        // Dynamic Scenario Switcher
+        function setScenario(scenario) {
+            currentScenario = scenario;
+            
+            // Toggle Button Styling
+            document.getElementById('btnScenBase').className = scenario === 'base' ? 'px-3 py-1.5 rounded font-medium transition text-amber-400 bg-slate-800 shadow' : 'px-3 py-1.5 rounded font-medium transition text-slate-400 hover:text-slate-200';
+            document.getElementById('btnScenCons').className = scenario === 'conservative' ? 'px-3 py-1.5 rounded font-medium transition text-amber-400 bg-slate-800 shadow' : 'px-3 py-1.5 rounded font-medium transition text-slate-400 hover:text-slate-200';
+            document.getElementById('btnScenGrowth').className = scenario === 'growth' ? 'px-3 py-1.5 rounded font-medium transition text-amber-400 bg-slate-800 shadow' : 'px-3 py-1.5 rounded font-medium transition text-slate-400 hover:text-slate-200';
+
+            const descMap = {
+                'base': 'Balanced Risk-Adjusted Baseline Scenario',
+                'conservative': 'Defensive Scenario (High P/E slashed, Cash boosted to 15%)',
+                'growth': 'Growth Scenario (Concentration caps relaxed to 15%)'
+            };
+            document.getElementById('scenarioDesc').innerText = descMap[scenario];
+
+            // Update Sliders default indicator
+            if (scenario === 'base') {
+                document.getElementById('sliderStockCap').value = 9.5;
+                document.getElementById('valStockCap').innerText = '9.5%';
+                document.getElementById('sliderSectorCap').value = 30.0;
+                document.getElementById('valSectorCap').innerText = '30.0%';
+            } else if (scenario === 'conservative') {
+                document.getElementById('sliderStockCap').value = 7.0;
+                document.getElementById('valStockCap').innerText = '7.0%';
+            } else if (scenario === 'growth') {
+                document.getElementById('sliderStockCap').value = 14.0;
+                document.getElementById('valStockCap').innerText = '14.0%';
+            }
+
+            renderTable(activeFilteredData);
+            updateCharts();
+            updateKPIs();
+        }
+
+        // Custom Slider Constraint Handler
+        function updateCustomConstraints() {
+            const stockCap = parseFloat(document.getElementById('sliderStockCap').value).toFixed(1);
+            const sectorCap = parseFloat(document.getElementById('sliderSectorCap').value).toFixed(1);
+            
+            document.getElementById('valStockCap').innerText = `${stockCap}%`;
+            document.getElementById('valSectorCap').innerText = `${sectorCap}%`;
+
+            renderTable(activeFilteredData);
+            updateCharts();
+        }
+
+        function resetConstraints() {
+            setScenario('base');
+        }
+
+        // Helper: Get Current Active Weight based on Scenario/Sliders
+        function getActiveWeight(item) {
+            const stockCap = parseFloat(document.getElementById('sliderStockCap').value);
+            let weight = item.baseWeight;
+            if (currentScenario === 'conservative') weight = item.consWeight;
+            if (currentScenario === 'growth') weight = item.growthWeight;
+
+            if (item.id !== 'cash' && weight > stockCap) {
+                return stockCap;
+            }
+            return weight;
+        }
+
+        // Table Rendering Engine
+        function renderTable(data) {
+            const tbody = document.getElementById('companyTableBody');
+            tbody.innerHTML = '';
+
+            data.forEach((item) => {
+                const weight = getActiveWeight(item);
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/50 transition border-b border-slate-800/40 text-xs';
+
+                // Valuation Badge Class
+                let valBadge = 'bg-slate-800 text-slate-300';
+                if (item.valuationView === 'Attractive') valBadge = 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30';
+                if (item.valuationView === 'Premium') valBadge = 'bg-amber-500/10 text-amber-400 border border-amber-500/30';
+                if (item.valuationView === 'Speculative') valBadge = 'bg-red-500/10 text-red-400 border border-red-500/30';
+
+                // Risk Badge Class
+                let riskBadge = 'text-slate-300';
+                if (item.riskLevel === 'Low') riskBadge = 'text-emerald-400';
+                if (item.riskLevel === 'Moderate') riskBadge = 'text-amber-400';
+                if (item.riskLevel === 'High') riskBadge = 'text-red-400';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-3 font-medium text-slate-200">
+                        <div class="font-bold text-white"><a href="${getCompanyPageUrl(item.id)}" target="_self" rel="noopener noreferrer">${item.name}</a></div>
+                        <div class="text-3xs text-slate-400 font-mono">${item.ticker} &#x2022; ${item.sector}</div>
+                    </td>
+                    <td class="py-3 px-2 text-center font-bold text-slate-200">${item.score}/100</td>
+                    <td class="py-3 px-2 text-center text-slate-300">${item.pe ? item.pe + 'x' : 'N/A'}</td>
+                    <td class="py-3 px-2 text-center">
+                        <span class="px-2 py-0.5 rounded text-3xs font-medium ${valBadge}">${item.valuationView}</span>
+                    </td>
+                    <td class="py-3 px-2 text-center font-semibold ${riskBadge}">${item.riskLevel}</td>
+                    <td class="py-3 px-3 text-right font-bold text-amber-400 text-sm">${weight.toFixed(1)}%</td>
+                    <td class="py-3 px-3 text-slate-300 text-2xs max-w-xs truncate" title="${item.thesis}">${item.thesis}</td>
+                    <td class="py-3 px-3 text-center">
+                        <button onclick="openModal('${item.id}')" class="px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded text-3xs font-bold transition">
+                            Defend Allocation %
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('tableMatchCount').innerText = `Showing ${data.length} holdings matching filters`;
+        }
+
+        // Table Filter & Search Engine
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const sector = document.getElementById('sectorFilter').value;
+            const risk = document.getElementById('riskFilter').value;
+
+            activeFilteredData = portfolioData.filter(item => {
+                const matchSearch = item.name.toLowerCase().includes(search) || item.ticker.toLowerCase().includes(search);
+                const matchSector = sector === '' || item.sector.includes(sector);
+                const matchRisk = risk === '' || item.riskLevel === risk;
+                return matchSearch && matchSector && matchRisk;
+            });
+
+            renderTable(activeFilteredData);
+        }
+
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('sectorFilter').value = '';
+            document.getElementById('riskFilter').value = '';
+            activeFilteredData = [...portfolioData];
+            renderTable(portfolioData);
+        }
+
+        // Table Sorting Engine
+        let sortDirections = {};
+        function sortTable(columnKey) {
+            const direction = sortDirections[columnKey] === 'asc' ? 'desc' : 'asc';
+            sortDirections[columnKey] = direction;
+
+            activeFilteredData.sort((a, b) => {
+                let valA = a[columnKey];
+                let valB = b[columnKey];
+
+                if (columnKey === 'weight') {
+                    valA = getActiveWeight(a);
+                    valB = getActiveWeight(b);
+                }
+
+                if (typeof valA === 'string') {
+                    return direction === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                }
+                return direction === 'asc' ? valA - valB : valB - valA;
+            });
+
+            renderTable(activeFilteredData);
+        }
+
+        // Chart Engine (Chart.js)
+        function initCharts() {
+            // Chart 1: Donut Chart
+            const ctxAllocation = document.getElementById('allocationChart').getContext('2d');
+            allocationChartInstance = new Chart(ctxAllocation, {
+                type: 'doughnut',
+                data: getAllocationChartData(),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 12 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw.toFixed(1)}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+
+            // Chart 2: Bar Chart (Score vs Weight)
+            const ctxScore = document.getElementById('scoreVsWeightChart').getContext('2d');
+            scoreChartInstance = new Chart(ctxScore, {
+                type: 'bar',
+                data: getScoreChartData(),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 9 } }, grid: { display: false } },
+                        y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { size: 10 } } }
+                    }
+                }
+            });
+        }
+
+        function toggleChartMode(mode) {
+            currentChartMode = mode;
+            document.getElementById('btnChartComp').className = mode === 'company' ? 'px-2 py-1 rounded text-amber-400 font-medium bg-slate-800' : 'px-2 py-1 rounded text-slate-400 hover:text-slate-200';
+            document.getElementById('btnChartSect').className = mode === 'sector' ? 'px-2 py-1 rounded text-indigo-400 font-medium bg-slate-800' : 'px-2 py-1 rounded text-slate-400 hover:text-slate-200';
+            updateCharts();
+        }
+
+        function getAllocationChartData() {
+            if (currentChartMode === 'company') {
+                const labels = portfolioData.map(d => d.ticker);
+                const data = portfolioData.map(d => getActiveWeight(d));
+                const backgroundColors = [
+                    '#f59e0b', '#3b82f6', '#ec4899', '#10b981', '#8b5cf6',
+                    '#6366f1', '#14b8a6', '#f97316', '#06b6d4', '#eab308',
+                    '#a855f7', '#64748b', '#059669', '#d97706', '#0284c7',
+                    '#475569', '#334155'
+                ];
+                return { labels, datasets: [{ data, backgroundColor: backgroundColors, borderWidth: 1, borderColor: '#0f172a' }] };
+            } else {
+                // Group by Sector
+                const sectorMap = {};
+                portfolioData.forEach(d => {
+                    const w = getActiveWeight(d);
+                    sectorMap[d.sector] = (sectorMap[d.sector] || 0) + w;
+                });
+                return {
+                    labels: Object.keys(sectorMap),
+                    datasets: [{
+                        data: Object.values(sectorMap),
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#14b8a6', '#f97316', '#a855f7', '#0284c7', '#334155'],
+                        borderWidth: 1,
+                        borderColor: '#0f172a'
+                    }]
+                };
+            }
+        }
+
+        function getScoreChartData() {
+            const topHoldings = [...portfolioData].sort((a,b) => getActiveWeight(b) - getActiveWeight(a)).slice(0, 10);
+            return {
+                labels: topHoldings.map(d => d.ticker),
+                datasets: [
+                    {
+                        label: 'Fundamental Score (/100)',
+                        data: topHoldings.map(d => d.score),
+                        backgroundColor: 'rgba(99, 102, 241, 0.7)',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Suggested Weight (%)',
+                        data: topHoldings.map(d => getActiveWeight(d)),
+                        backgroundColor: 'rgba(245, 158, 11, 0.8)',
+                        borderRadius: 4
+                    }
+                ]
+            };
+        }
+
+        function updateCharts() {
+            if (allocationChartInstance) {
+                allocationChartInstance.data = getAllocationChartData();
+                allocationChartInstance.update();
+            }
+            if (scoreChartInstance) {
+                scoreChartInstance.data = getScoreChartData();
+                scoreChartInstance.update();
+            }
+        }
+
+        function updateKPIs() {
+            const maxHolding = [...portfolioData].sort((a,b) => getActiveWeight(b) - getActiveWeight(a))[0];
+            document.getElementById('kpiMaxHolding').innerText = `${getActiveWeight(maxHolding).toFixed(1)}%`;
+            document.getElementById('kpiMaxHoldingName').innerText = `${maxHolding.ticker} (${maxHolding.sector})`;
+        }
+
+        // Defend Allocation Modal Engine
+        function openModal(id) {
+            const item = portfolioData.find(d => d.id === id);
+            if (!item) return;
+
+            const activeW = getActiveWeight(item);
+
+            document.getElementById('modalTicker').innerText = item.ticker;
+            document.getElementById('modalSector').innerText = item.sector;
+            document.getElementById('modalTitle').innerText = `Why Does ${item.name} Receive ${activeW.toFixed(1)}%?`;
+            document.getElementById('modalWeight').innerText = `${activeW.toFixed(1)}%`;
+            document.getElementById('modalScore').innerText = `${item.score} / 100`;
+            document.getElementById('modalPE').innerText = item.pe ? `${item.pe}x` : 'N/A';
+            document.getElementById('modalRisk').innerText = item.riskLevel;
+
+            document.getElementById('modalPositives').innerText = item.positives;
+            document.getElementById('modalNegatives').innerText = item.negatives;
+
+            document.getElementById('modalWhyNotMore').innerText = item.whyNotMore;
+            document.getElementById('modalWhyNotLess').innerText = item.whyNotLess;
+            document.getElementById('modalWhyNotZero').innerText = item.whyNotZero;
+
+            document.getElementById('traceBaseScore').innerText = `${item.traceBase} / 100`;
+            document.getElementById('traceFinalScore').innerText = `${item.traceFinal} / 100`;
+
+            const sourcesList = document.getElementById('modalSourcesList');
+            sourcesList.innerHTML = '';
+            item.sources.forEach(src => {
+                const li = document.createElement('li');
+                li.innerText = src;
+                sourcesList.appendChild(li);
+            });
+
+            switchTab('tabThesis');
+            document.getElementById('defendModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('defendModal').classList.add('hidden');
+        }
+
+        function switchTab(tabId) {
+            ['tabThesis', 'tabCounter', 'tabTrace', 'tabEvidence'].forEach(t => {
+                document.getElementById(t).classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+
+            ['btnTabThesis', 'btnTabCounter', 'btnTabTrace', 'btnTabEvidence'].forEach(b => {
+                document.getElementById(b).className = 'px-3 py-2 text-slate-400 hover:text-slate-200 font-medium';
+            });
+
+            const btnMap = {
+                'tabThesis': 'btnTabThesis',
+                'tabCounter': 'btnTabCounter',
+                'tabTrace': 'btnTabTrace',
+                'tabEvidence': 'btnTabEvidence'
+            };
+            document.getElementById(btnMap[tabId]).className = 'px-3 py-2 border-b-2 border-amber-500 text-amber-400 font-medium';
+        }
+
+        // CSV Export Feature
+        function exportCSV() {
+            let csv = 'Company Name,Ticker,Sector,Score,P/E Multiple,Valuation View,Risk Level,Suggested Weight (%),Core Thesis\n';
+            portfolioData.forEach(item => {
+                const w = getActiveWeight(item);
+                csv += `"${item.name}","${item.ticker}","${item.sector}",${item.score},"${item.pe || 'N/A'}","${item.valuationView}","${item.riskLevel}",${w.toFixed(1)},"${item.thesis}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'Equity_Portfolio_Allocations.csv');
+            a.click();
+        }
+    </script>
+</body>
 </html>
