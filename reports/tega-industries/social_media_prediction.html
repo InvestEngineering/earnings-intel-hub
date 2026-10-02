@@ -1,75 +1,1332 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tega Industries | social_media_prediction</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tega Industries - Investor Sentiment & Stock Target Intelligence</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617'
-            },
-            amber: {
-              400: '#fbbf24',
-              500: '#f59e0b'
-            }
-          }
-        }
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Embedded minimal CSS for Chart Container boundaries and custom styling -->
+  <style>
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 650px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 320px;
+      max-height: 400px;
+    }
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 350px;
       }
     }
-  </script>
-  <style>
-  /* header CSS moved to reports/header.html */
-</style>
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
 
-  <div id="reportHeader"></div>
-  <script>
-    (function () {
-      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
-      const parts = location.pathname.split('/');
-      const stockFolder = parts[parts.length-2] || '';
-      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      fetch('../header.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-          const host = document.getElementById('reportHeader');
-          if (!host) return;
-          host.innerHTML = html;
-          // set active tab
-          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
-          if (activeTab) activeTab.classList.add('active');
-          // humanize and title-case tabs
-          host.querySelectorAll('.report-tab').forEach(function(t){
-            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
-            const words = label.split(/\s+/).filter(Boolean).map(function(w){
-              if (/^ebitda$/i.test(w)) return 'EBITDA';
-              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            });
-            if (words.length) t.textContent = words.join(' ');
-          });
-          // set stock title if present in header
-          const title = host.querySelector('[data-stock-name]');
-          if (title) title.textContent = stockName || 'Stock Name';
-        })
-        .catch(function () {});
-    })();
-  </script>
+  <!-- Placeholder Comments as required by specification -->
+  <!-- Chosen Palette: Warm Slate & Corporate Emerald -->
+  <!-- Application Structure Plan: Designed as a 7-section thematic interactive dashboard prioritizing strategic drill-downs over static reading. Sections include: (1) Executive KPI Summary with instant sentiment meters, (2) Platform Divergence Matrix comparing X vs LinkedIn with interactive raw vs credibility weighting toggles, (3) 6-Month Trajectory & Cascades Timeline with clickable event details, (4) Filterable Narrative Deep-Dive mapping themes to author credibility and management disclosures, (5) Interactive Valuation Scenario Simulator allowing real-time EPS/PE sensitivity testing, (6) Sentiment vs Fundamentals Alignment Matrix with Catalysts/Risks breakdown, and (7) Searchable Source Database. This structure allows equity analysts and investors to rapidly move from surface-level social buzz to deep fundamental reconciliation. -->
+  <!-- Visualization & Content Choices: 
+       - Platform Sentiment Distribution: Chart.js Doughnut Charts (Goal: Compare platform proportions without SVG).
+       - Sentiment Weighting Model: Chart.js Grouped Bar Chart (Goal: Contrast Raw, Engagement, and Credibility weighted scores across platforms).
+       - 6-Month Trajectory: Chart.js Multi-line Chart (Goal: Display net sentiment movement over time mapped to key catalysts).
+       - Valuation & Target Comparison: Chart.js Horizontal Bar Chart + Real-time JS Calculator Input Sliders (Goal: Compare market targets and allow user-driven scenario modeling).
+       - Narrative & Source Tables: HTML Dynamic Grid & Search Filters powered by Vanilla JS (Goal: Organize qualitative insights and direct source evidence).
+       - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visuals rely on HTML5 Canvas (Chart.js) or styled HTML/Tailwind CSS components with Unicode indicators. -->
+  <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased">
-  
+<body class="bg-slate-50 text-slate-800 font-sans antialiased leading-relaxed min-h-screen flex flex-col">
 
-  <main class="report-shell">
-    <section class="report-card">
-      <span class="report-meta">social media prediction</span>
-      <h2>Tega Industries</h2>
-      <p>This section contains the social media prediction report for Tega Industries. Update this file with the stock-specific analysis whenever the report is ready.</p>
-      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
+  <!-- TOP HEADER / BRAND BAR -->
+  <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div class="flex items-center space-x-3">
+        <div class="bg-emerald-500 text-slate-900 text-xs font-bold px-2.5 py-1 rounded tracking-wider uppercase">
+          NSE: TEGA
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+            Tega Industries Ltd.
+            <span class="text-xs font-normal text-slate-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">
+              Sentiment & Valuation Intelligence
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400">Analysis Window: April 2, 2026 – October 2, 2026</p>
+        </div>
+      </div>
+
+      <!-- Quick Ticker Metrics -->
+      <div class="flex items-center space-x-4 text-xs sm:text-sm bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60">
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase">Market Price</span>
+          <span class="font-semibold text-emerald-400 text-base">₹2,093.40</span>
+        </div>
+        <div class="h-6 w-px bg-slate-700"></div>
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase">Market Cap</span>
+          <span class="font-medium text-slate-200">~₹15,800 Cr</span>
+        </div>
+        <div class="h-6 w-px bg-slate-700"></div>
+        <div>
+          <span class="text-slate-400 block text-[10px] uppercase">Combined Sentiment</span>
+          <span class="font-semibold text-teal-300">+50 <span class="text-[10px] font-normal text-slate-400">(Bullish)</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-slate-800/90 border-t border-slate-700/50 overflow-x-auto custom-scrollbar">
+      <div class="max-w-7xl mx-auto px-4 flex space-x-1 sm:space-x-4 text-xs sm:text-sm whitespace-nowrap">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab px-3 py-2.5 font-medium border-b-2 border-emerald-400 text-white flex items-center gap-1.5 transition-colors">
+          <span class="text-emerald-400">📊</span> Executive Dashboard
+        </button>
+        <button onclick="switchTab('platform')" id="tab-platform" class="nav-tab px-3 py-2.5 font-medium border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors">
+          <span class="text-emerald-400">💬</span> X vs LinkedIn Split
+        </button>
+        <button onclick="switchTab('timeline')" id="tab-timeline" class="nav-tab px-3 py-2.5 font-medium border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors">
+          <span class="text-emerald-400">📈</span> Trajectory & Cascades
+        </button>
+        <button onclick="switchTab('narratives')" id="tab-narratives" class="nav-tab px-3 py-2.5 font-medium border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors">
+          <span class="text-emerald-400">⚖️</span> Core Narratives
+        </button>
+        <button onclick="switchTab('valuation')" id="tab-valuation" class="nav-tab px-3 py-2.5 font-medium border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors">
+          <span class="text-emerald-400">🎯</span> Valuation Laboratory
+        </button>
+        <button onclick="switchTab('fundamentals')" id="tab-fundamentals" class="nav-tab px-3 py-2.5 font-medium border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors">
+          <span class="text-emerald-400">🔍</span> Fundamentals Matrix
+        </button>
+        <button onclick="switchTab('sources')" id="tab-sources" class="nav-tab px-3 py-2.5 font-medium border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-1.5 transition-colors">
+          <span class="text-emerald-400">📚</span> Source Database
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+    <!-- ========================================== -->
+    <!-- SECTION 1: EXECUTIVE DASHBOARD -->
+    <!-- ========================================== -->
+    <section id="sec-dashboard" class="tab-content space-y-6">
+      
+      <!-- Section Introductory Context Paragraph -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <span>📌</span> Executive Intelligence Overview
+        </h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          Welcome to the interactive intelligence portal for <strong>Tega Industries Ltd (NSE: TEGA)</strong>. This dashboard synthesizes 6 months of investor discourse across social platforms (X/Twitter and LinkedIn) alongside verifiable financial disclosures, quarterly reports, and independent fundamental equity research. Explore the key sentiment metrics, platform divergence, top market narratives, and interactive valuation models below to evaluate the market sentiment versus intrinsic business fundamentals.
+        </p>
+      </div>
+
+      <!-- KPI Summary Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        
+        <!-- Metric Card 1 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Current Market Price</span>
+            <span class="text-xs bg-emerald-100 text-emerald-800 font-medium px-2 py-0.5 rounded">Trailing 30d +30%</span>
+          </div>
+          <div class="text-2xl font-bold text-slate-900">₹2,093.40</div>
+          <p class="text-xs text-slate-500 mt-1">52-Week Range: Near High ₹2,198 | P/E: ~96.8x (Distorted by Q1 write-off)</p>
+        </div>
+
+        <!-- Metric Card 2 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Combined Sentiment</span>
+            <span class="text-xs bg-teal-100 text-teal-800 font-medium px-2 py-0.5 rounded">Scale: -100 to +100</span>
+          </div>
+          <div class="text-2xl font-bold text-teal-700 flex items-center gap-2">
+            +50 <span class="text-sm font-normal text-slate-600">(Moderate Bullish)</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Credibility-Weighted: <strong class="text-teal-800">+61</strong> | High Investor Conviction</p>
+        </div>
+
+        <!-- Metric Card 3 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Discourse Breakdown</span>
+            <span class="text-xs bg-indigo-100 text-indigo-800 font-medium px-2 py-0.5 rounded">535 Sampled Posts</span>
+          </div>
+          <div class="text-xl font-bold text-slate-800 flex items-center justify-between">
+            <span class="text-emerald-600">63.5% Bullish</span>
+            <span class="text-slate-400">|</span>
+            <span class="text-rose-600">16.8% Bearish</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">X Analyzed: 320 posts | LinkedIn Analyzed: 215 posts</p>
+        </div>
+
+        <!-- Metric Card 4 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+          <div class="flex justify-between items-start mb-2">
+            <span class="text-xs font-semibold uppercase text-slate-500 tracking-wider">Target Valuation</span>
+            <span class="text-xs bg-amber-100 text-amber-800 font-medium px-2 py-0.5 rounded">FY27E Base</span>
+          </div>
+          <div class="text-2xl font-bold text-slate-900">₹2,112</div>
+          <p class="text-xs text-slate-500 mt-1">Market Target Range: ₹1,798 (Quant) to ₹2,500 (Retail Bull)</p>
+        </div>
+      </div>
+
+      <!-- Core Synthesis Panels (2 Column Grid) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Platform Comparison Quick Highlights -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-base mb-3 flex items-center justify-between">
+            <span>⚡ Platform Demographic & Sentiment Split</span>
+            <button onclick="switchTab('platform')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">Explore Details &rarr;</button>
+          </h3>
+          
+          <div class="space-y-4 text-xs sm:text-sm">
+            <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                  <span class="text-sky-500">🐦</span> X (Twitter) Sentiment
+                </span>
+                <span class="font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Net Score: +34</span>
+              </div>
+              <p class="text-slate-600 text-xs">
+                <strong>Retail & Momentum Centric:</strong> 58% Bullish, 18% Neutral, 24% Bearish. High sensitivity to quarterly earnings noise and order announcements. Reactive to short-term technical chart breakouts.
+              </p>
+            </div>
+
+            <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+              <div class="flex justify-between items-center mb-1">
+                <span class="font-bold text-slate-800 flex items-center gap-1.5">
+                  <span class="text-blue-700">💼</span> LinkedIn Sentiment
+                </span>
+                <span class="font-semibold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200">Net Score: +66</span>
+              </div>
+              <p class="text-slate-600 text-xs">
+                <strong>Institutional & Industry Centric:</strong> 72% Bullish, 22% Neutral, 6% Bearish. Focuses on the $1.5B Molycop strategic acquisition, global comminution market synergies, and DynaPrime technical moats.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Driving Narratives Brief -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="font-bold text-slate-900 text-base mb-3 flex items-center justify-between">
+              <span>🔥 Top Dominant Market Narratives</span>
+              <button onclick="switchTab('narratives')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">View Matrix &rarr;</button>
+            </h3>
+
+            <div class="space-y-3 text-xs">
+              <div class="flex items-start space-x-2 p-2.5 bg-emerald-50/60 rounded-lg border border-emerald-100">
+                <span class="text-emerald-700 font-bold text-base leading-none">▲</span>
+                <div>
+                  <h4 class="font-bold text-slate-900">Transformational Molycop Acquisition ($1.5B)</h4>
+                  <p class="text-slate-600">Instantly scales Tega into 400+ global mines across 40 countries, driving $20M in projected synergies and long-term cross-selling.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2 p-2.5 bg-emerald-50/60 rounded-lg border border-emerald-100">
+                <span class="text-emerald-700 font-bold text-base leading-none">▲</span>
+                <div>
+                  <h4 class="font-bold text-slate-900">₹126 Cr Kalpataru Order Win & Legacy Recovery</h4>
+                  <p class="text-slate-600">Rebounds legacy equipment segment (which dropped 44% in Q1), restoring revenue visibility and operating leverage.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start space-x-2 p-2.5 bg-rose-50/60 rounded-lg border border-rose-100">
+                <span class="text-rose-700 font-bold text-base leading-none">▼</span>
+                <div>
+                  <h4 class="font-bold text-slate-900">Consolidated Debt Strain & Q1 Net Loss Shock</h4>
+                  <p class="text-slate-600">Parent loan of ₹1,500 Cr + $838M Molycop debt created brief retail panic during Q1 loss (₹108 Cr due to ₹191 Cr integration write-off).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 text-xs text-slate-500 flex justify-between items-center">
+            <span>Investor Polarization: <strong class="text-amber-700">High</strong></span>
+            <span>Data Confidence: <strong class="text-emerald-700">Medium-High</strong></span>
+          </div>
+        </div>
+
+      </div>
     </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 2: PLATFORM COMPARISON -->
+    <!-- ========================================== -->
+    <section id="sec-platform" class="tab-content hidden space-y-6">
+      
+      <!-- Section Introductory Context Paragraph -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <span>💬</span> Platform Sentiment Divergence & Quality Weighting
+        </h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          This section isolates the sentiment patterns between <strong>X (Twitter)</strong> and <strong>LinkedIn</strong>. While X acts as a fast-paced retail and short-term trading signal (often overreacting to headline accounting numbers), LinkedIn reflects long-term institutional commentary, supply chain perspectives, and metallurgical case studies. Adjusting raw sentiment for author credibility and post engagement reveals how high-information market participants assess Tega's long-term business potential.
+        </p>
+      </div>
+
+      <!-- Charts Row (2 Charts Side by Side) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Visual 1: Sentiment Distribution Chart -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Platform Sentiment Distribution (%)</h3>
+            <p class="text-xs text-slate-500 mb-4">Comparing Bullish, Neutral, and Bearish proportions across X and LinkedIn.</p>
+            <div class="chart-container">
+              <canvas id="chartPlatformSplit"></canvas>
+            </div>
+          </div>
+          <div class="mt-4 text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-200">
+            <strong>Key Insight:</strong> LinkedIn exhibits a minimal 6% bearish stance compared to X's 24% bearish sentiment, illustrating higher institutional comfort with debt integration.
+          </div>
+        </div>
+
+        <!-- Visual 2: Sentiment Weighting Comparison Bar Chart -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Sentiment Score Weighting Evolution</h3>
+            <p class="text-xs text-slate-500 mb-4">Impact of filtering raw scores by engagement velocity and author tier credibility.</p>
+            <div class="chart-container">
+              <canvas id="chartWeightingImpact"></canvas>
+            </div>
+          </div>
+          <div class="mt-4 text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-200">
+            <strong>Key Insight:</strong> Credibility-weighting increases Net Combined Sentiment from +50 to +61, confirming that institutional analysts dismiss the Q1 statutory loss as accounting noise.
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Comparison Detailed Data Table -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+          <h3 class="font-bold text-slate-900 text-sm">Platform Dissected Comparison Matrix</h3>
+          <span class="text-xs text-slate-500">Methodology: Platform-Isolated Filtering</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Metric / Dimension</th>
+                <th class="py-3 px-4 text-sky-700">X (Twitter)</th>
+                <th class="py-3 px-4 text-blue-800">LinkedIn</th>
+                <th class="py-3 px-4 text-slate-800">Combined / Synthesis</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-4 font-medium text-slate-900">Estimated Relevant Posts Discovered</td>
+                <td class="py-2.5 px-4">~1,450 posts</td>
+                <td class="py-2.5 px-4">~850 posts</td>
+                <td class="py-2.5 px-4">~2,300 total posts discovered</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-4 font-medium text-slate-900">Meaningful Analyzed Sample</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-800">320 posts</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-800">215 posts</td>
+                <td class="py-2.5 px-4 font-semibold text-slate-800">535 meaningful posts</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-4 font-medium text-slate-900">Bullish / Neutral / Bearish Split</td>
+                <td class="py-2.5 px-4"><span class="text-emerald-700 font-bold">58%</span> / 18% / <span class="text-rose-600 font-bold">24%</span></td>
+                <td class="py-2.5 px-4"><span class="text-emerald-700 font-bold">72%</span> / 22% / <span class="text-rose-600 font-bold">6%</span></td>
+                <td class="py-2.5 px-4"><span class="text-emerald-700 font-bold">63.5%</span> / 19.6% / <span class="text-rose-600 font-bold">16.8%</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-4 font-medium text-slate-900">Raw Net Sentiment Score</td>
+                <td class="py-2.5 px-4 font-bold text-emerald-700">+34</td>
+                <td class="py-2.5 px-4 font-bold text-teal-700">+66</td>
+                <td class="py-2.5 px-4 font-bold text-teal-800">+50</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-4 font-medium text-slate-900">Engagement-Weighted Score</td>
+                <td class="py-2.5 px-4 font-bold text-emerald-700">+41</td>
+                <td class="py-2.5 px-4 font-bold text-teal-700">+74</td>
+                <td class="py-2.5 px-4 font-bold text-teal-800">+57</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-4 font-medium text-slate-900">Credibility-Weighted Score</td>
+                <td class="py-2.5 px-4 font-bold text-emerald-700">+52</td>
+                <td class="py-2.5 px-4 font-bold text-teal-700">+78</td>
+                <td class="py-2.5 px-4 font-bold text-teal-800">+61</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-2.5 px-4 font-medium text-slate-900">Primary Demographic Driver</td>
+                <td class="py-2.5 px-4">Retail traders, technical analysts, financial bloggers</td>
+                <td class="py-2.5 px-4">Metallurgists, M&A advisors, equity researchers, executives</td>
+                <td class="py-2.5 px-4">Mixed ecosystem with distinct short vs long horizon bias</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 3: TIMELINE & INFORMATION CASCADES -->
+    <!-- ========================================== -->
+    <section id="sec-timeline" class="tab-content hidden space-y-6">
+      
+      <!-- Section Introductory Context Paragraph -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <span>📈</span> 6-Month Sentiment Trajectory & Event Cascades
+        </h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          Over the 6-month analysis period (April – October 2026), Tega Industries experienced three major market catalysts that dramatically influenced sentiment velocity. This section plots the monthly net sentiment trends across both platforms and details the information cascades that followed key exchange announcements and financial earnings releases.
+        </p>
+      </div>
+
+      <!-- Trend Chart -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="text-sm font-bold text-slate-900 mb-1">Monthly Net Sentiment Trend (May 2026 – Sept 2026)</h3>
+        <p class="text-xs text-slate-500 mb-4">Click event markers below the chart to explore how social discussions reacted to real-world corporate news.</p>
+        <div class="chart-container">
+          <canvas id="chartSentimentTrend"></canvas>
+        </div>
+      </div>
+
+      <!-- Information Cascades Interactive Cards -->
+      <div class="space-y-4">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <span>⚡</span> Major Information Cascades Breakdown
+        </h3>
+
+        <!-- Cascade 1 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-5 hover:border-indigo-300 transition-colors">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">EVENT 1</span>
+              <h4 class="font-bold text-slate-900 text-base">Closure of $1.5B Molycop Acquisition (June 1, 2026)</h4>
+            </div>
+            <span class="text-xs text-slate-500 font-medium">Stock Reaction: Base established above ₹1,900</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+              <span class="font-bold text-sky-700 block mb-1">X (Twitter) Cascade</span>
+              <p class="text-slate-600">Viral enthusiasm regarding Tega transforming into a global MNC overnight. Retail focused on immediate revenue jump to ₹1,280+ Cr/month.</p>
+            </div>
+            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+              <span class="font-bold text-blue-800 block mb-1">LinkedIn Cascade</span>
+              <p class="text-slate-600">In-depth structural analysis of Apollo Funds partnership, OCRPS instruments, and supply chain alignment across 26 plants.</p>
+            </div>
+            <div class="bg-emerald-50/70 p-3 rounded border border-emerald-200">
+              <span class="font-bold text-emerald-800 block mb-1">Investor Takeaway</span>
+              <p class="text-slate-700">Overwhelmingly bullish. Established long-term thesis of comminution circuit market dominance and $20M synergy potential.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cascade 2 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-5 hover:border-indigo-300 transition-colors">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="bg-rose-100 text-rose-800 text-xs font-bold px-2.5 py-1 rounded">EVENT 2</span>
+              <h4 class="font-bold text-slate-900 text-base">Q1 FY27 Earnings Release & Statutory Net Loss (Mid-Aug 2026)</h4>
+            </div>
+            <span class="text-xs text-slate-500 font-medium">Stock Reaction: Held technical support near ₹1,950</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+              <span class="font-bold text-sky-700 block mb-1">X (Twitter) Cascade</span>
+              <p class="text-slate-600">Headline panic sell-off triggered by reported ₹108 Cr net loss. Neutralized within 48h as Tier 2 analysts published IND-AS write-off breakdowns.</p>
+            </div>
+            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+              <span class="font-bold text-blue-800 block mb-1">LinkedIn Cascade</span>
+              <p class="text-slate-600">Completely calm response. Analysts focused on Molycop's 1-month EBITDA contribution of ₹162.8 Cr and robust legacy gross margins (~60%).</p>
+            </div>
+            <div class="bg-amber-50/70 p-3 rounded border border-amber-200">
+              <span class="font-bold text-amber-800 block mb-1">Investor Takeaway</span>
+              <p class="text-slate-700">High temporary polarization. Highlighted classic information arbitrage where headline accounting obscures core operating cash flow growth.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cascade 3 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden p-5 hover:border-indigo-300 transition-colors">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 border-b border-slate-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">EVENT 3</span>
+              <h4 class="font-bold text-slate-900 text-base">₹126 Cr Kalpataru Projects Order Win (Sept 18, 2026)</h4>
+            </div>
+            <span class="text-xs text-slate-500 font-medium">Stock Reaction: Rally +10% to 52W High ₹2,198</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+              <span class="font-bold text-sky-700 block mb-1">X (Twitter) Cascade</span>
+              <p class="text-slate-600">Viral momentum chatter. Highlighted as the definitive reversal for the lagging legacy equipment segment (which dropped 44% in Q1).</p>
+            </div>
+            <div class="bg-slate-50 p-3 rounded border border-slate-200">
+              <span class="font-bold text-blue-800 block mb-1">LinkedIn Cascade</span>
+              <p class="text-slate-600">Moderate professional updates noting execution stability and multi-year order book visibility for domestic projects.</p>
+            </div>
+            <div class="bg-emerald-50/70 p-3 rounded border border-emerald-200">
+              <span class="font-bold text-emerald-800 block mb-1">Investor Takeaway</span>
+              <p class="text-slate-700">Universally bullish catalyst. Confirmed operating leverage recovery in legacy business while Molycop integration proceeds.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 4: TOP NARRATIVES & AUTHOR TIERING -->
+    <!-- ========================================== -->
+    <section id="sec-narratives" class="tab-content hidden space-y-6">
+      
+      <!-- Section Introductory Context Paragraph -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <span>⚖️</span> Core Bullish & Bearish Narratives Matrix
+        </h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          Discourse surrounding Tega Industries is divided between long-term strategic growth thesis points and debt/margin risks. Below is a detailed mapping of major investor arguments, complete with author quality tiering, supporting empirical evidence, and official company management responses. Use the interactive filters to isolate bullish or bearish perspectives.
+        </p>
+      </div>
+
+      <!-- Narrative Filter Buttons -->
+      <div class="flex items-center space-x-2 border-b border-slate-200 pb-3">
+        <span class="text-xs font-bold text-slate-500 uppercase mr-2">Filter Themes:</span>
+        <button onclick="filterNarratives('all')" id="btn-narrative-all" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-900 text-white">All Themes (6)</button>
+        <button onclick="filterNarratives('bullish')" id="btn-narrative-bullish" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">Bullish Themes (3)</button>
+        <button onclick="filterNarratives('bearish')" id="btn-narrative-bearish" class="px-3 py-1 text-xs font-medium rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200">Bearish Themes (3)</button>
+      </div>
+
+      <!-- Narrative Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="narratives-container">
+        
+        <!-- Bullish Narrative 1 -->
+        <div class="narrative-card narrative-bullish bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-300 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Bullish Narrative 1</span>
+              <span class="text-xs text-slate-500 font-medium">LinkedIn: High | X: Medium</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Transformational Scale via Molycop ($1.5B)</h3>
+            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+              Consortium buyout with Apollo Funds expanded footprint to 400+ mines in 40 countries across 26 plants. Molycop contributed ₹1,283.4 Cr revenue and ₹162.8 Cr EBITDA in its first month (June 2026) alone.
+            </p>
+          </div>
+          <div class="space-y-2 text-[11px] pt-3 border-t border-slate-100">
+            <div class="flex justify-between"><span class="text-slate-500">Author Quality:</span> <span class="font-semibold text-slate-800">Tier 1 & Tier 2 (Institutional/M&A)</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Company Guidance:</span> <span class="font-semibold text-emerald-700">$20M Synergies over 2–2.5 Years</span></div>
+            <div class="bg-emerald-50 p-2 rounded text-emerald-900 font-medium mt-1">Status: Fully Supported by Exchange Filings</div>
+          </div>
+        </div>
+
+        <!-- Bullish Narrative 2 -->
+        <div class="narrative-card narrative-bullish bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-300 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Bullish Narrative 2</span>
+              <span class="text-xs text-slate-500 font-medium">X: High | LinkedIn: Low</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Legacy Equipment Segment Rebound</h3>
+            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+              Legacy equipment segment suffered a 44% YoY revenue drop in Q1 due to client clearance delays. The ₹126 Cr Kalpataru order win completely secures revenue visibility over 14 months execution.
+            </p>
+          </div>
+          <div class="space-y-2 text-[11px] pt-3 border-t border-slate-100">
+            <div class="flex justify-between"><span class="text-slate-500">Author Quality:</span> <span class="font-semibold text-slate-800">Tier 2 & Tier 3 (Retail Traders)</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Impact Run-Rate:</span> <span class="font-semibold text-emerald-700">~₹108 Cr/Year Revenue Securitization</span></div>
+            <div class="bg-emerald-50 p-2 rounded text-emerald-900 font-medium mt-1">Status: Fully Supported by Regulatory Filings</div>
+          </div>
+        </div>
+
+        <!-- Bullish Narrative 3 -->
+        <div class="narrative-card narrative-bullish bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-emerald-300 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="bg-emerald-100 text-emerald-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Bullish Narrative 3</span>
+              <span class="text-xs text-slate-500 font-medium">LinkedIn: High | X: Low</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">DynaPrime Technical Moat & ESG Alignment</h3>
+            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+              Patented composite liners deliver 50–85% longer wear life in 40ft+ SAG mills, lowering mill downtime and energy consumption by 5%. Targeted to reach 50% revenue share by 2027.
+            </p>
+          </div>
+          <div class="space-y-2 text-[11px] pt-3 border-t border-slate-100">
+            <div class="flex justify-between"><span class="text-slate-500">Author Quality:</span> <span class="font-semibold text-slate-800">Tier 1 (Metallurgists & Process Engineers)</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Capex Alignment:</span> <span class="font-semibold text-emerald-700">$30M Chile Plant Capacity Expansion</span></div>
+            <div class="bg-emerald-50 p-2 rounded text-emerald-900 font-medium mt-1">Status: Supported by Mine Case Studies</div>
+          </div>
+        </div>
+
+        <!-- Bearish Narrative 1 -->
+        <div class="narrative-card narrative-bearish bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-rose-300 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Bearish Narrative 1</span>
+              <span class="text-xs text-slate-500 font-medium">X: High | LinkedIn: Medium</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Heavy Balance Sheet Debt & Interest Burden</h3>
+            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+              Total group debt scaled to ₹112B (including ₹26B in OCRPS preference shares). Parent loan of ₹1,500 Cr + $838M inherited Molycop debt severely increases interest sensitivity.
+            </p>
+          </div>
+          <div class="space-y-2 text-[11px] pt-3 border-t border-slate-100">
+            <div class="flex justify-between"><span class="text-slate-500">Author Quality:</span> <span class="font-semibold text-slate-800">Tier 1 & Tier 2 (Quant Researchers)</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Management Response:</span> <span class="font-semibold text-slate-800">Net debt reduced by ₹3,218 Cr in Q1</span></div>
+            <div class="bg-amber-50 p-2 rounded text-amber-900 font-medium mt-1">Status: Partially Supported (High Debt, but Cash Flow Strong)</div>
+          </div>
+        </div>
+
+        <!-- Bearish Narrative 2 -->
+        <div class="narrative-card narrative-bearish bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-rose-300 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Bearish Narrative 2</span>
+              <span class="text-xs text-slate-500 font-medium">X: High | LinkedIn: Low</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Q1 Net Loss & Diluted EBITDA Margins</h3>
+            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+              Statutory Q1 net loss of ₹108.25 Cr and operating margin contraction to 3.22%. Retail traders feared core operational collapse.
+            </p>
+          </div>
+          <div class="space-y-2 text-[11px] pt-3 border-t border-slate-100">
+            <div class="flex justify-between"><span class="text-slate-500">Author Quality:</span> <span class="font-semibold text-slate-800">Tier 3 (Retail / Algorithmic Bots)</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Accounting Truth:</span> <span class="font-semibold text-slate-800">Loss due to ₹191 Cr 1-time transaction cost</span></div>
+            <div class="bg-rose-50 p-2 rounded text-rose-900 font-medium mt-1">Status: Contradicted on Normalized Basis (Adj PAT ₹54.7 Cr)</div>
+          </div>
+        </div>
+
+        <!-- Bearish Narrative 3 -->
+        <div class="narrative-card narrative-bearish bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:border-rose-300 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-start mb-2">
+              <span class="bg-rose-100 text-rose-800 text-[11px] font-bold px-2 py-0.5 rounded uppercase">Bearish Narrative 3</span>
+              <span class="text-xs text-slate-500 font-medium">X: Medium | LinkedIn: Low</span>
+            </div>
+            <h3 class="font-bold text-slate-900 text-base mb-2">Domestic & International Tax Litigations</h3>
+            <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+              TMML subsidiary received ₹121 Cr tax demand for AY2018-19. Chilean tribunal disallowed ₹32.32 Cr tax loss carry-forward for Tega Chile SpA.
+            </p>
+          </div>
+          <div class="space-y-2 text-[11px] pt-3 border-t border-slate-100">
+            <div class="flex justify-between"><span class="text-slate-500">Author Quality:</span> <span class="font-semibold text-slate-800">Tier 2 (Tax & Legal Bloggers)</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Company Position:</span> <span class="font-semibold text-slate-800">Pre-NCLT acquisition liability; actively contested</span></div>
+            <div class="bg-amber-50 p-2 rounded text-amber-900 font-medium mt-1">Status: Administrative Overhang (Low Insolvency Risk)</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Author Quality Hierarchy Grid -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h3 class="font-bold text-slate-900 text-sm mb-3">Author Credibility Hierarchy Matrix</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div class="p-3 bg-slate-50 rounded border border-slate-200">
+            <span class="font-bold text-indigo-700 block mb-1">Tier 1 — Professional</span>
+            <p class="text-slate-600">Institutional equity researchers (JM Financial, Motilal Oswal), M&A legal advisors (Argus Partners), metallurgists. Focus on TAM expansion and 18% target ROE.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded border border-slate-200">
+            <span class="font-bold text-sky-700 block mb-1">Tier 2 — Informed Investors</span>
+            <p class="text-slate-600">Sophisticated bloggers and analysts who dissected IND-AS 103 adjustments, educating retail during Q1 loss panic. Tracked Apollo Funds preferential allotment.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded border border-slate-200">
+            <span class="font-bold text-amber-700 block mb-1">Tier 3 — General Retail</span>
+            <p class="text-slate-600">Momentum chasers and short-term traders. High procyclicality—panic selling Q1 headline loss and buying Kalpataru order breakouts.</p>
+          </div>
+          <div class="p-3 bg-slate-50 rounded border border-slate-200">
+            <span class="font-bold text-slate-600 block mb-1">Tier 4 — Noise & Bots</span>
+            <p class="text-slate-600">Algorithmic news scrapers repeating PR wires without original commentary. Filtered out during deduplication.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 5: VALUATION LABORATORY -->
+    <!-- ========================================== -->
+    <section id="sec-valuation" class="tab-content hidden space-y-6">
+      
+      <!-- Section Introductory Context Paragraph -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <span>🎯</span> Target Price Landscape & Interactive Valuation Laboratory
+        </h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          Publicly discussed target prices for Tega range from quantitative algorithmic downside targets (₹1,798) to optimistic retail speculative targets (₹2,500). Because trailing quant models struggle with M&A accounting adjustments, forward-looking institutional valuation requires projecting consolidated FY27 net income and valuation multiples. Use the <strong>Interactive Valuation Simulator</strong> below to test your own earnings and P/E assumptions.
+        </p>
+      </div>
+
+      <!-- Target Comparison Chart & Simulator Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Target Price Comparison Bar Chart -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 mb-1">Public Targets vs Fundamental Scenarios (₹)</h3>
+            <p class="text-xs text-slate-500 mb-4">Comparing market price (₹2,093.40) against broker, quant, and fundamental targets.</p>
+            <div class="chart-container">
+              <canvas id="chartTargets"></canvas>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-slate-500 bg-slate-50 p-2.5 rounded border border-slate-200">
+            <strong>Key takeaway:</strong> Current stock price of ₹2,093.40 aligns almost perfectly with fundamental Base Case (₹2,112), indicating fair pricing for current integration progress.
+          </div>
+        </div>
+
+        <!-- Interactive Valuation Simulator Tool -->
+        <div class="bg-slate-900 text-white p-5 rounded-xl border border-slate-800 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <span>🧮</span> Interactive FY27E Valuation Model
+              </h3>
+              <span class="text-[11px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">Live Calculator</span>
+            </div>
+
+            <p class="text-xs text-slate-300 mb-4">
+              Adjust parameters below to simulate implied share price based on 7.51 Crore shares outstanding.
+            </p>
+
+            <!-- Slider 1: FY27E Consolidated Net Profit (PAT) -->
+            <div class="space-y-1.5 mb-4">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300">FY27E Consolidated PAT (₹ Crores):</span>
+                <span class="font-bold text-emerald-400" id="valPatText">₹675 Cr</span>
+              </div>
+              <input type="range" id="sliderPat" min="450" max="950" step="25" value="675" class="w-full accent-emerald-500 bg-slate-700 h-2 rounded cursor-pointer">
+              <div class="flex justify-between text-[10px] text-slate-400">
+                <span>Bear: ₹550 Cr</span>
+                <span>Base: ₹675 Cr</span>
+                <span>Bull: ₹740 Cr</span>
+              </div>
+            </div>
+
+            <!-- Slider 2: Target Forward P/E Multiple -->
+            <div class="space-y-1.5 mb-4">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300">Target Forward P/E Multiple:</span>
+                <span class="font-bold text-emerald-400" id="valPeText">23.5x</span>
+              </div>
+              <input type="range" id="sliderPe" min="15.0" max="35.0" step="0.5" value="23.5" class="w-full accent-emerald-500 bg-slate-700 h-2 rounded cursor-pointer">
+              <div class="flex justify-between text-[10px] text-slate-400">
+                <span>Bear: 20.0x</span>
+                <span>Base: 23.5x</span>
+                <span>Bull: 30.0x</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Output Card -->
+          <div class="bg-slate-800 p-4 rounded-lg border border-slate-700 mt-2 space-y-2">
+            <div class="grid grid-cols-2 gap-2 text-xs border-b border-slate-700 pb-2">
+              <div>
+                <span class="text-slate-400 block text-[10px]">Implied FY27E EPS</span>
+                <span class="font-bold text-white text-sm" id="calcEps">₹89.88</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px]">Market vs Calculated</span>
+                <span class="font-bold text-emerald-400 text-sm" id="calcDiff">+0.9% Upside</span>
+              </div>
+            </div>
+            <div class="flex justify-between items-center pt-1">
+              <span class="text-xs text-slate-300">Implied Target Price:</span>
+              <span class="text-2xl font-extrabold text-emerald-400" id="calcTargetPrice">₹2,112.18</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bear / Base / Bull Matrix Table -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-200">
+          <h3 class="font-bold text-slate-900 text-sm">Fundamental FY27E Valuation Scenario Matrix</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Scenario</th>
+                <th class="py-3 px-4">Core Operational Assumptions</th>
+                <th class="py-3 px-4">FY27E PAT</th>
+                <th class="py-3 px-4">Implied EPS</th>
+                <th class="py-3 px-4">Target Multiple</th>
+                <th class="py-3 px-4 text-emerald-800">Implied Target Price</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-4 font-bold text-rose-700">Bear Case</td>
+                <td class="py-3 px-4 text-xs">Integration friction across global plants, cross-selling delays, interest burden suppresses margins.</td>
+                <td class="py-3 px-4 font-semibold">₹550 Cr</td>
+                <td class="py-3 px-4">₹73.23</td>
+                <td class="py-3 px-4">20.0x</td>
+                <td class="py-3 px-4 font-bold text-rose-700">₹1,464</td>
+              </tr>
+              <tr class="hover:bg-slate-50 bg-emerald-50/30">
+                <td class="py-3 px-4 font-bold text-emerald-800">Base Case</td>
+                <td class="py-3 px-4 text-xs">Smooth integration, $20M synergies materialize over 2.5y, legacy growth ~15%, debt reduction on track.</td>
+                <td class="py-3 px-4 font-semibold">₹675 Cr</td>
+                <td class="py-3 px-4">₹89.88</td>
+                <td class="py-3 px-4">23.5x</td>
+                <td class="py-3 px-4 font-bold text-emerald-800">₹2,112</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-4 font-bold text-teal-700">Bull Case</td>
+                <td class="py-3 px-4 text-xs">Rapid cross-selling across 400+ mines, DynaPrime fast adoption in SAG mills, rapid debt paydown via free cash flow.</td>
+                <td class="py-3 px-4 font-semibold">₹740 Cr</td>
+                <td class="py-3 px-4">₹98.53</td>
+                <td class="py-3 px-4">30.0x</td>
+                <td class="py-3 px-4 font-bold text-teal-700">₹2,955</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 6: FUNDAMENTALS ALIGNMENT & RISKS -->
+    <!-- ========================================== -->
+    <section id="sec-fundamentals" class="tab-content hidden space-y-6">
+      
+      <!-- Section Introductory Context Paragraph -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <span>🔍</span> Sentiment vs. Fundamental Evidence Alignment
+        </h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          To ensure social media sentiment is not leading investors astray, this matrix cross-references recurring social claims against official exchange filings, auditor notes, and earnings conference transcripts. Additionally, key forward-looking catalysts and operational risks are mapped out below.
+        </p>
+      </div>
+
+      <!-- Alignment Table -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-200">
+          <h3 class="font-bold text-slate-900 text-sm">Reconciliation Matrix: Social Claims vs. Hard Data</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs sm:text-sm">
+            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Social Theme / Narrative</th>
+                <th class="py-3 px-4">X / LinkedIn Stance</th>
+                <th class="py-3 px-4">Fundamental Evidence</th>
+                <th class="py-3 px-4">Company Disclosure</th>
+                <th class="py-3 px-4">Alignment Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-4 font-bold text-slate-900">Molycop Global Scale</td>
+                <td class="py-3 px-4"><span class="text-emerald-700 font-semibold">Extremely Bullish</span></td>
+                <td class="py-3 px-4">Access to 400+ mines; Molycop June revenue ₹1,283 Cr.</td>
+                <td class="py-3 px-4">Management targets $20M synergies over 2.5 yrs.</td>
+                <td class="py-3 px-4"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-xs">Supported</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-4 font-bold text-slate-900">Legacy Equipment Recovery</td>
+                <td class="py-3 px-4"><span class="text-emerald-700 font-semibold">Bullish (Recent)</span></td>
+                <td class="py-3 px-4">₹126 Cr order win restores 14-month execution pipeline.</td>
+                <td class="py-3 px-4">Exchange filing confirmed Sept 18, 2026.</td>
+                <td class="py-3 px-4"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-xs">Supported</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-4 font-bold text-slate-900">Margin Expansion Myth</td>
+                <td class="py-3 px-4"><span class="text-amber-600 font-semibold">Mixed / Confused</span></td>
+                <td class="py-3 px-4">Legacy gross margin ~60%, but combined margin dilutes.</td>
+                <td class="py-3 px-4">Management explicitly guided diluted ~15% EBITDA.</td>
+                <td class="py-3 px-4"><span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded text-xs">Contradicted</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-4 font-bold text-slate-900">Balance Sheet Insolvency Risk</td>
+                <td class="py-3 px-4"><span class="text-rose-600 font-semibold">Bearish</span></td>
+                <td class="py-3 px-4">High net debt, but Q1 net debt reduced by ₹3,218 Cr.</td>
+                <td class="py-3 px-4">Parent term loan ₹1,500 Cr + $838M Molycop debt.</td>
+                <td class="py-3 px-4"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-xs">Partially Supported</span></td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="py-3 px-4 font-bold text-slate-900">DynaPrime Technical Advantage</td>
+                <td class="py-3 px-4"><span class="text-emerald-700 font-semibold">Bullish</span></td>
+                <td class="py-3 px-4">Proven 50–85% wear life extension in 40ft+ SAG mills.</td>
+                <td class="py-3 px-4">Pushing to reach 50% revenue share by 2027.</td>
+                <td class="py-3 px-4"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-xs">Supported</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Catalysts vs Risks Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Key Catalysts -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-base mb-3 flex items-center gap-2">
+            <span>🚀</span> Key Upside Catalysts (Next 6–12 Months)
+          </h3>
+          <ul class="space-y-3 text-xs">
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-600 font-bold">1.</span>
+              <div>
+                <strong>Cross-Selling Synergy Realization:</strong> Management guides cross-selling of Tega mill liners with Molycop grinding media will reflect in Q3/Q4 FY27 results.
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-600 font-bold">2.</span>
+              <div>
+                <strong>Chile Plant Capacity Commissioning:</strong> $30M expansion targeting soft commissioning in Jan 2027 and commercial operations by March 2027.
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-600 font-bold">3.</span>
+              <div>
+                <strong>Aggressive Debt De-leveraging:</strong> Monetization of non-core land assets and application of ~₹900 Cr annual free cash flow to pay down debt.
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-600 font-bold">4.</span>
+              <div>
+                <strong>Preferential Issue Finalization:</strong> Deployment of ₹95.4 Cr preferential issue to Apollo Funds (AP Jupiter) at ₹1,994/share.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Key Risks -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+          <h3 class="font-bold text-slate-900 text-base mb-3 flex items-center gap-2">
+            <span>⚠️</span> Key Downside Risks
+          </h3>
+          <ul class="space-y-3 text-xs">
+            <li class="flex items-start gap-2">
+              <span class="text-rose-600 font-bold">1.</span>
+              <div>
+                <strong>Steel Index Price Volatility:</strong> ~85% of Molycop customer contracts are index-linked. Fluctuations create optical top-line volatility.
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-rose-600 font-bold">2.</span>
+              <div>
+                <strong>Global Operational Integration Friction:</strong> Merging Indian manufacturing culture with US/Australian assets across 26 global facilities.
+              </div>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-rose-600 font-bold">3.</span>
+              <div>
+                <strong>Legacy Foreign & Domestic Tax Litigations:</strong> ₹121 Cr TMML pre-NCLT tax demand and ₹32.32 Cr Chilean tax loss disallowance overhang.
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- SECTION 7: SOURCE DATABASE -->
+    <!-- ========================================== -->
+    <section id="sec-sources" class="tab-content hidden space-y-6">
+      
+      <!-- Section Introductory Context Paragraph -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+        <h2 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
+          <span>📚</span> Source & Reference Citation Database
+        </h2>
+        <p class="text-slate-600 text-sm leading-relaxed">
+          Every statement, financial figure, and social media finding presented in this research suite is anchored in primary disclosures, official regulatory filings, and institutional research reports. Use the search bar or tag filters below to search through the reference database.
+        </p>
+      </div>
+
+      <!-- Controls Row: Search & Tag Filter -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row gap-3 justify-between items-center">
+        <div class="w-full sm:w-72">
+          <input type="text" id="sourceSearchInput" onkeyup="filterSources()" placeholder="Search title, publisher, keyword..." class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+        </div>
+        <div class="flex items-center space-x-2 w-full sm:w-auto overflow-x-auto text-xs">
+          <span class="text-slate-500 font-medium">Tag:</span>
+          <button onclick="filterSourceTag('all')" class="px-2.5 py-1 bg-slate-900 text-white rounded-full">All</button>
+          <button onclick="filterSourceTag('Fact')" class="px-2.5 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-full">Fact</button>
+          <button onclick="filterSourceTag('Management Claim')" class="px-2.5 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-full">Management Claim</button>
+          <button onclick="filterSourceTag('Analyst Opinion')" class="px-2.5 py-1 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-full">Analyst Opinion</button>
+        </div>
+      </div>
+
+      <!-- Source Database Table -->
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs" id="sourcesTable">
+            <thead class="bg-slate-100 text-slate-700 font-semibold uppercase text-[11px] tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">Title / Description</th>
+                <th class="py-3 px-4">Publisher / Source</th>
+                <th class="py-3 px-4">Classification Tag</th>
+                <th class="py-3 px-4">URL / Reference</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700" id="sourcesTableBody">
+              <!-- Dynamically populated by JS or rendered below -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
   </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 text-xs py-6 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <span class="font-bold text-white text-sm">Tega Industries Sentiment & Valuation Intelligence Platform</span>
+        <p class="text-slate-500 text-[11px] mt-0.5">Strictly for informational and research purposes. Not a financial recommendation or stock offer.</p>
+      </div>
+      <div class="text-right text-slate-500 text-[11px]">
+        <span>Data Analysis Period: April 2, 2026 – October 2, 2026</span> | <span>Confidence Level: Medium-High</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT CODE -->
+  <script>
+    // Global State & Data Models
+    const sourceData = [
+      { title: "Tega Industries Snapshot & Market Cap Data", publisher: "TickerTape", tag: "Fact", url: "https://www.tickertape.in/stocks/tega-industries-TEG" },
+      { title: "Tega Screener Consolidated Financials", publisher: "Screener.in", tag: "Fact", url: "https://www.screener.in/company/TEGA/consolidated/" },
+      { title: "Tijori Finance Projections & Peer Snapshot", publisher: "Tijori Finance", tag: "Analyst Opinion", url: "https://www.tijorifinance.com/company/tega-industries-ltd/" },
+      { title: "Q1 FY27 Earnings Call Transcript & Molycop Integration", publisher: "Investing.com", tag: "Management Claim", url: "https://in.investing.com/news/transcripts/earnings-call-transcript-tega-industries-q1-2026-stock-rises-on-strong-integration-update-93CH-5555027" },
+      { title: "Tega Q1 FY27 Results Dissection & Adjusted Profitability", publisher: "MultiBagg AI", tag: "Analyst Opinion", url: "https://www.multibagg.ai/market-pulse/articles/tega-q1fy27-98102" },
+      { title: "Tega Wins ₹126 Crore Kalpataru Order Announcement", publisher: "ScanX Trade", tag: "Fact", url: "https://scanx.trade/stock-market-news/companies/tega-industries-wins-rs-126-crore-order-kalpataru-engineering-supply/51282957" },
+      { title: "Kalpataru Projects Contract Filing Analysis", publisher: "Sahi News", tag: "Fact", url: "https://www.sahi.com/news/tega-industries-subsidiary-secures-126-crore-contract-from-kalpataru-projects" },
+      { title: "Tega Approves ₹95.40 Crore Preferential Issue to AP Jupiter", publisher: "Sahi News", tag: "Fact", url: "https://www.sahi.com/news/tega-industries-approves-95-40-crore-preferential-share-issue-to-ap-jupiter-3856-PE1_COR" },
+      { title: "Tega Industries Detailed LKP Securities Institutional Note", publisher: "LKP Securities", tag: "Analyst Opinion", url: "https://www.scribd.com/document/938850630/Tega-Industries-Limited-TEGA-LKP" },
+      { title: "JM Financial Institutional Coverage & Target Price Note", publisher: "JM Financial Research", tag: "Analyst Opinion", url: "https://jmflresearch.com/JMnew/JMCRM/analystreports/pdf/Tega_IC_20Jan22.pdf" },
+      { title: "DynaPrime Technology and SAG Mill Case Studies", publisher: "Tega Official Portal", tag: "Fact", url: "https://www.tegaindustries.com/blog/redefining-mill-lining-performance-for-large-size-sag-mills-how-dynaprime-dominates-the-challenge" },
+      { title: "Tega Exchange Press Release on Molycop Acquisition", publisher: "NSE / BSE Exchange", tag: "Fact", url: "https://www.tegaindustries.com/assets/pdfs/int/2025/Q3/Intimation-of-Press-Release---29.11.2025.pdf" }
+    ];
+
+    let activeTag = 'all';
+
+    // TAB SWITCHING LOGIC
+    function switchTab(tabId) {
+      // Hide all content sections
+      const sections = document.querySelectorAll('.tab-content');
+      sections.forEach(sec => sec.classList.add('hidden'));
+
+      // Deactivate all nav tabs
+      const tabs = document.querySelectorAll('.nav-tab');
+      tabs.forEach(tab => {
+        tab.classList.remove('border-emerald-400', 'text-white');
+        tab.classList.add('border-transparent', 'text-slate-300');
+      });
+
+      // Show active section
+      const activeSection = document.getElementById('sec-' + tabId);
+      if (activeSection) {
+        activeSection.classList.remove('hidden');
+      }
+
+      // Highlight active tab
+      const activeBtn = document.getElementById('tab-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-transparent', 'text-slate-300');
+        activeBtn.classList.add('border-emerald-400', 'text-white');
+      }
+    }
+
+    // NARRATIVE FILTERING LOGIC
+    function filterNarratives(type) {
+      const cards = document.querySelectorAll('.narrative-card');
+      const btns = ['btn-narrative-all', 'btn-narrative-bullish', 'btn-narrative-bearish'];
+      
+      btns.forEach(bId => {
+        const btn = document.getElementById(bId);
+        if (btn) {
+          btn.classList.remove('bg-slate-900', 'text-white');
+          btn.classList.add('bg-slate-100', 'text-slate-700');
+        }
+      });
+
+      const currentBtn = document.getElementById('btn-narrative-' + type);
+      if (currentBtn) {
+        currentBtn.classList.remove('bg-slate-100', 'text-slate-700');
+        currentBtn.classList.add('bg-slate-900', 'text-white');
+      }
+
+      cards.forEach(card => {
+        if (type === 'all') {
+          card.classList.remove('hidden');
+        } else if (type === 'bullish') {
+          if (card.classList.contains('narrative-bullish')) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        } else if (type === 'bearish') {
+          if (card.classList.contains('narrative-bearish')) {
+            card.classList.remove('hidden');
+          } else {
+            card.classList.add('hidden');
+          }
+        }
+      });
+    }
+
+    // VALUATION SIMULATOR CALCULATOR
+    function updateValuationCalculator() {
+      const patVal = parseFloat(document.getElementById('sliderPat').value);
+      const peVal = parseFloat(document.getElementById('sliderPe').value);
+      
+      const shares = 7.51; // 7.51 Crore shares
+      const currentPrice = 2093.40;
+
+      const eps = patVal / shares;
+      const targetPrice = eps * peVal;
+      const diffPct = ((targetPrice - currentPrice) / currentPrice) * 100;
+
+      document.getElementById('valPatText').innerText = `₹${patVal} Cr`;
+      document.getElementById('valPeText').innerText = `${peVal.toFixed(1)}x`;
+      document.getElementById('calcEps').innerText = `₹${eps.toFixed(2)}`;
+      document.getElementById('calcTargetPrice').innerText = `₹${targetPrice.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+
+      const diffElem = document.getElementById('calcDiff');
+      if (diffPct >= 0) {
+        diffElem.className = "font-bold text-emerald-400 text-sm";
+        diffElem.innerText = `+${diffPct.toFixed(1)}% Upside`;
+      } else {
+        diffElem.className = "font-bold text-rose-400 text-sm";
+        diffElem.innerText = `${diffPct.toFixed(1)}% Downside`;
+      }
+    }
+
+    // SOURCES TABLE RENDER & FILTER
+    function renderSourcesTable() {
+      const tableBody = document.getElementById('sourcesTableBody');
+      const searchVal = document.getElementById('sourceSearchInput')?.value.toLowerCase() || '';
+
+      tableBody.innerHTML = '';
+
+      sourceData.forEach(item => {
+        const matchesSearch = item.title.toLowerCase().includes(searchVal) || item.publisher.toLowerCase().includes(searchVal);
+        const matchesTag = (activeTag === 'all') || (item.tag === activeTag);
+
+        if (matchesSearch && matchesTag) {
+          const row = document.createElement('tr');
+          row.className = "hover:bg-slate-50";
+
+          let tagBg = "bg-slate-100 text-slate-800";
+          if (item.tag === 'Fact') tagBg = "bg-blue-100 text-blue-800";
+          if (item.tag === 'Management Claim') tagBg = "bg-purple-100 text-purple-800";
+          if (item.tag === 'Analyst Opinion') tagBg = "bg-emerald-100 text-emerald-800";
+
+          row.innerHTML = `
+            <td class="py-2.5 px-4 font-medium text-slate-900">${item.title}</td>
+            <td class="py-2.5 px-4 text-slate-600">${item.publisher}</td>
+            <td class="py-2.5 px-4"><span class="${tagBg} font-semibold px-2 py-0.5 rounded text-[10px]">${item.tag}</span></td>
+            <td class="py-2.5 px-4"><a href="${item.url}" target="_blank" class="text-indigo-600 hover:underline font-medium flex items-center gap-1">Visit Source ↗</a></td>
+          `;
+          tableBody.appendChild(row);
+        }
+      });
+    }
+
+    function filterSources() {
+      renderSourcesTable();
+    }
+
+    function filterSourceTag(tag) {
+      activeTag = tag;
+      renderSourcesTable();
+    }
+
+    // CHART INITIALIZATIONS
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // Initialize Valuation Calculator listeners
+      document.getElementById('sliderPat')?.addEventListener('input', updateValuationCalculator);
+      document.getElementById('sliderPe')?.addEventListener('input', updateValuationCalculator);
+      updateValuationCalculator();
+
+      // Render Sources Table
+      renderSourcesTable();
+
+      // Chart 1: Platform Split Doughnut Chart
+      const ctxPlatform = document.getElementById('chartPlatformSplit')?.getContext('2d');
+      if (ctxPlatform) {
+        new Chart(ctxPlatform, {
+          type: 'doughnut',
+          data: {
+            labels: ['X Bullish', 'X Neutral', 'X Bearish', 'LinkedIn Bullish', 'LinkedIn Neutral', 'LinkedIn Bearish'],
+            datasets: [{
+              data: [58, 18, 24, 72, 22, 6],
+              backgroundColor: [
+                '#10b981', '#cbd5e1', '#f43f5e',
+                '#059669', '#94a3b8', '#e11d48'
+              ],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { boxWidth: 12, font: { size: 10 } }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(ctx) {
+                    return ` ${ctx.label}: ${ctx.raw}%`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // Chart 2: Weighting Impact Grouped Bar Chart
+      const ctxWeighting = document.getElementById('chartWeightingImpact')?.getContext('2d');
+      if (ctxWeighting) {
+        new Chart(ctxWeighting, {
+          type: 'bar',
+          data: {
+            labels: ['X (Twitter)', 'LinkedIn', 'Combined'],
+            datasets: [
+              {
+                label: 'Raw Net Sentiment',
+                data: [34, 66, 50],
+                backgroundColor: '#94a3b8'
+              },
+              {
+                label: 'Engagement Weighted',
+                data: [41, 74, 57],
+                backgroundColor: '#38bdf8'
+              },
+              {
+                label: 'Credibility Weighted',
+                data: [52, 78, 61],
+                backgroundColor: '#059669'
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: true, max: 100, title: { display: true, text: 'Net Score (-100 to +100)', font: { size: 10 } } }
+            },
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
+      // Chart 3: Sentiment Trend Line Chart
+      const ctxTrend = document.getElementById('chartSentimentTrend')?.getContext('2d');
+      if (ctxTrend) {
+        new Chart(ctxTrend, {
+          type: 'line',
+          data: {
+            labels: ['May 2026', 'June 2026', 'July 2026', 'August 2026', 'Sept 2026'],
+            datasets: [
+              {
+                label: 'X Net Sentiment',
+                data: [15, 45, 20, -10, 60],
+                borderColor: '#0284c7',
+                backgroundColor: 'rgba(2, 132, 199, 0.1)',
+                fill: false,
+                tension: 0.3
+              },
+              {
+                label: 'LinkedIn Net Sentiment',
+                data: [40, 85, 50, 40, 70],
+                borderColor: '#0d9488',
+                backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                fill: false,
+                tension: 0.3
+              },
+              {
+                label: 'Combined Sentiment',
+                data: [27, 65, 35, 15, 65],
+                borderColor: '#059669',
+                backgroundColor: 'rgba(5, 150, 105, 0.15)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: { beginAtZero: false, min: -20, max: 100, title: { display: true, text: 'Net Sentiment Score', font: { size: 10 } } }
+            },
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+            }
+          }
+        });
+      }
+
+      // Chart 4: Target Price Comparison Horizontal Bar Chart
+      const ctxTargets = document.getElementById('chartTargets')?.getContext('2d');
+      if (ctxTargets) {
+        new Chart(ctxTargets, {
+          type: 'bar',
+          data: {
+            labels: [
+              'AlphaSpread (DCF)',
+              'Trendlyne (Quant)',
+              'JM Financial (Broker)',
+              'Current Market Price',
+              'Univest (Research)',
+              'FY27E Base Valuation',
+              'X Speculative Bull',
+              'FY27E Bull Valuation'
+            ],
+            datasets: [{
+              label: 'Target Price (₹)',
+              data: [1846, 1798, 2025, 2093.4, 2100, 2112, 2500, 2955],
+              backgroundColor: [
+                '#f43f5e', '#f43f5e', '#3b82f6', '#0f172a', '#3b82f6', '#10b981', '#8b5cf6', '#059669'
+              ]
+            }]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { beginAtZero: false, min: 1200, max: 3200, title: { display: true, text: 'Target Stock Price (₹)', font: { size: 10 } } }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+
+    });
+  </script>
 </body>
 </html>
