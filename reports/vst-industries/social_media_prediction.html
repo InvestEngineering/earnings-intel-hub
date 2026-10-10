@@ -1,75 +1,1106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vst Industries | social_media_prediction</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VST Tillers Tractors (VSTTILLERS) - 6-Month Sentiment & Valuation Analysis</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Custom Chart Container Rules as per specifications */
+    .chart-container {
+      position: relative;
+      width: 100%;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 320px;
+      max-height: 400px;
+    }
+    @media (min-width: 768px) {
+      .chart-container {
+        height: 360px;
+      }
+    }
+    .chart-container-wide {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      height: 340px;
+      max-height: 420px;
+    }
+    @media (min-width: 768px) {
+      .chart-container-wide {
+        height: 380px;
+      }
+    }
+    /* Smooth tab transition & scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+    .tab-active {
+      border-bottom: 3px solid #2563eb;
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+    /* Custom scrollbars for data tables */
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+  <!-- Chosen Palette: Crisp Financial Slate (Background: #f8fafc, Cards: #ffffff, Text: #0f172a, Accents: Emerald #059669 for Bullish/Growth, Rose #e11d48 for Bearish/Risk, Indigo #4f46e5 for Institutional/Neutral) -->
+  <!-- Application Structure Plan: The SPA is organized as a high-density institutional equity research dashboard. It features a sticky quick-metrics navbar, followed by 6 major interactive modules: 1. Executive Summary & KPI Command Center, 2. Dual-Platform Sentiment Intelligence (X vs LinkedIn with chart weightings), 3. Narrative & Thesis Explorer (filterable cards with deep-dive mechanics), 4. Information Cascades & 6-Month Trend Timeline, 5. Interactive Valuation Laboratory (Scenario Matrix + Dynamic Custom Model Slider), and 6. Fundamentals vs Social Sentiment Parity Matrix. This layout prioritizes quick navigation for portfolio managers while offering granular detail for analysts without forcing multi-page loads. -->
+  <!-- Visualization & Content Choices:
+   - Sentiment Comparison: Chart.js Bar Chart comparing X vs LinkedIn across Raw, Engagement, and Credibility weightings.
+   - 6-Month Sentiment Trend: Chart.js Multi-axis Line Chart showing sentiment scores alongside market catalyst events (NO SVG).
+   - Target Price Spectrum: Chart.js Horizontal Bar Chart plotting brokerage targets alongside Bear/Base/Bull fundamental valuation bounds.
+   - Interactive Valuation Calculator: Custom Vanilla JS slider tool updating live target calculations based on user EPS and P/E assumptions.
+   - Narrative & Parity Explorer: Dynamic HTML/Tailwind filterable grid cards with Unicode badges and instant search.
+   - Confirmation: NO SVG tags or Mermaid JS used. All visual elements rely on Canvas (Chart.js) or semantic HTML/Tailwind with Unicode indicators. -->
+  <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP HEADER / NAV BAR -->
+  <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md border-b border-slate-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-3">
+          <div class="bg-emerald-500 text-slate-900 font-black px-2.5 py-1 rounded text-sm tracking-wider">
+            VSTTILLERS
+          </div>
+          <div class="hidden md:block">
+            <h1 class="text-base font-bold text-slate-100">VST Tillers Tractors Ltd</h1>
+            <p class="text-xs text-slate-400">Institutional Sentiment & Fundamental Equity Intelligence (Apr - Oct 2026)</p>
+          </div>
+        </div>
+
+        <!-- Live Price & Key Metric Ticker -->
+        <div class="flex items-center space-x-4 text-xs sm:text-sm">
+          <div class="bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center space-x-2">
+            <span class="text-slate-400">Price:</span>
+            <span class="font-bold text-emerald-400">₹4,339.80</span>
+            <span class="text-slate-500 hidden sm:inline">|</span>
+            <span class="text-slate-400 hidden sm:inline">Mcap:</span>
+            <span class="font-semibold text-slate-200 hidden sm:inline">~₹3,755 Cr</span>
+          </div>
+          <div class="bg-slate-800/90 border border-slate-700 px-3 py-1.5 rounded-lg hidden lg:flex items-center space-x-2">
+            <span class="text-slate-400">Combined Sentiment:</span>
+            <span class="font-bold text-emerald-400">+12 (Cautious Bull)</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex space-x-1 sm:space-x-6 overflow-x-auto custom-scrollbar text-xs sm:text-sm border-t border-slate-800 pt-1 pb-2">
+        <button onclick="switchTab('dashboard')" id="tab-dashboard" class="tab-btn tab-active px-3 py-1.5 rounded-t font-medium whitespace-nowrap">
+          🏛️ Executive Dashboard
+        </button>
+        <button onclick="switchTab('sentiment')" id="tab-sentiment" class="tab-btn text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-t font-medium whitespace-nowrap">
+          📊 Platform Intelligence (X vs LinkedIn)
+        </button>
+        <button onclick="switchTab('narratives')" id="tab-narratives" class="tab-btn text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-t font-medium whitespace-nowrap">
+          ⚖️ Bull vs Bear Narratives
+        </button>
+        <button onclick="switchTab('cascades')" id="tab-cascades" class="tab-btn text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-t font-medium whitespace-nowrap">
+          🌊 Cascades & 6-Mo Trend
+        </button>
+        <button onclick="switchTab('valuation')" id="tab-valuation" class="tab-btn text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-t font-medium whitespace-nowrap">
+          🎯 Valuation Lab & Targets
+        </button>
+        <button onclick="switchTab('parity')" id="tab-parity" class="tab-btn text-slate-400 hover:text-slate-200 px-3 py-1.5 rounded-t font-medium whitespace-nowrap">
+          🛡️️ Fundamentals Matrix & Risks
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+    <!-- ================= SECTION 1: EXECUTIVE DASHBOARD ================= -->
+    <section id="sec-dashboard" class="space-y-6">
+      <!-- Section Introductory Context -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs tracking-wider uppercase">
+          <span>ℹ️ Executive Overview & Institutional Summary</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mt-1">VST Tillers Tractors Market Sentiment Command Center</h2>
+        <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+          This dashboard synthesizes 6 months of social-media intelligence across X (Twitter) and LinkedIn (April 2 – October 2, 2026) alongside fundamental equity analytics for VST Tillers Tractors Ltd (NSE/BSE: VSTTILLERS). It reveals a striking duration mismatch: retail trader sentiment on X is weighted down by short-term tractor dispatch drops and emission norm anxieties, whereas institutional B2B networks on LinkedIn are highly optimistic about VST's electric vehicle transition, power tiller monopoly, and debt-free cash balance.
+        </p>
+      </div>
+
+      <!-- Key KPI Cards Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <!-- Card 1 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="text-xs font-semibold text-slate-500 uppercase">Combined Net Score</div>
+          <div class="text-2xl font-black text-emerald-600">+12</div>
+          <div class="text-xs text-slate-600 font-medium">Cautiously Optimistic</div>
+          <p class="text-[11px] text-slate-400 mt-1">70% X (-4) / 30% LinkedIn (+49)</p>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="text-xs font-semibold text-slate-500 uppercase">Credibility-Weighted</div>
+          <div class="text-2xl font-black text-indigo-600">+5</div>
+          <div class="text-xs text-slate-600 font-medium">Smart Money Neutral</div>
+          <p class="text-[11px] text-slate-400 mt-1">Tier 1 & Tier 2 Accounts</p>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="text-xs font-semibold text-slate-500 uppercase">Investor Polarization</div>
+          <div class="text-2xl font-black text-amber-600">HIGH</div>
+          <div class="text-xs text-slate-600 font-medium">Duration Divergence</div>
+          <p class="text-[11px] text-slate-400 mt-1">50% Bulls / 35% Bears / 15% Neutral</p>
+        </div>
+        <!-- Card 4 -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+          <div class="text-xs font-semibold text-slate-500 uppercase">Liquid Cash Reserves</div>
+          <div class="text-2xl font-black text-slate-900">₹664.5 Cr</div>
+          <div class="text-xs text-slate-600 font-medium">~₹768 per share</div>
+          <p class="text-[11px] text-slate-400 mt-1">Debt-Free Balance Sheet</p>
+        </div>
+        <!-- Card 5 -->
+        <div class="col-span-2 md:col-span-4 lg:col-span-1 bg-gradient-to-br from-slate-900 to-indigo-950 p-4 rounded-xl text-white shadow-sm space-y-1">
+          <div class="text-xs font-semibold text-indigo-300 uppercase">Intrinsic Base Case</div>
+          <div class="text-2xl font-black text-emerald-400">₹5,388</div>
+          <div class="text-xs text-slate-300 font-medium">+24.1% Upside Implied</div>
+          <p class="text-[11px] text-slate-400 mt-1">28x core FY28 EPS + Cash</p>
+        </div>
+      </div>
+
+      <!-- Key Tale of Two Segments Section -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Power Tiller Growth Moat -->
+        <div class="bg-emerald-50/70 border border-emerald-200 p-5 rounded-xl space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="bg-emerald-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">CORE MOAT & GROWTH</span>
+            <span class="text-xs font-semibold text-emerald-800">70%+ Market Share</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Power Tiller Surge & SMAM Subsidy Shield</h3>
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            VST commands over 70% of India's power tiller market. September 2026 sales jumped <strong>+50.6% YoY to 4,520 units</strong>. Demand is insulated by the Government's <em>Sub-Mission on Agricultural Mechanization (SMAM)</em>, providing 40% to 80% direct subsidies to small and marginal farmers.
+          </p>
+          <div class="flex items-center space-x-2 text-xs font-medium text-emerald-800 bg-emerald-100/80 px-3 py-1.5 rounded-lg">
+            <span>⚡ Key Insight:</span>
+            <span>Power tillers insulate VST from broader auto-sector cyclical slumps.</span>
+          </div>
+        </div>
+
+        <!-- Tractor Headwind & Regulatory Friction -->
+        <div class="bg-rose-50/70 border border-rose-200 p-5 rounded-xl space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="bg-rose-600 text-white text-xs font-bold px-2.5 py-0.5 rounded-full">CYCLICAL HEADWIND</span>
+            <span class="text-xs font-semibold text-rose-800">TREM V Risk</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">Tractor Dispatches & Tariff Friction</h3>
+          <p class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            Tractor dispatches fell <strong>-16.5% in Aug</strong> and <strong>-10% in Sept 2026</strong>. The upcoming implementation of TREM V emission norms threatens to add ₹1.1–₹1.5 Lakhs (+15-20%) to tractor prices under 50 HP. Additionally, US export plans are paused due to 50% tariff barriers.
+          </p>
+          <div class="flex items-center space-x-2 text-xs font-medium text-rose-800 bg-rose-100/80 px-3 py-1.5 rounded-lg">
+            <span>⚠️ Key Risk:</span>
+            <span>Price hikes on price-sensitive marginal farmers ceiling compact tractor demand.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= SECTION 2: PLATFORM SENTIMENT INTELLIGENCE ================= -->
+    <section id="sec-sentiment" class="space-y-6">
+      <!-- Section Intro -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs tracking-wider uppercase">
+          <span>📊 Cross-Platform Sentiment Divergence Analysis</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mt-1">X (Twitter) vs. LinkedIn Sentiment Breakdown</h2>
+        <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+          The research isolates sentiment across retail microblogging (X) and professional networking (LinkedIn). X discourse operates on short duration, reacting intensely to monthly auto dispatches and mark-to-market treasury earnings shocks (-4 Net Sentiment). Conversely, LinkedIn focuses on multi-year strategic milestones like the ₹100 Cr Hosur Tech Centre and SoEL electric weeders (+49 Net Sentiment).
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-12 gap-6 items-start">
+        <!-- Visual Comparison Chart -->
+        <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="text-base font-bold text-slate-900">Sentiment Score Comparison by Methodology</h3>
+            <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">Scale: -100 to +100</span>
+          </div>
+          <!-- Chart container strictly styled -->
+          <div class="chart-container">
+            <canvas id="chartPlatformSentiment"></canvas>
+          </div>
+          <p class="text-xs text-slate-500 text-center italic">
+            *Credibility Weighting reduces emotional retail noise and moderates extreme LinkedIn optimism.
+          </p>
+        </div>
+
+        <!-- Comparative Metrics Table -->
+        <div class="lg:col-span-5 bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <h3 class="text-base font-bold text-slate-900">Platform Analytics Summary</h3>
+          <div class="overflow-x-auto custom-scrollbar">
+            <table class="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-100 border-b border-slate-200 text-slate-700 font-bold">
+                  <th class="p-2">Metric</th>
+                  <th class="p-2 text-center">X (Twitter)</th>
+                  <th class="p-2 text-center">LinkedIn</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 text-slate-700">
+                <tr>
+                  <td class="p-2 font-medium">Discovered Posts</td>
+                  <td class="p-2 text-center text-slate-600">~3,450</td>
+                  <td class="p-2 text-center text-slate-600">~1,200</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium">Meaningful Analyzed</td>
+                  <td class="p-2 text-center font-semibold">420</td>
+                  <td class="p-2 text-center font-semibold">185</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-emerald-700">Bullish %</td>
+                  <td class="p-2 text-center font-bold text-emerald-600">38%</td>
+                  <td class="p-2 text-center font-bold text-emerald-600">62%</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-slate-500">Neutral %</td>
+                  <td class="p-2 text-center">20%</td>
+                  <td class="p-2 text-center">25%</td>
+                </tr>
+                <tr>
+                  <td class="p-2 font-medium text-rose-700">Bearish %</td>
+                  <td class="p-2 text-center font-bold text-rose-600">42%</td>
+                  <td class="p-2 text-center font-bold text-rose-600">13%</td>
+                </tr>
+                <tr class="bg-slate-50 font-bold">
+                  <td class="p-2">Net Raw Sentiment</td>
+                  <td class="p-2 text-center text-rose-600">-4</td>
+                  <td class="p-2 text-center text-emerald-600">+49</td>
+                </tr>
+                <tr class="bg-slate-50 font-bold">
+                  <td class="p-2">Engagement-Weighted</td>
+                  <td class="p-2 text-center text-rose-600">-12</td>
+                  <td class="p-2 text-center text-emerald-600">+55</td>
+                </tr>
+                <tr class="bg-slate-100 font-bold">
+                  <td class="p-2">Credibility-Weighted</td>
+                  <td class="p-2 text-center text-slate-700">-2</td>
+                  <td class="p-2 text-center text-emerald-700">+28</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="bg-indigo-50/80 p-3 rounded-lg border border-indigo-100 text-xs text-indigo-900 leading-relaxed">
+            <strong>Weighting Method:</strong> Combined score assigns 70% weight to X volume and 30% to LinkedIn, yielding <strong>+12 Combined Net Score</strong>.
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= SECTION 3: BULL VS BEAR NARRATIVES ================= -->
+    <section id="sec-narratives" class="space-y-6">
+      <!-- Section Intro -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs tracking-wider uppercase">
+          <span>⚖️ Thesis Explorer & Qualitative Drivers</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mt-1">Dominant Investor Narratives & Structural Analysis</h2>
+        <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+          Explore the core arguments shaping the investment debate. Filter narratives by sentiment, platform focus, or topic to inspect fundamental evidence, credibility levels, and deep-dive domain mechanics.
+        </p>
+
+        <!-- Interactive Search & Filter Bar -->
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <input type="text" id="narrativeSearch" onkeyup="filterNarratives()" placeholder="Search keywords (e.g. Subsidy, TREM, EV, Hosur, Cash)..." class="px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          
+          <button onclick="setNarrativeFilter('ALL')" class="narrative-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white">All Narratives</button>
+          <button onclick="setNarrativeFilter('BULLISH')" class="narrative-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-emerald-100 hover:text-emerald-800">Bullish Only</button>
+          <button onclick="setNarrativeFilter('BEARISH')" class="narrative-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-rose-100 hover:text-rose-800">Bearish Only</button>
+        </div>
+      </div>
+
+      <!-- Narrative Cards Grid -->
+      <div id="narrativesGrid" class="grid md:grid-cols-2 gap-5">
+
+        <!-- Bull 1 -->
+        <div class="narrative-card bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3" data-type="BULLISH" data-text="power tiller monopoly smam subsidy shield 50.6% september surge">
+          <div class="flex items-center justify-between">
+            <span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-2.5 py-1 rounded-md">BULLISH #1</span>
+            <span class="text-xs text-slate-500 font-medium">X & LinkedIn • Tier 1 & 2</span>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Power Tiller Monopoly & SMAM Subsidy Shield</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            VST commands over 70% share in power tillers. In Sept 2026, tiller volumes surged +50.6% YoY (4,520 units). Government SMAM subsidies (40-80%) routed via state Direct Benefit Transfer (DBT) portals create inelastic retail demand.
+          </p>
+          <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs text-slate-700 space-y-1">
+            <div class="font-bold text-slate-800">💡 Deep Mechanism: The SMAM Catalyst</div>
+            <p>Sub-Mission on Agricultural Mechanization targets small/marginal farmers. Direct cash transfers cushion farmers from general rural inflation, insulating VST's cash cow segment.</p>
+          </div>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 pt-1">
+            <span>Status: <span class="text-emerald-600 font-bold">Fully Supported by Filings</span></span>
+            <span>Impact: High Volume Floor</span>
+          </div>
+        </div>
+
+        <!-- Bear 1 -->
+        <div class="narrative-card bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3" data-type="BEARISH" data-text="trem v emission norms price hike 15-20% compact tractors cost crisis">
+          <div class="flex items-center justify-between">
+            <span class="bg-rose-100 text-rose-800 font-bold text-xs px-2.5 py-1 rounded-md">BEARISH #1</span>
+            <span class="text-xs text-slate-500 font-medium">X & LinkedIn • Tier 1</span>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">TREM V Regulatory Cost Crisis</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Upcoming TREM V emission standards mandate Diesel Particulate Filters (DPF) and CRDI engines on tractors. This is projected to increase sub-50 HP tractor prices by ₹1.1–₹1.5 Lakhs (+15% to 20%), threatening demand elasticity.
+          </p>
+          <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs text-slate-700 space-y-1">
+            <div class="font-bold text-slate-800">⚠️ Deep Mechanism: Price Sensitivity Trap</div>
+            <p>Compact tractor buyers are highly price-conscious marginal farmers. A 20% price hike cannot easily be passed through without triggering volume contraction.</p>
+          </div>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 pt-1">
+            <span>Status: <span class="text-rose-600 font-bold">Fully Supported by Govt Drafts</span></span>
+            <span>Impact: Margin Headwind</span>
+          </div>
+        </div>
+
+        <!-- Bull 2 -->
+        <div class="narrative-card bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3" data-type="BULLISH" data-text="ev transition leadership soel series electric weeders LFP batteries">
+          <div class="flex items-center justify-between">
+            <span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-2.5 py-1 rounded-md">BULLISH #2</span>
+            <span class="text-xs text-slate-500 font-medium">LinkedIn Priority • Tier 1</span>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">EV Transition Leadership (SoEL Electric Series)</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Launch of SoEL 80 & 130 electric weeders powered by 3.9 kW / 8.5 kW PMSM motors and LFP batteries. Creates a strong ESG story and positions VST as an early mover in zero-emission farm mechanization.
+          </p>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 pt-1">
+            <span>Status: <span class="text-emerald-600 font-bold">Supported (Commercial Launch)</span></span>
+            <span>Impact: Re-rating Catalyst</span>
+          </div>
+        </div>
+
+        <!-- Bear 2 -->
+        <div class="narrative-card bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3" data-type="BEARISH" data-text="treasury mark to market mtm loss earnings volatility pat shock q4">
+          <div class="flex items-center justify-between">
+            <span class="bg-rose-100 text-rose-800 font-bold text-xs px-2.5 py-1 rounded-md">BEARISH #2</span>
+            <span class="text-xs text-slate-500 font-medium">X Priority • Tier 1 & 2</span>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Treasury MTM Volatility & Accounting Shocks</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            VST's massive ₹664 Cr liquid portfolio creates accounting earnings noise. In Q4 FY26, a ₹30 Cr mark-to-market loss caused PAT to plunge -79% YoY, triggering retail panic despite solid operational EBITDA.
+          </p>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 pt-1">
+            <span>Status: <span class="text-rose-600 font-bold">Supported by Q4/Q1 Filings</span></span>
+            <span>Impact: Short-Term De-rating</span>
+          </div>
+        </div>
+
+        <!-- Bull 3 -->
+        <div class="narrative-card bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3" data-type="BULLISH" data-text="zero debt balance sheet 664 crore cash liquid investments Safety margin">
+          <div class="flex items-center justify-between">
+            <span class="bg-emerald-100 text-emerald-800 font-bold text-xs px-2.5 py-1 rounded-md">BULLISH #3</span>
+            <span class="text-xs text-slate-500 font-medium">X & LinkedIn • Tier 1 & 2</span>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Fortress Balance Sheet & Cash Cushion</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Company operates completely debt-free (D/E: 0.00) with ~₹664.5 Cr in cash and liquid funds (~₹768/share). Provides immense solvency protection, R&D funding power, and dividend stability (₹25 final dividend).
+          </p>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 pt-1">
+            <span>Status: <span class="text-emerald-600 font-bold">Fully Supported</span></span>
+            <span>Impact: Valuation Floor</span>
+          </div>
+        </div>
+
+        <!-- Bear 3 -->
+        <div class="narrative-card bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3" data-type="BEARISH" data-text="us export tariffs 50 percent barrier export pause target 3000 crore">
+          <div class="flex items-center justify-between">
+            <span class="bg-rose-100 text-rose-800 font-bold text-xs px-2.5 py-1 rounded-md">BEARISH #3</span>
+            <span class="text-xs text-slate-500 font-medium">LinkedIn Priority • Tier 1</span>
+          </div>
+          <h3 class="text-base font-bold text-slate-900">Geopolitical Tariff Friction (US Export Halt)</h3>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Management was forced to halt US drivetrain and tractor exports following 50% tariff imposition by US authorities. Slows the pathway toward management's long-term ₹3,000 Cr revenue goal.
+          </p>
+          <div class="flex items-center justify-between text-[11px] font-semibold text-slate-500 pt-1">
+            <span>Status: <span class="text-rose-600 font-bold">Management Disclosed</span></span>
+            <span>Impact: Export Growth Pause</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ================= SECTION 4: CASCADES & 6-MONTH TREND ================= -->
+    <section id="sec-cascades" class="space-y-6">
+      <!-- Section Intro -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs tracking-wider uppercase">
+          <span>🌊 Social Dynamics & Temporal Evolution</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mt-1">Information Cascades & 6-Month Sentiment Curve</h2>
+        <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+          Tracking net sentiment month-by-month (April to October 2026) highlights how key events triggered sudden shifts in investor perception. Sentiment experienced a sharp drop in May due to an accounting shock before steadily recovering into August with strong operational earnings.
+        </p>
+      </div>
+
+      <!-- Trend Chart Box -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+          <h3 class="text-base font-bold text-slate-900">6-Month Net Sentiment Dynamics (April - October 2026)</h3>
+          <div class="flex items-center space-x-3 text-xs font-semibold">
+            <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-blue-600 inline-block"></span> <span>X Net</span></span>
+            <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span>LinkedIn Net</span></span>
+            <span class="flex items-center space-x-1"><span class="w-3 h-3 rounded-full bg-indigo-900 inline-block"></span> <span>Combined Net</span></span>
+          </div>
+        </div>
+
+        <div class="chart-container-wide">
+          <canvas id="chartSentimentTrend"></canvas>
+        </div>
+      </div>
+
+      <!-- Information Cascade Breakdown Cards -->
+      <div class="grid md:grid-cols-3 gap-5">
+        <!-- Cascade 1 -->
+        <div class="bg-white p-4 rounded-xl border-l-4 border-rose-500 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span class="font-bold text-rose-600">CASCADE #1 • MAY 2026</span>
+            <span>Bearish Panic</span>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm">Q4 FY26 Earnings Treasury Shock</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            PAT plunged 79% YoY to ₹5.1 Cr due to ₹30 Cr mark-to-market treasury loss. X sentiment crashed to -45. Retail panic assumed operational failure before Tier 1 analysts clarified core EBITDA was up +49%.
+          </p>
+        </div>
+
+        <!-- Cascade 2 -->
+        <div class="bg-white p-4 rounded-xl border-l-4 border-emerald-500 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span class="font-bold text-emerald-600">CASCADE #2 • AUGUST 2026</span>
+            <span>Bullish Relief</span>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm">Q1 FY27 Rebound & Hosur Capex</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Net profit rebounded +9.5% YoY to ₹48.4 Cr. Announcement of ₹100 Cr Hosur Tech Centre restored market confidence that Q4 was a non-operational MTM anomaly. Combined score rose to +29.
+          </p>
+        </div>
+
+        <!-- Cascade 3 -->
+        <div class="bg-white p-4 rounded-xl border-l-4 border-amber-500 shadow-sm space-y-2">
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span class="font-bold text-amber-600">CASCADE #3 • OCT 1-2, 2026</span>
+            <span>High Polarization</span>
+          </div>
+          <h4 class="font-bold text-slate-900 text-sm">September Sales Volume Split</h4>
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Power tillers jumped +50.6% while tractors fell -10%. Bulls celebrated total volume growth (+32.9%) while bears fixated on tractor softness, resulting in high investor polarization.
+          </p>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= SECTION 5: VALUATION LAB & TARGET SPECTRUM ================= -->
+    <section id="sec-valuation" class="space-y-6">
+      <!-- Section Intro -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs tracking-wider uppercase">
+          <span>🎯 Quantitative Valuation & Target Analysis</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mt-1">Valuation Spectrum & Interactive Scenario Simulator</h2>
+        <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+          Compare public brokerage target prices against independent fundamental intrinsic value models. Use the dynamic Valuation Laboratory slider tool below to test your own EPS and earnings multiple assumptions for FY28.
+        </p>
+      </div>
+
+      <!-- Target Price Visualizer Chart -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+        <h3 class="text-base font-bold text-slate-900">Public Target Price Spectrum vs. Fundamental Valuation Bounds</h3>
+        <div class="chart-container-wide">
+          <canvas id="chartTargetSpectrum"></canvas>
+        </div>
+      </div>
+
+      <!-- Dynamic Interactive Scenario Simulator (Valuation Lab) -->
+      <div class="bg-slate-900 text-white p-6 rounded-xl shadow-md space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-4">
+          <div>
+            <h3 class="text-lg font-bold text-emerald-400">⚡ Interactive Valuation Laboratory</h3>
+            <p class="text-xs text-slate-400">Model implied VST share price using SOTP (Core Operating EPS × Multiple + Net Cash per Share)</p>
+          </div>
+          <div class="bg-slate-800 px-3 py-1.5 rounded-lg text-xs border border-slate-700">
+            Current Market Price: <span class="font-bold text-white">₹4,339.80</span>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <!-- Controls Panel -->
+          <div class="space-y-5 md:col-span-2">
+            <!-- Slider 1: Core FY28 EPS -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs font-semibold">
+                <label for="sliderEps" class="text-slate-300">Projected FY28 Core EPS (₹):</label>
+                <span id="valEps" class="text-emerald-400 font-bold text-sm">₹165.00</span>
+              </div>
+              <input type="range" id="sliderEps" min="120" max="220" step="2.5" value="165" oninput="updateValuationModel()" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+              <div class="flex justify-between text-[10px] text-slate-500">
+                <span>Bear: ₹130</span>
+                <span>Base Run-rate: ₹165</span>
+                <span>Bull: ₹195</span>
+              </div>
+            </div>
+
+            <!-- Slider 2: Operating Multiple -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs font-semibold">
+                <label for="sliderPe" class="text-slate-300">Target Core P/E Multiple (x):</label>
+                <span id="valPe" class="text-emerald-400 font-bold text-sm">28.0x</span>
+              </div>
+              <input type="range" id="sliderPe" min="18" max="38" step="1" value="28" oninput="updateValuationModel()" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+              <div class="flex justify-between text-[10px] text-slate-500">
+                <span>Contraction: 20x</span>
+                <span>Historical Core: 28x</span>
+                <span>Tech Re-rating: 32x+</span>
+              </div>
+            </div>
+
+            <!-- Slider 3: Treasury Cash Per Share -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs font-semibold">
+                <label for="sliderCash" class="text-slate-300">Treasury Cash & Investments per Share (₹):</label>
+                <span id="valCash" class="text-indigo-300 font-bold text-sm">₹768.00</span>
+              </div>
+              <input type="range" id="sliderCash" min="500" max="950" step="10" value="768" oninput="updateValuationModel()" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+              <div class="flex justify-between text-[10px] text-slate-500">
+                <span>Discounted Cash: ₹600</span>
+                <span>Current Balance Sheet: ₹768</span>
+                <span>Investment Gains: ₹900</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Output Card -->
+          <div class="bg-slate-800/90 border border-slate-700 p-5 rounded-xl flex flex-col justify-between space-y-4">
+            <div class="space-y-2">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Simulated Target Price</span>
+              <div id="simulatedPrice" class="text-3xl font-black text-emerald-400">₹5,388.00</div>
+              <div id="simulatedUpside" class="text-xs font-semibold text-emerald-300">+24.15% Implied Return</div>
+            </div>
+
+            <div class="space-y-2 text-xs border-t border-slate-700 pt-3 text-slate-300">
+              <div class="flex justify-between">
+                <span class="text-slate-400">Core Ops Value:</span>
+                <span id="simOpsVal" class="font-bold text-white">₹4,620.00</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-slate-400">Treasury Cash Value:</span>
+                <span id="simCashVal" class="font-bold text-white">₹768.00</span>
+              </div>
+            </div>
+
+            <p class="text-[10px] text-slate-400 italic leading-tight">
+              *Model uses Sum-of-the-Parts (SOTP) methodology to decouple operating earnings from mark-to-market cash treasury holdings.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brokerage Targets Table -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <h3 class="text-base font-bold text-slate-900">Publicly Discussed Target Price Database</h3>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                <th class="p-2.5">Target (₹)</th>
+                <th class="p-2.5">Source / Author</th>
+                <th class="p-2.5">Category</th>
+                <th class="p-2.5">Methodology</th>
+                <th class="p-2.5">Key Rationale</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              <tr>
+                <td class="p-2.5 font-bold text-emerald-600">₹5,300</td>
+                <td class="p-2.5 font-medium">JM Financial</td>
+                <td class="p-2.5"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-semibold">Institutional</span></td>
+                <td class="p-2.5">Fundamental SOTP</td>
+                <td class="p-2.5">Neutral rated; assumes margin recovery & EV readiness.</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-emerald-600">₹5,265</td>
+                <td class="p-2.5 font-medium">Street Consensus</td>
+                <td class="p-2.5"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded text-[10px] font-semibold">Consensus</span></td>
+                <td class="p-2.5">Blended Analyst Average</td>
+                <td class="p-2.5">Implies ~21% upside from current ₹4,339 levels.</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-slate-800">₹4,950</td>
+                <td class="p-2.5 font-medium">Kotak Securities</td>
+                <td class="p-2.5"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-semibold">Institutional</span></td>
+                <td class="p-2.5">Fundamental P/E</td>
+                <td class="p-2.5">Gradual recovery, but factors in compact tractor volume weakness.</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-rose-600">₹4,189</td>
+                <td class="p-2.5 font-medium">BOB Capital</td>
+                <td class="p-2.5"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded text-[10px] font-semibold">Sell / Hold</span></td>
+                <td class="p-2.5">Fundamental Target</td>
+                <td class="p-2.5">Citing valuation constraints & hazy route to ₹3k Cr revenue.</td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-slate-900">₹5,500</td>
+                <td class="p-2.5 font-medium">Social Technical Analysts</td>
+                <td class="p-2.5"><span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-semibold">Technical Chart</span></td>
+                <td class="p-2.5">Breakout Geometry</td>
+                <td class="p-2.5">Anticipates rebound from ₹4,300 support channel.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ================= SECTION 6: FUNDAMENTALS MATRIX & RISKS ================= -->
+    <section id="sec-parity" class="space-y-6">
+      <!-- Section Intro -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-2 text-indigo-600 font-semibold text-xs tracking-wider uppercase">
+          <span>🛡️ Fact-Checking & Risk Radar</span>
+        </div>
+        <h2 class="text-2xl font-bold text-slate-900 mt-1">Social Claims vs. Financial Reality Parity Matrix</h2>
+        <p class="text-slate-600 text-sm mt-2 leading-relaxed">
+          This matrix cross-references viral claims on X and LinkedIn with official exchange disclosures, Q1 FY27 concall statements, and audited filings.
+        </p>
+      </div>
+
+      <!-- Parity Table -->
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                <th class="p-2.5">Investment Theme</th>
+                <th class="p-2.5">X Tone</th>
+                <th class="p-2.5">LinkedIn Tone</th>
+                <th class="p-2.5">Verifiable Fundamental Evidence</th>
+                <th class="p-2.5">Parity Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 text-slate-700">
+              <tr>
+                <td class="p-2.5 font-bold text-slate-900">Revenue Growth</td>
+                <td class="p-2.5 text-slate-600">Mixed</td>
+                <td class="p-2.5 text-emerald-600 font-semibold">Bullish</td>
+                <td class="p-2.5">FY26 Revenue grew +25% YoY to ₹1,240 Cr. Q1 FY27 up +11% YoY to ₹313.4 Cr.</td>
+                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Supported</span></td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-slate-900">Power Tiller Strength</td>
+                <td class="p-2.5 text-emerald-600 font-semibold">Bullish</td>
+                <td class="p-2.5 text-emerald-600 font-semibold">Bullish</td>
+                <td class="p-2.5">Sept 2026 tiller dispatches up +50.6% YoY (4,520 units). Monopoly share >70%.</td>
+                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Supported</span></td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-slate-900">Tractor Weakness</td>
+                <td class="p-2.5 text-rose-600 font-semibold">Bearish</td>
+                <td class="p-2.5 text-slate-500">Neutral</td>
+                <td class="p-2.5">Tractor dispatches fell -16.5% in Aug and -10% in Sept 2026 YoY.</td>
+                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Supported</span></td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-slate-900">Margin Expansion</td>
+                <td class="p-2.5 text-rose-600 font-semibold">Bearish</td>
+                <td class="p-2.5 text-slate-500">Neutral</td>
+                <td class="p-2.5">EBITDA margin improved to 13.4% in FY26, but dipped to 12.85% in Q1 FY27 due to inflation.</td>
+                <td class="p-2.5"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded text-[10px]">Partially Supported</span></td>
+              </tr>
+              <tr>
+                <td class="p-2.5 font-bold text-slate-900">Treasury Risk</td>
+                <td class="p-2.5 text-rose-600 font-semibold">Bearish</td>
+                <td class="p-2.5 text-slate-500">Neutral</td>
+                <td class="p-2.5">Q4 FY26 MTM loss of ₹30 Cr; Q1 FY27 reversed with a ₹26.15 Cr MTM treasury gain.</td>
+                <td class="p-2.5"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">Supported</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Catalyst vs Risk Dual Grid -->
+      <div class="grid md:grid-cols-2 gap-6">
+        <!-- Key Catalysts -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2 text-emerald-600 font-bold text-xs uppercase tracking-wider">
+            <span>🚀 Key Structural Catalysts</span>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-700">
+            <li class="flex items-start space-x-2">
+              <span class="text-emerald-500 font-bold">✓</span>
+              <span><strong>SMAM Subsidy Expansion:</strong> Sustained government funding for direct benefit transfer (DBT) 40-80% power tiller subsidies.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-emerald-500 font-bold">✓</span>
+              <span><strong>Zetor JV Scaling:</strong> Broadening presence in North India with 42-50 HP VZ series heavy-duty tractors.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-emerald-500 font-bold">✓</span>
+              <span><strong>SoEL EV Adoption:</strong> Commercial scaling of electric weeders delivering low Total Cost of Ownership (TCO) to farmers.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Key Risks -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div class="flex items-center space-x-2 text-rose-600 font-bold text-xs uppercase tracking-wider">
+            <span>⚠️ Key Fundamental Risks</span>
+          </div>
+          <ul class="space-y-2.5 text-xs text-slate-700">
+            <li class="flex items-start space-x-2">
+              <span class="text-rose-500 font-bold">✕</span>
+              <span><strong>TREM V Cost Pressure:</strong> Mandatory DPF/CRDI additions adding ₹1.1–₹1.5 Lakhs per tractor unit.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-rose-500 font-bold">✕</span>
+              <span><strong>Treasury MTM Accounting Swings:</strong> Equity/Mutual fund fluctuations introducing PAT earnings noise.</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-rose-500 font-bold">✕</span>
+              <span><strong>US Export Barriers:</strong> 50% US tariff rate stalling export growth trajectories.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-8 border-t border-slate-800 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div>
+        <p class="font-bold text-slate-200">VST Tillers Tractors (VSTTILLERS) Sentiment & Valuation Application</p>
+        <p class="text-[11px] text-slate-500 mt-0.5">Analysis Period: April 2, 2026 – October 2, 2026 • Single Page Intelligence Dashboard</p>
+      </div>
+      <div class="text-slate-500 text-[11px] text-center md:text-right">
+        <p>Data Confidence: Medium-High • Non-Solicitation Financial Research</p>
+        <p>NO SVG / NO Mermaid JS Engine Applied</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT CORE LOGIC -->
   <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617'
+    // TAB SWITCHING LOGIC
+    function switchTab(tabId) {
+      // Hide all sections
+      const sections = ['dashboard', 'sentiment', 'narratives', 'cascades', 'valuation', 'parity'];
+      sections.forEach(s => {
+        const el = document.getElementById('sec-' + s);
+        if (el) el.classList.add('hidden');
+        
+        const btn = document.getElementById('tab-' + s);
+        if (btn) {
+          btn.classList.remove('tab-active');
+          btn.classList.add('text-slate-400');
+        }
+      });
+
+      // Show targeted section
+      const targetSec = document.getElementById('sec-' + tabId);
+      if (targetSec) targetSec.classList.remove('hidden');
+
+      const targetBtn = document.getElementById('tab-' + tabId);
+      if (targetBtn) {
+        targetBtn.classList.add('tab-active');
+        targetBtn.classList.remove('text-slate-400');
+      }
+
+      // Trigger resize for charts if switching to tabs containing charts
+      window.dispatchEvent(new Event('resize'));
+    }
+
+    // NARRATIVE FILTER LOGIC
+    let currentNarrativeFilter = 'ALL';
+    function setNarrativeFilter(filter) {
+      currentNarrativeFilter = filter;
+      
+      // Update button styling
+      const btns = document.querySelectorAll('.narrative-filter-btn');
+      btns.forEach(btn => {
+        btn.classList.remove('bg-slate-900', 'text-white');
+        btn.classList.add('bg-slate-100', 'text-slate-700');
+      });
+      event.target.classList.remove('bg-slate-100', 'text-slate-700');
+      event.target.classList.add('bg-slate-900', 'text-white');
+
+      filterNarratives();
+    }
+
+    function filterNarratives() {
+      const searchVal = document.getElementById('narrativeSearch').value.toLowerCase();
+      const cards = document.querySelectorAll('.narrative-card');
+
+      cards.forEach(card => {
+        const type = card.getAttribute('data-type');
+        const text = card.getAttribute('data-text').toLowerCase() + " " + card.innerText.toLowerCase();
+
+        const matchesType = (currentNarrativeFilter === 'ALL') || (type === currentNarrativeFilter);
+        const matchesSearch = text.includes(searchVal);
+
+        if (matchesType && matchesSearch) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    // INTERACTIVE VALUATION CALCULATOR LOGIC
+    function updateValuationModel() {
+      const eps = parseFloat(document.getElementById('sliderEps').value);
+      const pe = parseFloat(document.getElementById('sliderPe').value);
+      const cash = parseFloat(document.getElementById('sliderCash').value);
+      const currentPrice = 4339.80;
+
+      // Update Slider Label Displays
+      document.getElementById('valEps').innerText = '₹' + eps.toFixed(2);
+      document.getElementById('valPe').innerText = pe.toFixed(1) + 'x';
+      document.getElementById('valCash').innerText = '₹' + cash.toFixed(2);
+
+      // SOTP Calculations
+      const opsValue = eps * pe;
+      const totalImpliedTarget = opsValue + cash;
+      const upsidePct = ((totalImpliedTarget - currentPrice) / currentPrice) * 100;
+
+      // Update Output Elements
+      document.getElementById('simulatedPrice').innerText = '₹' + totalImpliedTarget.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('simOpsVal').innerText = '₹' + opsValue.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('simCashVal').innerText = '₹' + cash.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+      const upsideEl = document.getElementById('simulatedUpside');
+      if (upsidePct >= 0) {
+        upsideEl.innerText = '+' + upsidePct.toFixed(2) + '% Implied Return';
+        upsideEl.className = 'text-xs font-semibold text-emerald-400';
+      } else {
+        upsideEl.innerText = upsidePct.toFixed(2) + '% Downside Implied';
+        upsideEl.className = 'text-xs font-semibold text-rose-400';
+      }
+    }
+
+    // INITIALIZE CHART.JS VISUALIZATIONS
+    document.addEventListener('DOMContentLoaded', function() {
+
+      // CHART 1: Platform Sentiment Comparison
+      const ctxPlatform = document.getElementById('chartPlatformSentiment').getContext('2d');
+      new Chart(ctxPlatform, {
+        type: 'bar',
+        data: {
+          labels: ['X (Twitter)', 'LinkedIn', 'Combined Social'],
+          datasets: [
+            {
+              label: 'Raw Net Sentiment',
+              data: [-4, 49, 12],
+              backgroundColor: '#3b82f6',
+              borderRadius: 4
             },
-            amber: {
-              400: '#fbbf24',
-              500: '#f59e0b'
+            {
+              label: 'Engagement-Weighted',
+              data: [-12, 55, 15],
+              backgroundColor: '#ef4444',
+              borderRadius: 4
+            },
+            {
+              label: 'Credibility-Weighted',
+              data: [-2, 28, 5],
+              backgroundColor: '#10b981',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 12, font: { size: 11 } }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.dataset.label + ': ' + (context.raw > 0 ? '+' : '') + context.raw;
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: -25,
+              max: 70,
+              grid: { color: '#f1f5f9' },
+              title: { display: true, text: 'Net Sentiment Score (-100 to +100)', font: { size: 10 } }
+            },
+            x: {
+              grid: { display: false }
             }
           }
         }
-      }
-    }
-  </script>
-  <style>
-  /* header CSS moved to reports/header.html */
-</style>
+      });
 
-  <div id="reportHeader"></div>
-  <script>
-    (function () {
-      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
-      const parts = location.pathname.split('/');
-      const stockFolder = parts[parts.length-2] || '';
-      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      fetch('../header.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-          const host = document.getElementById('reportHeader');
-          if (!host) return;
-          host.innerHTML = html;
-          // set active tab
-          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
-          if (activeTab) activeTab.classList.add('active');
-          // humanize and title-case tabs
-          host.querySelectorAll('.report-tab').forEach(function(t){
-            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
-            const words = label.split(/\s+/).filter(Boolean).map(function(w){
-              if (/^ebitda$/i.test(w)) return 'EBITDA';
-              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            });
-            if (words.length) t.textContent = words.join(' ');
-          });
-          // set stock title if present in header
-          const title = host.querySelector('[data-stock-name]');
-          if (title) title.textContent = stockName || 'Stock Name';
-        })
-        .catch(function () {});
-    })();
-  </script>
-</head>
-<body class="bg-slate-950 text-slate-100 antialiased">
-  
 
-  <main class="report-shell">
-    <section class="report-card">
-      <span class="report-meta">social media prediction</span>
-      <h2>Vst Industries</h2>
-      <p>This section contains the social media prediction report for Vst Industries. Update this file with the stock-specific analysis whenever the report is ready.</p>
-      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
-    </section>
-  </main>
+      // CHART 2: 6-Month Sentiment Trend Line Chart
+      const ctxTrend = document.getElementById('chartSentimentTrend').getContext('2d');
+      new Chart(ctxTrend, {
+        type: 'line',
+        data: {
+          labels: ['April 2026', 'May 2026', 'June 2026', 'July 2026', 'August 2026', 'Sept/Oct 2026'],
+          datasets: [
+            {
+              label: 'Combined Score',
+              data: [22, -28, 0, 7, 29, 5],
+              borderColor: '#312e81',
+              backgroundColor: '#312e81',
+              borderWidth: 3,
+              tension: 0.3,
+              pointRadius: 5
+            },
+            {
+              label: 'X (Twitter) Net',
+              data: [15, -45, -10, -15, 20, -10],
+              borderColor: '#2563eb',
+              borderDash: [4, 4],
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 3
+            },
+            {
+              label: 'LinkedIn Net',
+              data: [40, 10, 30, 60, 50, 40],
+              borderColor: '#10b981',
+              borderDash: [4, 4],
+              borderWidth: 2,
+              tension: 0.3,
+              pointRadius: 3
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: { boxWidth: 12, font: { size: 11 } }
+            },
+            tooltip: {
+              callbacks: {
+                afterBody: function(context) {
+                  const events = [
+                    'EV Announcements',
+                    'Q4 PAT Shock (-79% MTM loss)',
+                    'Zetor JV Updates',
+                    'Hosur Tech Centre Capex',
+                    'Q1 Results Rebound (+9.5% PAT)',
+                    'Sept Sales Split (+50% Tiller / -10% Tractor)'
+                  ];
+                  return 'Event: ' + events[context[0].dataIndex];
+                }
+              }
+            }
+          },
+          scales: {
+            y: {
+              min: -55,
+              max: 75,
+              grid: { color: '#f1f5f9' },
+              title: { display: true, text: 'Net Sentiment', font: { size: 10 } }
+            },
+            x: {
+              grid: { display: false }
+            }
+          }
+        }
+      });
+
+
+      // CHART 3: Target Price Spectrum
+      const ctxTarget = document.getElementById('chartTargetSpectrum').getContext('2d');
+      new Chart(ctxTarget, {
+        type: 'bar',
+        data: {
+          labels: [
+            'Fundamental Bear Case',
+            'BOB Capital Target',
+            'Current Share Price',
+            'Kotak Target',
+            'Street Consensus',
+            'JM Financial Target',
+            'Fundamental Base Case',
+            'Technical Breakout Target',
+            'Fundamental Bull Case'
+          ],
+          datasets: [{
+            label: 'Target / Valuation Level (₹)',
+            data: [4018, 4189, 4339.8, 4950, 5265, 5300, 5388, 5500, 7008],
+            backgroundColor: [
+              '#f43f5e',
+              '#fb7185',
+              '#64748b',
+              '#94a3b8',
+              '#6366f1',
+              '#3b82f6',
+              '#10b981',
+              '#f59e0b',
+              '#059669'
+            ],
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return 'Value: ₹' + context.raw.toLocaleString('en-IN');
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              min: 3500,
+              max: 7500,
+              grid: { color: '#f1f5f9' },
+              title: { display: true, text: 'Equity Value per Share (₹)', font: { size: 10 } }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } }
+            }
+          }
+        }
+      });
+
+    });
+  </script>
 </body>
 </html>

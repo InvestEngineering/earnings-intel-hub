@@ -1,75 +1,860 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sandur | social_media_prediction</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617'
-            },
-            amber: {
-              400: '#fbbf24',
-              500: '#f59e0b'
-            }
-          }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANDUMA - Investor Sentiment & Fundamental Valuation Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
         }
-      }
-    }
-  </script>
-  <style>
-  /* header CSS moved to reports/header.html */
-</style>
-
-  <div id="reportHeader"></div>
-  <script>
-    (function () {
-      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
-      const parts = location.pathname.split('/');
-      const stockFolder = parts[parts.length-2] || '';
-      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      fetch('../header.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-          const host = document.getElementById('reportHeader');
-          if (!host) return;
-          host.innerHTML = html;
-          // set active tab
-          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
-          if (activeTab) activeTab.classList.add('active');
-          // humanize and title-case tabs
-          host.querySelectorAll('.report-tab').forEach(function(t){
-            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
-            const words = label.split(/\s+/).filter(Boolean).map(function(w){
-              if (/^ebitda$/i.test(w)) return 'EBITDA';
-              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            });
-            if (words.length) t.textContent = words.join(' ');
-          });
-          // set stock title if present in header
-          const title = host.querySelector('[data-stock-name]');
-          if (title) title.textContent = stockName || 'Stock Name';
-        })
-        .catch(function () {});
-    })();
-  </script>
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-active {
+            border-bottom: 3px solid #2563eb;
+            color: #1e40af;
+            font-weight: 700;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased">
-  
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
 
-  <main class="report-shell">
-    <section class="report-card">
-      <span class="report-meta">social media prediction</span>
-      <h2>Sandur</h2>
-      <p>This section contains the social media prediction report for Sandur. Update this file with the stock-specific analysis whenever the report is ready.</p>
-      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
+<!-- Chosen Palette: Slate & Warm Neutral with Sapphire & Amber Accents -->
+<!-- Application Structure Plan: Designed as a 6-module interactive executive dashboard that reorganizes the report into logical analytical tasks rather than a linear report. Modules include: 1) Executive Snapshot & Key Ticker Metrics, 2) Multi-Platform Sentiment & Credibility Weighting Analysis, 3) Bull/Bear Narrative Explorer & Reality Matrix, 4) Sentiment Trendline & Catalyst Cascades, 5) Interactive Fundamental Scenario Simulator & Target Price Matrix, and 6) Integrated Risk, Catalysts & Source Filing Index. This structure gives equity analysts immediate macro insights while offering dynamic tools to test valuation assumptions. -->
+<!-- Visualization & Content Choices: 1. Sentiment Comparison: Stacked horizontal bars & Doughnut charts (Chart.js Canvas) to show raw vs engagement vs credibility sentiment. 2. Sentiment Trend: Dual-line time-series (Chart.js Canvas) for 6-month X vs LinkedIn trajectories. 3. Target Price & Sources: Searchable and filterable dynamic HTML tables with live input filtering. 4. Valuation Simulator: Interactive sliders with real-time math engine calculating target price, return upside, and scenario benchmarks. CONFIRMING NO SVG or MERMAID JS used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+<header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white font-bold px-3 py-1.5 rounded text-sm tracking-wider">SANDUMA</div>
+                <div>
+                    <h1 class="text-lg font-bold text-slate-100 leading-tight">The Sandur Manganese & Iron Ores Ltd</h1>
+                    <p class="text-xs text-slate-400">Royal Sandur Group | NSE: SANDUMA | BSE: 504918 | Analysis: April – October 2026</p>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <div class="bg-slate-800 px-3 py-1.5 rounded border border-slate-700">
+                    <span class="text-slate-400">CMP:</span> <span class="font-bold text-emerald-400">₹177.67 - ₹182.69</span>
+                </div>
+                <div class="bg-slate-800 px-3 py-1.5 rounded border border-slate-700">
+                    <span class="text-slate-400">MCap:</span> <span class="font-bold text-slate-200">₹8,637 - ₹8,980 Cr</span>
+                </div>
+                <div class="bg-slate-800 px-3 py-1.5 rounded border border-slate-700">
+                    <span class="text-slate-400">P/E:</span> <span class="font-bold text-amber-300">11.98x</span>
+                </div>
+                <div class="bg-slate-800 px-3 py-1.5 rounded border border-slate-700">
+                    <span class="text-slate-400">Inst. Hold:</span> <span class="font-bold text-rose-400">2.31%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <nav class="bg-slate-800 text-slate-300 border-t border-slate-700 overflow-x-auto custom-scrollbar">
+        <div class="max-w-7xl mx-auto px-4 flex space-x-6 text-sm font-medium whitespace-nowrap">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="py-2.5 px-1 tab-active transition-colors">Executive Summary</button>
+            <button onclick="switchTab('sentiment')" id="tab-sentiment" class="py-2.5 px-1 hover:text-white transition-colors">Platform Sentiment Analysis</button>
+            <button onclick="switchTab('narratives')" id="tab-narratives" class="py-2.5 px-1 hover:text-white transition-colors">Bull/Bear Narratives</button>
+            <button onclick="switchTab('trends')" id="tab-trends" class="py-2.5 px-1 hover:text-white transition-colors">6-Mo Trends & Cascades</button>
+            <button onclick="switchTab('valuation')" id="tab-valuation" class="py-2.5 px-1 hover:text-white transition-colors">Valuation & Scenario Engine</button>
+            <button onclick="switchTab('sources')" id="tab-sources" class="py-2.5 px-1 hover:text-white transition-colors">Source Database & Catalysts</button>
+        </div>
+    </nav>
+</header>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <section id="sec-dashboard" class="space-y-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">6-Month Digital Sentiment & Equity Assessment</h2>
+            <p class="text-slate-600 text-sm leading-relaxed">
+                This interactive intelligence platform synthesizes 598 meaningful digital discussions across X (Twitter) and LinkedIn regarding Sandur Manganese & Iron Ores Ltd (SANDUMA) from April to October 2026. While raw social chatter is moderately bullish (+44), credibility-weighted sentiment drops to +35 due to institutional skepticism surrounding recent non-core subsidiary incorporations in healthcare and hospitality.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Combined Raw Sentiment</span>
+                    <div class="text-3xl font-extrabold text-blue-600 mt-2">+44.3</div>
+                    <p class="text-xs text-slate-500 mt-1">Moderately Bullish (60% Bull / 16% Bear)</p>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 mt-4 overflow-hidden flex">
+                    <div class="bg-emerald-500 h-full" style="width: 60%"></div>
+                    <div class="bg-slate-300 h-full" style="width: 24%"></div>
+                    <div class="bg-rose-500 h-full" style="width: 16%"></div>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Credibility-Weighted</span>
+                    <div class="text-3xl font-extrabold text-amber-600 mt-2">+35.0</div>
+                    <p class="text-xs text-slate-500 mt-1">Tempered by Institutional Caution</p>
+                </div>
+                <div class="text-xs font-medium text-amber-700 bg-amber-50 px-2 py-1 rounded mt-3 inline-block">
+                    High Institutional Discount
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Investor Polarization</span>
+                    <div class="text-3xl font-extrabold text-rose-600 mt-2">HIGH</div>
+                    <p class="text-xs text-slate-500 mt-1">Core Operations vs Non-Core Capital</p>
+                </div>
+                <p class="text-xs text-slate-600 mt-2">Retail bullish on value; Inst. wary of "diworsification".</p>
+            </div>
+
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <span class="text-xs font-semibold uppercase text-slate-400 tracking-wider">Fundamental Base Target</span>
+                    <div class="text-3xl font-extrabold text-emerald-600 mt-2">₹222.75</div>
+                    <p class="text-xs text-slate-500 mt-1">Implying ~24% Upside from ₹177</p>
+                </div>
+                <div class="text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-1 rounded mt-3 inline-block">
+                    Base Model: 13.5x FY27e EPS ₹16.50
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-slate-900 text-base">Key Operational & Valuation Baseline</h3>
+                    <span class="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">Q1 FY27 Disclosures</span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+                    <div class="p-3 bg-slate-50 rounded-lg">
+                        <span class="text-xs text-slate-500 block">52-Week Range</span>
+                        <span class="font-bold text-slate-800">₹158.71 – ₹273.00</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg">
+                        <span class="text-xs text-slate-500 block">TTM Earnings Per Share</span>
+                        <span class="font-bold text-slate-800">₹14.75</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg">
+                        <span class="text-xs text-slate-500 block">Price-to-Book (P/B)</span>
+                        <span class="font-bold text-slate-800">2.66x</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg">
+                        <span class="text-xs text-slate-500 block">ROCE / ROE</span>
+                        <span class="font-bold text-slate-800">24.23% / 23.00%</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg">
+                        <span class="text-xs text-slate-500 block">Consolidated Gross Debt/Eq</span>
+                        <span class="font-bold text-slate-800">0.31x (0.11x Standalone)</span>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg">
+                        <span class="text-xs text-slate-500 block">Promoter Holding</span>
+                        <span class="font-bold text-slate-800">74.22%</span>
+                    </div>
+                </div>
+                <div class="mt-4 p-4 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-900">
+                    <span class="font-bold">Institutional Paradox:</span> Combined FII (1.73%) and DII (0.58%) ownership stands at just 2.31%. SANDUMA trades at an ~11.98x P/E, presenting a notable discount to the broader metal sector average (~18.3x), primarily driven by capital allocation uncertainty.
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base mb-2">Core Drivers Snapshot</h3>
+                    <ul class="space-y-3 text-xs text-slate-700">
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 font-bold mr-2">✓</span>
+                            <span><strong>Arjas Steel Integration:</strong> Vertical integration into Special Bar Quality (SBQ) steel offering 0.585 MTPA capacity.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-emerald-500 font-bold mr-2">✓</span>
+                            <span><strong>Downhill Pipe Conveyor:</strong> 1.2km system eliminating truck freight costs directly to rail siding.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-rose-500 font-bold mr-2">✗</span>
+                            <span><strong>Non-Core Diversification:</strong> Sept 2026 filings for Royal Sandur MedTech & Hospitality created strong retail skepticism.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-amber-500 font-bold mr-2">!</span>
+                            <span><strong>Regulatory Overhang:</strong> ₹139.05 Cr compensatory afforestation notice from Forest Department.</span>
+                        </li>
+                    </ul>
+                </div>
+                <button onclick="switchTab('valuation')" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs py-2 px-4 rounded transition-colors">
+                    Open Valuation Scenario Engine →
+                </button>
+            </div>
+        </div>
     </section>
-  </main>
+
+    <section id="sec-sentiment" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Platform Sentiment Breakdown: X (Twitter) vs. LinkedIn</h2>
+            <p class="text-slate-600 text-sm">
+                This section contrasts retail short-term trading conversations on X against structural corporate and operational analysis on LinkedIn. X discourse is dominated by valuation multiples and chart patterns, while LinkedIn focuses on ESG milestones and supply chain operations.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+                <h3 class="font-bold text-slate-900 text-base mb-1">X (Twitter) Sentiment Profile</h3>
+                <p class="text-xs text-slate-500 mb-4">412 Meaningful Posts Analyzed (Retail & Chartist Focus)</p>
+                <div class="chart-container">
+                    <canvas id="chartXSentiment"></canvas>
+                </div>
+                <div class="mt-4 p-3 bg-slate-50 rounded border border-slate-200 text-xs space-y-1 text-slate-700">
+                    <p><strong>Net Sentiment:</strong> <span class="text-blue-600 font-bold">+38</span> | <strong>Engagement-Weighted:</strong> <span class="text-blue-700 font-bold">+45</span></p>
+                    <p><strong>Primary Driver:</strong> Low P/E multiple (~12x), 2:1 bonus history, ₹1,000 Cr QIP approval, and technical breakout charts.</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+                <h3 class="font-bold text-slate-900 text-base mb-1">LinkedIn Sentiment Profile</h3>
+                <p class="text-xs text-slate-500 mb-4">186 Meaningful Posts Analyzed (Professional & Operational Focus)</p>
+                <div class="chart-container">
+                    <canvas id="chartLinkedInSentiment"></canvas>
+                </div>
+                <div class="mt-4 p-3 bg-slate-50 rounded border border-slate-200 text-xs space-y-1 text-slate-700">
+                    <p><strong>Net Sentiment:</strong> <span class="text-emerald-600 font-bold">+58</span> | <strong>Engagement-Weighted:</strong> <span class="text-emerald-700 font-bold">+62</span></p>
+                    <p><strong>Primary Driver:</strong> 5-Star Mining rating, 42.9 MW renewable energy integration, and Arjas SBQ steel synergy.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-base mb-4">Sentiment Weighting Comparison Across Models</h3>
+            <div class="chart-container" style="max-height: 280px;">
+                <canvas id="chartWeightingComparison"></canvas>
+            </div>
+            <div class="mt-4 text-xs text-slate-600 leading-relaxed">
+                Applying credibility weighting significantly reduces overall bullishness (+44 raw vs +35 credibility-weighted). Institutional brokerages (JM Financial, Kotak) acknowledge operating efficiencies but maintain neutral ratings pending clarity on QIP capital deployment.
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200 overflow-x-auto">
+            <h3 class="font-bold text-slate-900 text-base mb-3">Author Quality & Tier Stratification</h3>
+            <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                <thead>
+                    <tr class="bg-slate-100 text-slate-900 border-b border-slate-200 font-semibold">
+                        <th class="p-3">Tier Category</th>
+                        <th class="p-3">Primary Participants</th>
+                        <th class="p-3">Core Analytical Focus</th>
+                        <th class="p-3">Dominant Sentiment</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                    <tr>
+                        <td class="p-3 font-bold text-slate-900">Tier 1: Professional</td>
+                        <td class="p-3">JM Financial, Kotak Sec, CRISIL, ICRA</td>
+                        <td class="p-3">Debt/Equity (0.31x), cash flows, holding discounts, steel cyclicality</td>
+                        <td class="p-3"><span class="bg-slate-200 text-slate-800 px-2 py-0.5 rounded">Neutral / Cautious</span></td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold text-slate-900">Tier 2: Informed Investor</td>
+                        <td class="p-3">SEBI Ind. Analysts, ValuePickr Veterans</td>
+                        <td class="p-3">Downhill Conveyor savings vs MedTech ROE drag</td>
+                        <td class="p-3"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Moderately Bullish</span></td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold text-slate-900">Tier 3: Retail Participants</td>
+                        <td class="p-3">X Chartist Accounts, Retail Traders</td>
+                        <td class="p-3">₹450+ Univest targets, 2:1 bonus, chart breakouts</td>
+                        <td class="p-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Highly Bullish</span></td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 font-bold text-slate-900">Tier 4: Bots & Noise</td>
+                        <td class="p-3">Automated Ticker Feeds, Aggregator Bots</td>
+                        <td class="p-3">Daily support/resistance noise (~1,200 posts excluded)</td>
+                        <td class="p-3"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Excluded</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section id="sec-narratives" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Dominant Market Narratives & Reality Cross-Check</h2>
+            <p class="text-slate-600 text-sm">
+                Explore the top bullish thesis points and bearish risks driving social media discussions. Each claim has been cross-referenced against company regulatory filings and quarterly financial reports.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-emerald-200 bg-emerald-50/20">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-emerald-600 text-white font-bold text-xs px-2.5 py-1 rounded">BULLISH NARRATIVES</span>
+                    <span class="text-xs text-emerald-800 font-semibold">Driven by Execution & Value</span>
+                </div>
+                <div class="space-y-4 text-xs text-slate-700">
+                    <div class="p-3 bg-white rounded border border-emerald-100 shadow-sm">
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">1. Arjas Steel SBQ Synergies</h4>
+                        <p class="mb-2">Transition from pure miner to integrated 0.585 MTPA Special Bar Quality steel producer. Quarterly sales >1 Lakh tonnes at ₹70,000+/tonne realization.</p>
+                        <span class="bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Filing Status: Supported (Q4 FY26 / Q1 FY27 Reports)</span>
+                    </div>
+                    <div class="p-3 bg-white rounded border border-emerald-100 shadow-sm">
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">2. Logistics Capex Optimization</h4>
+                        <p class="mb-2">1.2km Downhill Conveyor Pipe System commissioned in H1 FY27 drastically cuts truck freight costs. ₹285 Cr Beneficiation Plant targeting Q2 FY28.</p>
+                        <span class="bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Filing Status: Supported (Annual Report FY26)</span>
+                    </div>
+                    <div class="p-3 bg-white rounded border border-emerald-100 shadow-sm">
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">3. Low Valuation & QIP Catalyst</h4>
+                        <p class="mb-2">Trading at 12x TTM P/E with ₹1,000 Cr QIP approval seen by retail as institutional validation for growth capital.</p>
+                        <span class="bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Filing Status: Supported (BSE Filings Sept 2026)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-rose-200 bg-rose-50/20">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-rose-600 text-white font-bold text-xs px-2.5 py-1 rounded">BEARISH NARRATIVES</span>
+                    <span class="text-xs text-rose-800 font-semibold">Driven by Capital Allocation Risks</span>
+                </div>
+                <div class="space-y-4 text-xs text-slate-700">
+                    <div class="p-3 bg-white rounded border border-rose-100 shadow-sm">
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">1. Capital "Diworsification"</h4>
+                        <p class="mb-2">Incorporation of Royal Sandur MedTech & Royal Sandur Hospitality in Sept 2026 raised concerns about mining cash flows being diverted to non-core sectors.</p>
+                        <span class="bg-amber-100 text-amber-800 font-semibold px-2 py-0.5 rounded">Filing Status: Partially Supported (Filings confirm incorporation)</span>
+                    </div>
+                    <div class="p-3 bg-white rounded border border-rose-100 shadow-sm">
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">2. Regulatory & Forest Fine Overhang</h4>
+                        <p class="mb-2">Demand notice of ₹139.05 Cr for compensatory afforestation from Karnataka Forest Department creates unexpected cash outflow risks.</p>
+                        <span class="bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Filing Status: Supported (June 2026 Disclosures)</span>
+                    </div>
+                    <div class="p-3 bg-white rounded border border-rose-100 shadow-sm">
+                        <h4 class="font-bold text-slate-900 text-sm mb-1">3. Sequential Volume Contraction</h4>
+                        <p class="mb-2">Q1 FY27 iron ore sales volume dropped 36% QoQ and manganese sales fell 19% QoQ due to monsoon seasonality and limits.</p>
+                        <span class="bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded">Filing Status: Supported (Q1 FY27 Earnings)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-base mb-3">Social Media Claims vs. Fundamental Reality Matrix</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-900 border-b border-slate-200 font-semibold">
+                            <th class="p-3">Discussion Theme</th>
+                            <th class="p-3">Social Claim</th>
+                            <th class="p-3">Fundamental Evidence</th>
+                            <th class="p-3">Verification Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr>
+                            <td class="p-3 font-bold text-slate-900">Arjas Integration</td>
+                            <td class="p-3">Drives massive EBITDA expansion</td>
+                            <td class="p-3">EBITDA margins expanded to 25-27% with high realizations</td>
+                            <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Supported</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-slate-900">₹1,000 Cr QIP</td>
+                            <td class="p-3">Purely for core steel/mining capex</td>
+                            <td class="p-3">QIP approved, but concurrent MedTech/Hospitality filings blur deployment</td>
+                            <td class="p-3"><span class="bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded">Partially Supported</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-slate-900">Target >₹500</td>
+                            <td class="p-3">Guaranteed multibagger stock</td>
+                            <td class="p-3">Requires >22x PE multiple, unreasonable for merchant miners with <2.5% Inst. hold</td>
+                            <td class="p-3"><span class="bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded">Contradicted</span></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-slate-900">Freight Optimization</td>
+                            <td class="p-3">Pipe conveyor drastically lowers cost</td>
+                            <td class="p-3">1.2km conveyor eliminates truck haulage to railway siding</td>
+                            <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded">Supported</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="sec-trends" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">6-Month Sentiment Trendline & Key Information Cascades</h2>
+            <p class="text-slate-600 text-sm">
+                Track how investor sentiment evolved month-by-month from April to October 2026 in response to quarterly earnings disclosures, regulatory notices, and corporate restructuring announcements.
+            </p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-base mb-1">Monthly Net Sentiment Trajectory</h3>
+            <p class="text-xs text-slate-500 mb-4">Comparing X (Twitter) Net Sentiment against LinkedIn Net Sentiment</p>
+            <div class="chart-container">
+                <canvas id="chartMonthlyTrend"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-blue-600 text-white font-bold text-xs px-2.5 py-1 rounded">CASCADE 1</span>
+                    <span class="text-xs text-slate-500">August 2026</span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm mb-2">Q1 FY27 Earnings & Rebranding Launch</h4>
+                <ul class="space-y-2 text-xs text-slate-700">
+                    <li><strong>Trigger Event:</strong> Q1 PAT jumped 36% YoY to ₹228 Cr; Royal Sandur Group brand launched.</li>
+                    <li><strong>X Reaction:</strong> Rapid viral bullish posts celebrating PAT expansion and growth momentum.</li>
+                    <li><strong>LinkedIn Reaction:</strong> Professional analysis of 26% EBITDA margin and pipe conveyor operational efficiency.</li>
+                    <li><strong>Stock Reaction:</strong> Sustained consolidation near 52-week highs (₹190-₹198).</li>
+                </ul>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+                <div class="flex items-center space-x-2 mb-3">
+                    <span class="bg-amber-600 text-white font-bold text-xs px-2.5 py-1 rounded">CASCADE 2</span>
+                    <span class="text-xs text-slate-500">September 2026</span>
+                </div>
+                <h4 class="font-bold text-slate-900 text-sm mb-2">₹1,000 Cr QIP & Subsidiary Incorporations</h4>
+                <ul class="space-y-2 text-xs text-slate-700">
+                    <li><strong>Trigger Event:</strong> Board approved ₹1,000 Cr QIP; simultaneously incorporated MedTech & Hospitality arms.</li>
+                    <li><strong>X Reaction:</strong> Deeply polarized. Momentum accounts lauded QIP; value accounts warned of diworsification.</li>
+                    <li><strong>LinkedIn Reaction:</strong> Muted/skeptical regarding conglomerate management efficiency.</li>
+                    <li><strong>Stock Reaction:</strong> Spike to ₹202 followed by swift retracement back to ₹177-₹182 range.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section id="sec-valuation" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Interactive Fundamental Scenario Simulator & Target Matrix</h2>
+            <p class="text-slate-600 text-sm">
+                Test custom valuation parameters or explore institutional vs speculative price targets. Adjust FY27e Earnings Per Share (EPS) and Target P/E Multiples below to model potential returns relative to the baseline market price of <strong>₹177.15</strong>.
+            </p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-blue-200 bg-blue-50/20">
+            <h3 class="font-bold text-blue-950 text-base mb-4">Interactive Valuation Calculator</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="space-y-5">
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                            <span>Projected FY27e EPS: <strong id="valEpsDisplay" class="text-blue-600 text-sm">₹16.50</strong></span>
+                            <span class="text-slate-400">(TTM: ₹14.75)</span>
+                        </div>
+                        <input type="range" id="sliderEps" min="10" max="25" step="0.25" value="16.50" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updateValuation()">
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>Bear: ₹12.50</span>
+                            <span>Base: ₹16.50</span>
+                            <span>Bull: ₹20.00</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs font-semibold text-slate-700 mb-1">
+                            <span>Target P/E Multiple: <strong id="valPeDisplay" class="text-blue-600 text-sm">13.5x</strong></span>
+                            <span class="text-slate-400">(Current: 12.0x)</span>
+                        </div>
+                        <input type="range" id="sliderPe" min="8" max="25" step="0.5" value="13.5" class="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600" oninput="updateValuation()">
+                        <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+                            <span>Bear: 10.0x</span>
+                            <span>Base: 13.5x</span>
+                            <span>Bull: 16.0x</span>
+                            <span>Speculative: 22.0x</span>
+                        </div>
+                    </div>
+
+                    <div class="flex space-x-2 pt-2">
+                        <button onclick="setScenario('bear')" class="px-3 py-1.5 bg-rose-100 hover:bg-rose-200 text-rose-800 text-xs font-semibold rounded">Preset Bear Case</button>
+                        <button onclick="setScenario('base')" class="px-3 py-1.5 bg-blue-100 hover:bg-blue-200 text-blue-800 text-xs font-semibold rounded">Preset Base Case</button>
+                        <button onclick="setScenario('bull')" class="px-3 py-1.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-semibold rounded">Preset Bull Case</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm text-center flex flex-col justify-center">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Calculated Target Stock Price</span>
+                    <div id="calcTargetPrice" class="text-4xl font-black text-slate-900 my-2">₹222.75</div>
+                    <div id="calcUpside" class="text-sm font-bold text-emerald-600">+25.7% upside vs ₹177.15</div>
+                    <div class="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500 text-left space-y-1">
+                        <p><strong>Implied Market Cap:</strong> <span id="calcMcap">₹10,828</span> Cr</p>
+                        <p><strong>Required PE Expansion:</strong> <span id="calcPeExp">+12.5%</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-base mb-3">Fundamental Model Scenarios Breakdown</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="p-4 rounded-lg bg-rose-50 border border-rose-200">
+                    <div class="font-bold text-rose-900 text-sm mb-1">BEAR CASE: ₹125.00</div>
+                    <p class="text-rose-700 mb-2">Chinese steel dumping depresses SBQ margins; QIP dilution occurs without ROE expansion; ₹139 Cr fine paid.</p>
+                    <p class="font-semibold text-rose-950">Assumptions: EPS ₹12.50 @ 10.0x P/E</p>
+                </div>
+                <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                    <div class="font-bold text-blue-900 text-sm mb-1">BASE CASE: ₹222.75</div>
+                    <p class="text-blue-700 mb-2">Steady mining utilization (4.45 MTPA Iron / 0.6 MTPA Mn); Arjas Steel normalizes; QIP spent on Beneficiation plant.</p>
+                    <p class="font-semibold text-blue-950">Assumptions: EPS ₹16.50 @ 13.5x P/E</p>
+                </div>
+                <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200">
+                    <div class="font-bold text-emerald-900 text-sm mb-1">BULL CASE: ₹324.83</div>
+                    <p class="text-emerald-700 mb-2">Conveyor freight cost savings realized; Beneficiation plant comes online early; FII institutional re-rating.</p>
+                    <p class="font-semibold text-emerald-950">Assumptions: EPS ₹20.00 @ 16.0x P/E</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <h3 class="font-bold text-slate-900 text-base">Publicly Discussed Target Price Explorer</h3>
+                <input type="text" id="targetSearch" placeholder="Search target or source..." onkeyup="filterTargets()" class="px-3 py-1.5 border border-slate-300 rounded text-xs w-full sm:w-64 focus:outline-none focus:ring-1 focus:ring-blue-500">
+            </div>
+            <div class="overflow-x-auto">
+                <table id="targetTable" class="w-full text-left text-xs text-slate-700 border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-900 border-b border-slate-200 font-semibold">
+                            <th class="p-3">Target Price</th>
+                            <th class="p-3">Platform / Source</th>
+                            <th class="p-3">Category</th>
+                            <th class="p-3">Date</th>
+                            <th class="p-3">Methodology & Rationale</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr>
+                            <td class="p-3 font-bold text-rose-600">₹141.00</td>
+                            <td class="p-3">Univest Bear Model</td>
+                            <td class="p-3"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded">Fundamental (Bear)</span></td>
+                            <td class="p-3">Jun 2026</td>
+                            <td class="p-3">Demand slowdown, margin compression from cheap imports.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-slate-800">₹189.86</td>
+                            <td class="p-3">TradingTick</td>
+                            <td class="p-3"><span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded">Technical</span></td>
+                            <td class="p-3">Sep 2026</td>
+                            <td class="p-3">Short-term resistance levels from momentum charts.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-blue-600">₹235.00</td>
+                            <td class="p-3">Kotak Securities</td>
+                            <td class="p-3"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Institutional Broker</span></td>
+                            <td class="p-3">Jun 2026</td>
+                            <td class="p-3">Neutral rating based on metals cycle and gradual execution.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-blue-600">₹245.00</td>
+                            <td class="p-3">Consensus Average</td>
+                            <td class="p-3"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Institutional Consensus</span></td>
+                            <td class="p-3">Jun 2026</td>
+                            <td class="p-3">12-month blended analyst expectation.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-emerald-600">₹255.00</td>
+                            <td class="p-3">JM Financial</td>
+                            <td class="p-3"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Institutional Broker</span></td>
+                            <td class="p-3">Jun 2026</td>
+                            <td class="p-3">Capex completion, Arjas Steel margin expansion.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-emerald-600">₹271.00</td>
+                            <td class="p-3">HDFC Sky Desk</td>
+                            <td class="p-3"><span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded">Technical Desk</span></td>
+                            <td class="p-3">Sep 2026</td>
+                            <td class="p-3">Inverted head & shoulder breakout on weekly charts.</td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold text-purple-600">₹456 – ₹524</td>
+                            <td class="p-3">Univest Aggregator</td>
+                            <td class="p-3"><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded">Retail Speculative</span></td>
+                            <td class="p-3">Apr 2026</td>
+                            <td class="p-3">Assumes aggressive 20% EPS growth and >20x PE expansion.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="sec-sources" class="space-y-6 hidden">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h2 class="text-xl font-bold text-slate-900 mb-2">Catalysts, Risks & Verified Filing Index</h2>
+            <p class="text-slate-600 text-sm">
+                Examine upcoming corporate catalysts, fundamental downside risks, and the underlying database of regulatory disclosures and primary research sources.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-emerald-200">
+                <h3 class="font-bold text-emerald-900 text-base mb-3">Key Upcoming Catalysts</h3>
+                <ul class="space-y-2.5 text-xs text-slate-700">
+                    <li class="flex items-start">
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded mr-2">1</span>
+                        <div><strong>QIP Pricing & Allotment:</strong> Formal confirmation of funds ring-fenced for mining/steel capex will trigger institutional re-rating.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded mr-2">2</span>
+                        <div><strong>Downhill Conveyor Margin Impact:</strong> Q2/Q3 FY27 earnings showing quantified per-tonne freight cost reductions.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded mr-2">3</span>
+                        <div><strong>Beneficiation Plant Progress:</strong> Operational milestones for the ₹285 Cr beneficiation facility.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.5 rounded mr-2">4</span>
+                        <div><strong>MOIL Ore Price Hikes:</strong> October 2026 price increase of 5% in manganese ore supporting realization margins.</div>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-rose-200">
+                <h3 class="font-bold text-rose-900 text-base mb-3">Key Structural Risks</h3>
+                <ul class="space-y-2.5 text-xs text-slate-700">
+                    <li class="flex items-start">
+                        <span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded mr-2">1</span>
+                        <div><strong>Non-Core Capital Expenditure:</strong> Scaling up MedTech and Hospitality investments away from primary core operations.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded mr-2">2</span>
+                        <div><strong>Regulatory Exactions:</strong> Further demand notices or penalties from Karnataka Forest Department.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded mr-2">3</span>
+                        <div><strong>Equity Dilution:</strong> Dilutive impact of ₹1,000 Cr QIP if capital deployment yields low immediate ROE.</div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded mr-2">4</span>
+                        <div><strong>Global Steel Margin Compression:</strong> Cheap Chinese steel exports suppressing domestic SBQ realization rates.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
+            <h3 class="font-bold text-slate-900 text-base mb-3">Primary Source Filing & Reference Index</h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-900 border-b border-slate-200 font-semibold">
+                            <th class="p-3">Source ID</th>
+                            <th class="p-3">Reference / Disclosure</th>
+                            <th class="p-3">Document Type</th>
+                            <th class="p-3">Verification Link / Direct URL</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        <tr>
+                            <td class="p-3 font-bold">Ref [1, 2]</td>
+                            <td class="p-3">Arjas Steel FY26 Acquisition & Integration</td>
+                            <td class="p-3">MultiBagg Corporate Research</td>
+                            <td class="p-3 text-blue-600 underline"><a href="https://www.multibagg.ai/market-pulse/articles/smiore-fy26-update-93521" target="_blank">https://www.multibagg.ai/.../smiore-fy26-update</a></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold">Ref [3]</td>
+                            <td class="p-3">Q1 FY27 Earnings & Beneficiation Capex</td>
+                            <td class="p-3">Investor Presentation / MultiBagg</td>
+                            <td class="p-3 text-blue-600 underline"><a href="https://www.sandurgroup.com/downloads/financial-results-and-presentations/quarterly-results/2026-27/Q1/investor-presentation.pdf" target="_blank">sandurgroup.com/investor-presentation.pdf</a></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold">Ref [5, 6]</td>
+                            <td class="p-3">MedTech & Hospitality Incorporation Disclosures</td>
+                            <td class="p-3">BSE Filings / SAHI Corporate News</td>
+                            <td class="p-3 text-blue-600 underline"><a href="https://www.sahi.com/news/sandur-manganese-incorporates-wholly-owned-subsidiary-royal-sandur-hospitality-869-PE1_CORP" target="_blank">sahi.com/.../royal-sandur-hospitality</a></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold">Ref [17]</td>
+                            <td class="p-3">₹1,000 Crore QIP Board Approval</td>
+                            <td class="p-3">EquityPandit Filing Disclosure</td>
+                            <td class="p-3 text-blue-600 underline"><a href="https://www.equitypandit.com/sandur-manganese-approves-rs-1000-crore-qip-shares-jump-2-5/" target="_blank">equitypandit.com/.../qip-approval</a></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold">Ref [33]</td>
+                            <td class="p-3">Supreme Court Forest Clearance Order</td>
+                            <td class="p-3">New Indian Express Report</td>
+                            <td class="p-3 text-blue-600 underline"><a href="https://www.newindianexpress.com/states/karnataka/2026/May/26/sc-junks-karnataka-iron-ore-firms-plea-against-forest-clearance-conditions" target="_blank">newindianexpress.com/.../sc-forest-clearance</a></td>
+                        </tr>
+                        <tr>
+                            <td class="p-3 font-bold">Ref [38]</td>
+                            <td class="p-3">CRISIL A+ Credit Rating Reaffirmation</td>
+                            <td class="p-3">CRISIL Rating Rationale</td>
+                            <td class="p-3 text-blue-600 underline"><a href="https://www.crisil.com/mnt/winshare/Ratings/RatingList/RatingDocs/TheSandurManganeseAndIronOresLimited_June%2002_%202026_RR_392742.html" target="_blank">crisil.com/.../TheSandurManganese_June2026.html</a></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-center space-y-2">
+        <p><strong>Sandur Manganese & Iron Ores Ltd (SANDUMA) Sentiment & Valuation Dashboard</strong></p>
+        <p>Institutional Equity Research & Digital Intelligence | Created for Informational & Analytical Exploration</p>
+        <p class="text-slate-500">Source Material Window: April 3, 2026 – October 3, 2026. Data sampling includes 598 meaningful social posts cross-referenced with exchange disclosures.</p>
+    </div>
+</footer>
+
+<script>
+    function switchTab(tabId) {
+        document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+        document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('tab-active'));
+        
+        document.getElementById('sec-' + tabId).classList.remove('hidden');
+        document.getElementById('tab-' + tabId).classList.add('tab-active');
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    const currentCmp = 177.15;
+    const currentShares = 48.61;
+
+    function calculateTarget(eps, pe) {
+        const price = eps * pe;
+        const upside = ((price - currentCmp) / currentCmp) * 100;
+        const mcap = price * currentShares;
+        const peExp = ((pe - 12.0) / 12.0) * 100;
+        
+        return { price, upside, mcap, peExp };
+    }
+
+    function updateValuation() {
+        const eps = parseFloat(document.getElementById('sliderEps').value);
+        const pe = parseFloat(document.getElementById('sliderPe').value);
+        
+        document.getElementById('valEpsDisplay').innerText = '₹' + eps.toFixed(2);
+        document.getElementById('valPeDisplay').innerText = pe.toFixed(1) + 'x';
+        
+        const res = calculateTarget(eps, pe);
+        
+        document.getElementById('calcTargetPrice').innerText = '₹' + res.price.toFixed(2);
+        
+        const upsideEl = document.getElementById('calcUpside');
+        if (res.upside >= 0) {
+            upsideEl.innerText = '+' + res.upside.toFixed(1) + '% upside vs ₹' + currentCmp;
+            upsideEl.className = 'text-sm font-bold text-emerald-600';
+        } else {
+            upsideEl.innerText = res.upside.toFixed(1) + '% downside vs ₹' + currentCmp;
+            upsideEl.className = 'text-sm font-bold text-rose-600';
+        }
+        
+        document.getElementById('calcMcap').innerText = '₹' + Math.round(res.mcap).toLocaleString();
+        document.getElementById('calcPeExp').innerText = (res.peExp >= 0 ? '+' : '') + res.peExp.toFixed(1) + '%';
+    }
+
+    function setScenario(type) {
+        if (type === 'bear') {
+            document.getElementById('sliderEps').value = 12.50;
+            document.getElementById('sliderPe').value = 10.0;
+        } else if (type === 'base') {
+            document.getElementById('sliderEps').value = 16.50;
+            document.getElementById('sliderPe').value = 13.5;
+        } else if (type === 'bull') {
+            document.getElementById('sliderEps').value = 20.00;
+            document.getElementById('sliderPe').value = 16.0;
+        }
+        updateValuation();
+    }
+
+    function filterTargets() {
+        const input = document.getElementById('targetSearch').value.toLowerCase();
+        const rows = document.querySelectorAll('#targetTable tbody tr');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? '' : 'none';
+        });
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const ctxX = document.getElementById('chartXSentiment').getContext('2d');
+        new Chart(ctxX, {
+            type: 'doughnut',
+            data: {
+                labels: ['Bullish (58%)', 'Neutral (22%)', 'Bearish (20%)'],
+                datasets: [{
+                    data: [58, 22, 20],
+                    backgroundColor: ['#10b981', '#94a3b8', '#f43f5e']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        const ctxL = document.getElementById('chartLinkedInSentiment').getContext('2d');
+        new Chart(ctxL, {
+            type: 'doughnut',
+            data: {
+                labels: ['Bullish (65%)', 'Neutral (28%)', 'Bearish (7%)'],
+                datasets: [{
+                    data: [65, 28, 7],
+                    backgroundColor: ['#059669', '#94a3b8', '#e11d48']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+
+        const ctxW = document.getElementById('chartWeightingComparison').getContext('2d');
+        new Chart(ctxW, {
+            type: 'bar',
+            data: {
+                labels: ['X (Twitter)', 'LinkedIn', 'Combined Overall'],
+                datasets: [
+                    { label: 'Raw Net Sentiment', data: [38, 58, 44], backgroundColor: '#3b82f6' },
+                    { label: 'Engagement-Weighted', data: [45, 62, 50], backgroundColor: '#1d4ed8' },
+                    { label: 'Credibility-Weighted', data: [28, 48, 35], backgroundColor: '#d97706' }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { min: 0, max: 80, title: { display: true, text: 'Net Score (-100 to +100)' } } }
+            }
+        });
+
+        const ctxT = document.getElementById('chartMonthlyTrend').getContext('2d');
+        new Chart(ctxT, {
+            type: 'line',
+            data: {
+                labels: ['Apr 2026', 'May 2026', 'Jun 2026', 'Jul 2026', 'Aug 2026', 'Sep 2026'],
+                datasets: [
+                    { label: 'X Net Sentiment', data: [35, 45, 20, 30, 60, 40], borderColor: '#0284c7', tension: 0.3, fill: false },
+                    { label: 'LinkedIn Net Sentiment', data: [45, 60, 40, 55, 75, 50], borderColor: '#16a34a', tension: 0.3, fill: false },
+                    { label: 'Combined', data: [40, 52, 30, 42, 67, 45], borderColor: '#d97706', borderDash: [5, 5], tension: 0.3, fill: false }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { min: 0, max: 90, title: { display: true, text: 'Net Sentiment Score' } } }
+            }
+        });
+
+        updateValuation();
+    });
+</script>
 </body>
 </html>
