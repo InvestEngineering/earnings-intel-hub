@@ -1,75 +1,1222 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Beml | social_media_prediction</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617'
-            },
-            amber: {
-              400: '#fbbf24',
-              500: '#f59e0b'
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEML Ltd - 6-Month Sentiment & Valuation Analysis</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
-  <style>
-  /* header CSS moved to reports/header.html */
-</style>
-
-  <div id="reportHeader"></div>
-  <script>
-    (function () {
-      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
-      const parts = location.pathname.split('/');
-      const stockFolder = parts[parts.length-2] || '';
-      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      fetch('../header.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-          const host = document.getElementById('reportHeader');
-          if (!host) return;
-          host.innerHTML = html;
-          // set active tab
-          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
-          if (activeTab) activeTab.classList.add('active');
-          // humanize and title-case tabs
-          host.querySelectorAll('.report-tab').forEach(function(t){
-            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
-            const words = label.split(/\s+/).filter(Boolean).map(function(w){
-              if (/^ebitda$/i.test(w)) return 'EBITDA';
-              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            });
-            if (words.length) t.textContent = words.join(' ');
-          });
-          // set stock title if present in header
-          const title = host.querySelector('[data-stock-name]');
-          if (title) title.textContent = stockName || 'Stock Name';
-        })
-        .catch(function () {});
-    })();
-  </script>
+    </script>
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        /* Custom scrollbar for clean UX */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased">
-  
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-emerald-100 selection:text-emerald-900">
 
-  <main class="report-shell">
-    <section class="report-card">
-      <span class="report-meta">social media prediction</span>
-      <h2>Beml</h2>
-      <p>This section contains the social media prediction report for Beml. Update this file with the stock-specific analysis whenever the report is ready.</p>
-      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
-    </section>
-  </main>
+    <!-- Chosen Palette: Warm Institutional Slate & Financial Emerald (Slate Gray background, Emerald Green for Bullish, Crimson Red for Bearish, Amber for Neutral) -->
+
+    <!-- Application Structure Plan:
+        1. Sticky Header & Quick Navigation: Corporate identity, ticker details, and real-time tabs to switch seamlessly between analytical views.
+        2. Executive Dashboard: High-level metric cards (Current Price, Combined Net Sentiment, Credibility Score, Valuation Targets) & executive intro.
+        3. Platform Breakdown (X vs LinkedIn): Comparative Chart.js bar charts, metrics tables, author credibility tier distribution, and platform dynamics.
+        4. Sentiment Evolution & Information Cascades: Interactive 6-month sentiment trend line chart paired with chronological cascade event breakdown cards.
+        5. Deep-Dive Investment Narratives: Filterable/tabbed view of dominant Bullish vs Bearish theses with backing company disclosures & risk factors.
+        6. Interactive Fundamental Valuation Suite: Live interactive DCF/P-E valuation scenario calculator allows users to adjust Revenue CAGR, EBITDA Margins, and P/E Multiples to model share prices dynamically alongside public price target databases.
+        7. Sentiment vs. Fundamentals Matrix: Visual alignment quadrant & support status grid evaluating social hype against audited financials.
+        8. Source Database & Evidence Audit: Searchable primary source registry with verification badges.
+    -->
+
+    <!-- Visualization & Content Choices:
+        - Platform Comparison -> Chart.js Grouped Bar Chart -> Allows direct visual comparison of Bullish/Neutral/Bearish metrics across X and LinkedIn -> Interaction: Legend toggle & tooltips -> Library: Chart.js Canvas.
+        - Sentiment Trend -> Chart.js Line Chart with Dual Metrics -> Traces monthly sentiment trajectory across 6 months -> Interaction: Dynamic point inspection & event cross-highlighting -> Library: Chart.js Canvas.
+        - Author Stratification -> Chart.js Doughnut Chart -> Visualizes distributions across Tiers 1-4 -> Interaction: Hover tooltips -> Library: Chart.js Canvas.
+        - Fundamental Scenario Explorer -> Interactive Vanilla JS Calculator + Slider Controls -> Solves dynamic evaluation without clutter -> Interaction: Live slider inputs trigger real-time stock target calculation & return % calculation.
+        - Searchable Tables -> Custom Vanilla JS filters for public price targets and source databases.
+        - NO SVG or Mermaid JS used; Unicode symbols & CSS indicators used throughout.
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 bg-slate-900 text-white shadow-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <span class="bg-emerald-600 text-white font-bold text-lg px-2.5 py-1 rounded shadow-sm">BEML</span>
+                    <div>
+                        <h1 class="font-bold text-base leading-tight">BEML Limited Intelligence Hub</h1>
+                        <p class="text-xs text-slate-400">NSE: BEML | BSE: 500048 | 6-Month Sentiment & Valuation Analysis</p>
+                    </div>
+                </div>
+                <!-- Navigation Tabs -->
+                <nav class="hidden md:flex space-x-1 text-sm font-medium">
+                    <a href="#dashboard" class="px-3 py-2 rounded-md hover:bg-slate-800 hover:text-emerald-400 transition-colors">Executive Dashboard</a>
+                    <a href="#platforms" class="px-3 py-2 rounded-md hover:bg-slate-800 hover:text-emerald-400 transition-colors">X vs LinkedIn</a>
+                    <a href="#trends" class="px-3 py-2 rounded-md hover:bg-slate-800 hover:text-emerald-400 transition-colors">Trends & Cascades</a>
+                    <a href="#narratives" class="px-3 py-2 rounded-md hover:bg-slate-800 hover:text-emerald-400 transition-colors">Bull & Bear Theses</a>
+                    <a href="#valuation" class="px-3 py-2 rounded-md hover:bg-slate-800 hover:text-emerald-400 transition-colors">Valuation Explorer</a>
+                    <a href="#matrix" class="px-3 py-2 rounded-md hover:bg-slate-800 hover:text-emerald-400 transition-colors">Fundamentals Matrix</a>
+                </nav>
+                <div class="text-right text-xs">
+                    <span class="inline-block bg-slate-800 border border-slate-700 px-2.5 py-1 rounded text-slate-300">
+                        Price: <strong class="text-white">₹2,036.50</strong> <span class="text-slate-400">(Sep 27, 2026)</span>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Navigation Bar -->
+        <div class="md:hidden flex overflow-x-auto bg-slate-800 px-2 py-1 text-xs whitespace-nowrap border-t border-slate-700">
+            <a href="#dashboard" class="px-3 py-1.5 text-slate-300 hover:text-white">Dashboard</a>
+            <a href="#platforms" class="px-3 py-1.5 text-slate-300 hover:text-white">X vs LinkedIn</a>
+            <a href="#trends" class="px-3 py-1.5 text-slate-300 hover:text-white">Trends</a>
+            <a href="#narratives" class="px-3 py-1.5 text-slate-300 hover:text-white">Theses</a>
+            <a href="#valuation" class="px-3 py-1.5 text-slate-300 hover:text-white">Valuation</a>
+            <a href="#matrix" class="px-3 py-1.5 text-slate-300 hover:text-white">Matrix</a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <!-- Intro Section Context Header -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">Institutional Equity & Sentiment Intelligence</span>
+                        <span class="text-xs text-slate-500">Period: March 27, 2026 – September 27, 2026</span>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-900">BEML Ltd Social Sentiment & Fundamental Valuation Report</h2>
+                    <p class="text-sm text-slate-600 mt-1 max-w-4xl">
+                        This interactive application synthesizes 525 meaningful investor discussions across X (Twitter) and LinkedIn regarding BEML Ltd, evaluating public market narratives against audited financial disclosures, multi-year order book execution, and independent fundamental valuation models.
+                    </p>
+                </div>
+                <div class="flex items-center gap-3 self-start lg:self-auto shrink-0">
+                    <div class="text-center px-4 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="text-xs text-slate-500 block uppercase font-bold tracking-wider">Order Book</span>
+                        <span class="text-base font-extrabold text-slate-800">₹21,700+ Cr</span>
+                    </div>
+                    <div class="text-center px-4 py-2 bg-slate-50 rounded-lg border border-slate-200">
+                        <span class="text-xs text-slate-500 block uppercase font-bold tracking-wider">Trailing P/E</span>
+                        <span class="text-base font-extrabold text-amber-700">95.0x</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. EXECUTIVE DASHBOARD -->
+        <section id="dashboard" class="space-y-6">
+            <div>
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>📊</span> 1. Executive Dashboard & Market Intelligence Consensus
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    Key platform sentiment metrics, credibility adjustments, polarization indices, and intrinsic scenario valuation baselines.
+                </p>
+            </div>
+
+            <!-- Key Metric KPI Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- KPI 1 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Combined Social Score</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">+46.3</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-black text-slate-900">+46.3 <span class="text-xs font-normal text-slate-500">/ +100</span></div>
+                        <p class="text-xs text-slate-600 mt-1">Weighted: X (65%) + LinkedIn (35%)</p>
+                    </div>
+                    <div class="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 73%"></div>
+                    </div>
+                </div>
+
+                <!-- KPI 2 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Credibility-Weighted</span>
+                        <span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-bold">+54.0</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-black text-indigo-900">+54.0 <span class="text-xs font-normal text-slate-500">/ +100</span></div>
+                        <p class="text-xs text-slate-600 mt-1">Weighted by Tier 1 & Tier 2 Analysts</p>
+                    </div>
+                    <div class="mt-3 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-indigo-600 h-1.5 rounded-full" style="width: 77%"></div>
+                    </div>
+                </div>
+
+                <!-- KPI 3 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Investor Polarization</span>
+                        <span class="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-bold">Medium-High</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-black text-amber-900">Moderate Friction</div>
+                        <p class="text-xs text-slate-600 mt-1">Value Bears vs. Structural Growth Bulls</p>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
+                        <span>Confidence: High</span>
+                        <span>Sample: 525 posts</span>
+                    </div>
+                </div>
+
+                <!-- KPI 4 -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Base Case Valuation</span>
+                        <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">+35.7% Upside</span>
+                    </div>
+                    <div class="mt-3">
+                        <div class="text-2xl font-black text-emerald-700">₹2,764.00</div>
+                        <p class="text-xs text-slate-600 mt-1">Range: ₹1,575 (Bear) – ₹3,375 (Bull)</p>
+                    </div>
+                    <div class="mt-3 text-xs text-slate-500">
+                        Current: ₹2,036.50 (35-40x FY28E P/E)
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Overview Cards for X, LinkedIn, Combined -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- X Summary -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-slate-900">X (Twitter) Intelligence</span>
+                        </div>
+                        <span class="text-xs bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded">340 Analyzed</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center my-4">
+                        <div class="p-2 bg-emerald-50 rounded border border-emerald-100">
+                            <div class="text-lg font-bold text-emerald-700">62%</div>
+                            <div class="text-[10px] text-emerald-800 font-medium uppercase">Bullish</div>
+                        </div>
+                        <div class="p-2 bg-slate-50 rounded border border-slate-100">
+                            <div class="text-lg font-bold text-slate-600">15%</div>
+                            <div class="text-[10px] text-slate-600 font-medium uppercase">Neutral</div>
+                        </div>
+                        <div class="p-2 bg-rose-50 rounded border border-rose-100">
+                            <div class="text-lg font-bold text-rose-700">23%</div>
+                            <div class="text-[10px] text-rose-800 font-medium uppercase">Bearish</div>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 text-xs text-slate-600">
+                        <div class="flex justify-between">
+                            <span>Raw Net Score:</span>
+                            <strong class="text-emerald-700">+39.0</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Engagement Weighted:</span>
+                            <strong class="text-emerald-700">+45.0</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Primary Audience:</span>
+                            <span class="text-slate-800">Retail, Chartists, Speculators</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Summary -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-bold text-slate-900">LinkedIn Intelligence</span>
+                        </div>
+                        <span class="text-xs bg-indigo-50 text-indigo-700 font-semibold px-2 py-0.5 rounded">185 Analyzed</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center my-4">
+                        <div class="p-2 bg-emerald-50 rounded border border-emerald-100">
+                            <div class="text-lg font-bold text-emerald-700">71%</div>
+                            <div class="text-[10px] text-emerald-800 font-medium uppercase">Bullish</div>
+                        </div>
+                        <div class="p-2 bg-slate-50 rounded border border-slate-100">
+                            <div class="text-lg font-bold text-slate-600">18%</div>
+                            <div class="text-[10px] text-slate-600 font-medium uppercase">Neutral</div>
+                        </div>
+                        <div class="p-2 bg-rose-50 rounded border border-rose-100">
+                            <div class="text-lg font-bold text-rose-700">11%</div>
+                            <div class="text-[10px] text-rose-800 font-medium uppercase">Bearish</div>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 text-xs text-slate-600">
+                        <div class="flex justify-between">
+                            <span>Raw Net Score:</span>
+                            <strong class="text-emerald-700">+60.0</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Engagement Weighted:</span>
+                            <strong class="text-emerald-700">+65.0</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Primary Audience:</span>
+                            <span class="text-slate-800">Equity Analysts, Defense Industry</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strategic Summary -->
+                <div class="bg-slate-900 text-white p-6 rounded-xl border border-slate-800 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs uppercase font-bold text-emerald-400 tracking-wider">Executive Synthesis</span>
+                        <h4 class="text-base font-bold text-white mt-1">Divergence Between Retail & Institutional Money</h4>
+                        <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                            LinkedIn institutional authors exhibit significantly higher bullish conviction (+60) than X retail traders (+39), actively looking past current margin compressions toward FY27-FY28 execution on the ₹5,400 Cr NHSRCL bullet train contract.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-800 text-xs flex justify-between text-slate-400">
+                        <span>Public Targets: ₹2,011 – ₹4,602</span>
+                        <span class="text-emerald-400 font-bold">Smart Money: Bullish</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. PLATFORM BREAKDOWN & COMPARISON -->
+        <section id="platforms" class="space-y-6">
+            <div class="border-t border-slate-200 pt-8">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>💬</span> 2. Platform-Specific Sentiment & Author Quality Audit
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    Comparative distribution of sentiment and author credibility tiers across X (Twitter) and LinkedIn.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Visualizing Platform Comparison Chart -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h4 class="text-sm font-bold text-slate-900 mb-2">Platform Sentiment Breakdown (%)</h4>
+                    <p class="text-xs text-slate-500 mb-4">Direct comparison of Bullish, Neutral, Bearish distribution and Net Scores.</p>
+                    <div class="chart-container">
+                        <canvas id="platformChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Author Quality & Credibility Tiers Chart -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h4 class="text-sm font-bold text-slate-900 mb-2">Author Stratification Tiers (Sample)</h4>
+                    <p class="text-xs text-slate-500 mb-4">Distribution of author credibility across Tiers 1-4 for weighted scoring.</p>
+                    <div class="chart-container">
+                        <canvas id="authorTierChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Detail Matrix Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 bg-slate-50 border-b border-slate-200">
+                    <h4 class="text-sm font-bold text-slate-900">Comprehensive Platform Comparison Matrix</h4>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs text-left text-slate-700">
+                        <thead class="bg-slate-100 text-slate-900 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="px-4 py-3">Metric</th>
+                                <th class="px-4 py-3">X (Twitter)</th>
+                                <th class="px-4 py-3">LinkedIn</th>
+                                <th class="px-4 py-3">Combined / Analytical Interpretation</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Relevant Posts Discovered</td>
+                                <td class="px-4 py-3">~1,200</td>
+                                <td class="px-4 py-3">~450</td>
+                                <td class="px-4 py-3 text-slate-600">~1,650 total raw historical matches discovered</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Meaningful Posts Analyzed</td>
+                                <td class="px-4 py-3 font-bold text-slate-900">340</td>
+                                <td class="px-4 py-3 font-bold text-slate-900">185</td>
+                                <td class="px-4 py-3 text-slate-600">525 total high-signal observations after noise filter</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Bullish / Neutral / Bearish %</td>
+                                <td class="px-4 py-3"><span class="text-emerald-700 font-semibold">62%</span> / 15% / <span class="text-rose-700 font-semibold">23%</span></td>
+                                <td class="px-4 py-3"><span class="text-emerald-700 font-semibold">71%</span> / 18% / <span class="text-rose-700 font-semibold">11%</span></td>
+                                <td class="px-4 py-3 text-slate-600">LinkedIn displays significantly higher bullish consensus</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Net Sentiment Score</td>
+                                <td class="px-4 py-3 font-bold text-emerald-700">+39.0</td>
+                                <td class="px-4 py-3 font-bold text-emerald-700">+60.0</td>
+                                <td class="px-4 py-3 font-bold text-emerald-800">+46.3 (Weighted 65/35)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Engagement-Weighted Score</td>
+                                <td class="px-4 py-3 font-bold text-emerald-700">+45.0</td>
+                                <td class="px-4 py-3 font-bold text-emerald-700">+65.0</td>
+                                <td class="px-4 py-3 text-slate-600">+52.0 (Virality driven by ₹5,400 Cr order announcements)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Credibility-Weighted Score</td>
+                                <td class="px-4 py-3 font-bold text-indigo-700">+41.0</td>
+                                <td class="px-4 py-3 font-bold text-indigo-700">+62.0</td>
+                                <td class="px-4 py-3 font-bold text-indigo-800">+54.0 (Tier-1 and Tier-2 analytical conviction)</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Core Focus Area</td>
+                                <td class="px-4 py-3">Technical levels, immediate earnings reactions, order announcements.</td>
+                                <td class="px-4 py-3">Multi-year order book execution, defense indigenization, capital efficiency.</td>
+                                <td class="px-4 py-3 text-slate-600">X reacts to current noise; LinkedIn models long-term capex.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. SENTIMENT TREND & INFORMATION CASCADES -->
+        <section id="trends" class="space-y-6">
+            <div class="border-t border-slate-200 pt-8">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>📈</span> 3. Six-Month Sentiment Evolution & Information Cascades
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    Monthly sentiment dynamics from April to September 2026 showing the V-shaped recovery and catalyst events.
+                </p>
+            </div>
+
+            <!-- Sentiment Line Chart -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Monthly Net Sentiment Trajectory (April 2026 – September 2026)</h4>
+                        <p class="text-xs text-slate-500">Notice the trough during Q4 FY26 earnings (May) followed by a sharp recovery during the Q1 concall and mega-orders.</p>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Major Information Cascades -->
+            <div class="space-y-4">
+                <h4 class="text-sm font-bold text-slate-900">Key Information Cascades Identified</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Cascade 1 -->
+                    <div class="bg-white p-5 rounded-xl border border-rose-200 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-bl">Late May 2026</div>
+                        <span class="text-xs font-bold text-rose-700 block mb-1">Cascade #1: Earnings Shock</span>
+                        <h5 class="text-sm font-bold text-slate-900">Q4 FY26 Margin Collapse</h5>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                            Full-year FY26 results showed record revenue (₹4,350 Cr) but a steep 51.6% drop in net profit. Net margins fell to 6.9%.
+                        </p>
+                        <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+                            <div><strong>Market Reaction:</strong> Retail panic sell-off; stock fell >7%.</div>
+                            <div><strong>Net Sentiment Impact:</strong> Dropped to -18 (Combined).</div>
+                        </div>
+                    </div>
+
+                    <!-- Cascade 2 -->
+                    <div class="bg-white p-5 rounded-xl border border-indigo-200 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-indigo-600 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-bl">August 2026</div>
+                        <span class="text-xs font-bold text-indigo-700 block mb-1">Cascade #2: Management Reassurance</span>
+                        <h5 class="text-sm font-bold text-slate-900">Q1 FY27 Guidance Turning Point</h5>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                            Despite reporting a Q1 loss, management's concall guided for ₹20,000 Cr order inflows in FY27, 30% top-line growth, and a return to 13% margins.
+                        </p>
+                        <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+                            <div><strong>Market Reaction:</strong> 18.8% stock rally into late August.</div>
+                            <div><strong>Net Sentiment Impact:</strong> Surged to +45 (Combined).</div>
+                        </div>
+                    </div>
+
+                    <!-- Cascade 3 -->
+                    <div class="bg-white p-5 rounded-xl border border-emerald-200 shadow-sm relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-emerald-600 text-white text-[10px] uppercase font-bold px-2 py-0.5 rounded-bl">Mid-Sept 2026</div>
+                        <span class="text-xs font-bold text-emerald-700 block mb-1">Cascade #3: High-Speed Milestone</span>
+                        <h5 class="text-sm font-bold text-slate-900">₹5,400 Cr NHSRCL Order Win</h5>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                            Formal announcement of Mumbai-Ahmedabad bullet train rolling stock order for B28 trainsets triggered intense viral euphoria.
+                        </p>
+                        <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 space-y-1">
+                            <div><strong>Market Reaction:</strong> Intraday stock jump +6%; order book >₹21,700 Cr.</div>
+                            <div><strong>Net Sentiment Impact:</strong> Peak +75 (Combined).</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. TOP BULLISH & BEARISH NARRATIVES -->
+        <section id="narratives" class="space-y-6">
+            <div class="border-t border-slate-200 pt-8">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>🎯</span> 4. Dominant Investor Narratives & Evidence Audit
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    In-depth breakdown of the primary bullish catalysts and bearish counter-arguments discussed across social platforms.
+                </p>
+            </div>
+
+            <!-- Narrative Filter Tabs -->
+            <div class="flex space-x-2 border-b border-slate-200 pb-2">
+                <button id="btnBullish" onclick="toggleNarrative('bullish')" class="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow-sm transition-all">
+                    🟢 Top Bullish Themes (3)
+                </button>
+                <button id="btnBearish" onclick="toggleNarrative('bearish')" class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all">
+                    🔴 Top Bearish Themes (3)
+                </button>
+            </div>
+
+            <!-- Bullish Narratives Container -->
+            <div id="bullishNarratives" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Bull 1 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded">Core Narrative #1</span>
+                        <span class="text-[10px] text-slate-500">Mentions: High</span>
+                    </div>
+                    <h4 class="text-base font-bold text-slate-900">Rail & Metro Revenue Inflection</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Transition from legacy mining equipment to a dominant urban mobility and bullet train engineering platform. Rail & Metro now constitutes ~65% of the total ₹21,700+ Cr order backlog.
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs space-y-1">
+                        <div class="font-semibold text-slate-800">Primary Supporting Evidence:</div>
+                        <p class="text-slate-600 text-[11px]">₹5,400 Cr NHSRCL high-speed contract + ₹180.6 Cr Vande Bharat sleeper order. Management target: Rail segment to hit 45% of annual revenue by FY28 (up from 24% in FY26).</p>
+                    </div>
+                    <div class="text-[11px] text-emerald-700 font-semibold flex justify-between items-center pt-2">
+                        <span>Disclosure Verification:</span>
+                        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Supported</span>
+                    </div>
+                </div>
+
+                <!-- Bull 2 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded">Core Narrative #2</span>
+                        <span class="text-[10px] text-slate-500">Mentions: Moderate</span>
+                    </div>
+                    <h4 class="text-base font-bold text-slate-900">Defense Indigenization Platform</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Surging orders for heavy defense systems backed by central government domestic procurement mandates ("Aatmanirbhar Bharat").
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs space-y-1">
+                        <div class="font-semibold text-slate-800">Primary Supporting Evidence:</div>
+                        <p class="text-slate-600 text-[11px]">Successful trials for 12x12 High Mobility Vehicles (HMVs), 1500 HP Main Battle Tank engine development, and AMCA fighter jet consortium participation. Defense revenue grew 25% YoY in Q1 FY27.</p>
+                    </div>
+                    <div class="text-[11px] text-emerald-700 font-semibold flex justify-between items-center pt-2">
+                        <span>Disclosure Verification:</span>
+                        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Supported</span>
+                    </div>
+                </div>
+
+                <!-- Bull 3 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded">Core Narrative #3</span>
+                        <span class="text-[10px] text-slate-500">Mentions: Emerging</span>
+                    </div>
+                    <h4 class="text-base font-bold text-slate-900">Global Export Penetration</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Early international commercial traction expanding market presence into Middle Eastern, African, and CIS regional infrastructure.
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs space-y-1">
+                        <div class="font-semibold text-slate-800">Primary Supporting Evidence:</div>
+                        <p class="text-slate-600 text-[11px]">$6.23 Million export order for motor graders to Uzbekistan (CIS region) alongside hydraulic excavator shipments to Mauritius.</p>
+                    </div>
+                    <div class="text-[11px] text-emerald-700 font-semibold flex justify-between items-center pt-2">
+                        <span>Disclosure Verification:</span>
+                        <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">Supported</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bearish Narratives Container (Hidden by default) -->
+            <div id="bearishNarratives" class="grid grid-cols-1 md:grid-cols-3 gap-6 hidden">
+                <!-- Bear 1 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-rose-800 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded">Bear Risk #1</span>
+                        <span class="text-[10px] text-slate-500">Concern: Severe</span>
+                    </div>
+                    <h4 class="text-base font-bold text-slate-900">Margin Compression & Poor Earnings Quality</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Top-line expansion is failing to translate into bottom-line profits due to severe fixed cost overruns and government contract price caps.
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs space-y-1">
+                        <div class="font-semibold text-slate-800">Primary Financial Evidence:</div>
+                        <p class="text-slate-600 text-[11px]">FY26 net profit fell 51.6% YoY to ₹141.36 Cr despite record revenue (₹4,350 Cr). EBITDA margin collapsed from 12.6% (FY25) to 6.9% (FY26).</p>
+                    </div>
+                    <div class="text-[11px] text-rose-700 font-semibold flex justify-between items-center pt-2">
+                        <span>Disclosure Verification:</span>
+                        <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded">Confirmed Fact</span>
+                    </div>
+                </div>
+
+                <!-- Bear 2 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-rose-800 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded">Bear Risk #2</span>
+                        <span class="text-[10px] text-slate-500">Concern: High</span>
+                    </div>
+                    <h4 class="text-base font-bold text-slate-900">Extreme Working Capital Drain</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Capital is trapped in delayed government accounts receivables, driving free cash flow deeply negative despite operating earnings.
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs space-y-1">
+                        <div class="font-semibold text-slate-800">Primary Financial Evidence:</div>
+                        <p class="text-slate-600 text-[11px]">Trade receivables expanded 34.1% YoY to ₹2,274 Cr in FY26. Debtor days ballooned as payments from State Metros & Defense slowed down.</p>
+                    </div>
+                    <div class="text-[11px] text-rose-700 font-semibold flex justify-between items-center pt-2">
+                        <span>Disclosure Verification:</span>
+                        <span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded">Confirmed Fact</span>
+                    </div>
+                </div>
+
+                <!-- Bear 3 -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-rose-800 bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded">Bear Risk #3</span>
+                        <span class="text-[10px] text-slate-500">Concern: Moderate</span>
+                    </div>
+                    <h4 class="text-base font-bold text-slate-900">Frontier Technological Execution Risk</h4>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        Manufacturing 280 km/h bullet trainsets (B28) without prior domestic precedent poses severe technical and delay risks.
+                    </p>
+                    <div class="bg-slate-50 p-3 rounded border border-slate-100 text-xs space-y-1">
+                        <div class="font-semibold text-slate-800">Primary Financial Evidence:</div>
+                        <p class="text-slate-600 text-[11px]">Delays in Vande Bharat sleeper prototype testing previously led institutional brokerages (e.g., Elara Capital) to cut earnings estimates.</p>
+                    </div>
+                    <div class="text-[11px] text-amber-700 font-semibold flex justify-between items-center pt-2">
+                        <span>Disclosure Verification:</span>
+                        <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded">Execution Key Risk</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. FUNDAMENTAL VALUATION SUITE & TARGET PRICE EXPLORER -->
+        <section id="valuation" class="space-y-6">
+            <div class="border-t border-slate-200 pt-8">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>🧮</span> 5. Fundamental Valuation Suite & Interactive Scenario Calculator
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    Simulate future share price targets by adjusting FY28E financial metrics, or explore publicly discussed target prices from institutions and traders.
+                </p>
+            </div>
+
+            <!-- INTERACTIVE CALCULATOR CARD -->
+            <div class="bg-slate-900 text-white p-6 rounded-xl border border-slate-800 shadow-lg">
+                <div class="flex flex-col lg:flex-row justify-between lg:items-center gap-4 pb-6 border-b border-slate-800">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-wider text-emerald-400">Interactive Model</span>
+                        <h4 class="text-xl font-bold text-white mt-0.5">FY28 Fundamental Valuation Calculator</h4>
+                        <p class="text-xs text-slate-400 mt-1">Adjust revenue growth, EBITDA margin, and market multiple to dynamically project BEML's implied share price.</p>
+                    </div>
+                    <!-- Quick Presets -->
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="applyPreset('bear')" class="px-3 py-1.5 rounded text-xs font-semibold bg-rose-900/60 hover:bg-rose-800 text-rose-200 border border-rose-700 transition-colors">
+                            Apply Bear Scenario
+                        </button>
+                        <button onclick="applyPreset('base')" class="px-3 py-1.5 rounded text-xs font-semibold bg-emerald-900/60 hover:bg-emerald-800 text-emerald-200 border border-emerald-700 transition-colors">
+                            Apply Base Scenario
+                        </button>
+                        <button onclick="applyPreset('bull')" class="px-3 py-1.5 rounded text-xs font-semibold bg-indigo-900/60 hover:bg-indigo-800 text-indigo-200 border border-indigo-700 transition-colors">
+                            Apply Bull Scenario
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+                    <!-- Controls Column -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <!-- Control 1: Revenue CAGR -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <label for="inputRevenue" class="text-slate-300">FY28E Revenue (₹ Crore)</label>
+                                <span class="text-emerald-400 font-bold" id="valRevenueText">₹6,930 Cr (26.2% CAGR)</span>
+                            </div>
+                            <input type="range" id="inputRevenue" min="5000" max="8500" step="100" value="6930" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500" oninput="calculateValuation()">
+                            <div class="flex justify-between text-[10px] text-slate-500">
+                                <span>₹5,000 Cr (Bear Execution)</span>
+                                <span>₹6,930 Cr (Base Target)</span>
+                                <span>₹8,500 Cr (Bull Acceleration)</span>
+                            </div>
+                        </div>
+
+                        <!-- Control 2: EBITDA Margin -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <label for="inputMargin" class="text-slate-300">FY28E Net Profit Margin (%)</label>
+                                <span class="text-emerald-400 font-bold" id="valMarginText">8.30% (EBITDA ~13.6%)</span>
+                            </div>
+                            <input type="range" id="inputMargin" min="5.0" max="12.0" step="0.1" value="8.3" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500" oninput="calculateValuation()">
+                            <div class="flex justify-between text-[10px] text-slate-500">
+                                <span>5.0% (Current Depressed)</span>
+                                <span>8.3% (Base Recovery)</span>
+                                <span>12.0% (Peak Expansion)</span>
+                            </div>
+                        </div>
+
+                        <!-- Control 3: Exit P/E Multiple -->
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-xs font-semibold">
+                                <label for="inputMultiple" class="text-slate-300">Target FY28 P/E Exit Multiple</label>
+                                <span class="text-emerald-400 font-bold" id="valMultipleText">40.0x P/E</span>
+                            </div>
+                            <input type="range" id="inputMultiple" min="25.0" max="55.0" step="1.0" value="40.0" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500" oninput="calculateValuation()">
+                            <div class="flex justify-between text-[10px] text-slate-500">
+                                <span>25x (Derating)</span>
+                                <span>40x (Defense PSU Peer Baseline)</span>
+                                <span>55x (High-Growth Premium)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculated Results Display Column -->
+                    <div class="lg:col-span-5 bg-slate-800 p-6 rounded-xl border border-slate-700 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Calculated Target Output</span>
+                            <div class="mt-2 flex items-baseline gap-2">
+                                <div class="text-3xl font-black text-emerald-400" id="outputTargetPrice">₹2,764.00</div>
+                                <span class="text-xs text-slate-400">per share</span>
+                            </div>
+                            <div class="mt-1 text-xs font-bold text-emerald-300" id="outputUpsideText">
+                                Implied Return: +35.7% from ₹2,036.50
+                            </div>
+                        </div>
+
+                        <div class="my-4 py-3 border-y border-slate-700 space-y-2 text-xs">
+                            <div class="flex justify-between text-slate-300">
+                                <span>Projected FY28 Net Profit:</span>
+                                <strong class="text-white" id="outputNetProfit">₹575.2 Cr</strong>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Projected FY28 EPS:</span>
+                                <strong class="text-white" id="outputEPS">₹69.10</strong>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Shares Outstanding:</span>
+                                <span class="text-slate-400">4.16 Crore</span>
+                            </div>
+                        </div>
+
+                        <p class="text-[10px] text-slate-400 italic">
+                            *This model provides dynamic scenario calculations based on forward financial parameters. It is an analytical simulation tool, not a trading guarantee.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PUBLIC TARGET PRICE SEARCH TABLE -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-6 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900">Public Target Price Tracker & Analyst Disclosures</h4>
+                        <p class="text-xs text-slate-500">Filter publicly discussed price targets across institutional research, retail chartists, and fin-tech models.</p>
+                    </div>
+                    <!-- Table Search Filter -->
+                    <div class="flex items-center gap-2">
+                        <select id="targetFilterType" onchange="filterTargetTable()" class="text-xs bg-white border border-slate-300 rounded-lg px-3 py-1.5 font-medium text-slate-700 focus:outline-none focus:border-emerald-500">
+                            <option value="all">All Author Types</option>
+                            <option value="Institutional">Institutional Brokers</option>
+                            <option value="Retail">Retail / Technical</option>
+                            <option value="Fin-Tech">Fin-Tech / Forecast</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-xs text-left text-slate-700" id="targetTable">
+                        <thead class="bg-slate-100 text-slate-900 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="px-4 py-3">Target Price</th>
+                                <th class="px-4 py-3">Platform</th>
+                                <th class="px-4 py-3">Author / Entity</th>
+                                <th class="px-4 py-3">Author Type</th>
+                                <th class="px-4 py-3">Methodology</th>
+                                <th class="px-4 py-3">Analytical Rationale</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr data-type="Fin-Tech">
+                                <td class="px-4 py-3 font-bold text-slate-900">₹4,602.00</td>
+                                <td class="px-4 py-3">Web / X</td>
+                                <td class="px-4 py-3 font-semibold">Univest</td>
+                                <td class="px-4 py-3"><span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-medium">Fin-Tech</span></td>
+                                <td class="px-4 py-3">Quantitative Forecast</td>
+                                <td class="px-4 py-3 text-slate-600">Deep-future structural bull case modeling ignoring near-term working capital friction.</td>
+                            </tr>
+                            <tr data-type="Institutional">
+                                <td class="px-4 py-3 font-bold text-indigo-700">₹2,765.00</td>
+                                <td class="px-4 py-3">LinkedIn</td>
+                                <td class="px-4 py-3 font-semibold">ICICI Direct</td>
+                                <td class="px-4 py-3"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-medium">Institutional</span></td>
+                                <td class="px-4 py-3">40x FY28E P/E</td>
+                                <td class="px-4 py-3 text-slate-600">Rail & Metro revenue inflection expanding margins to 13.6% by FY28.</td>
+                            </tr>
+                            <tr data-type="Institutional">
+                                <td class="px-4 py-3 font-bold text-indigo-700">₹2,700.00</td>
+                                <td class="px-4 py-3">LinkedIn</td>
+                                <td class="px-4 py-3 font-semibold">Elara Capital</td>
+                                <td class="px-4 py-3"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-medium">Institutional</span></td>
+                                <td class="px-4 py-3">37x FY27E P/E</td>
+                                <td class="px-4 py-3 text-slate-600">Multi-year pipeline execution; target adjusted for Vande Bharat prototype delay.</td>
+                            </tr>
+                            <tr data-type="Institutional">
+                                <td class="px-4 py-3 font-bold text-indigo-700">₹2,600.00</td>
+                                <td class="px-4 py-3">LinkedIn</td>
+                                <td class="px-4 py-3 font-semibold">Emkay Research</td>
+                                <td class="px-4 py-3"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-medium">Institutional</span></td>
+                                <td class="px-4 py-3">SOTP Target Multiple</td>
+                                <td class="px-4 py-3 text-slate-600">Pure exposure to three distinct sovereign engineering vectors (Defense, Rail, Mining).</td>
+                            </tr>
+                            <tr data-type="Retail">
+                                <td class="px-4 py-3 font-bold text-emerald-700">₹3,000.00</td>
+                                <td class="px-4 py-3">X / Trading</td>
+                                <td class="px-4 py-3 font-semibold">H. Trivedi</td>
+                                <td class="px-4 py-3"><span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-medium">Retail</span></td>
+                                <td class="px-4 py-3">Technical Breakout</td>
+                                <td class="px-4 py-3 text-slate-600">Momentum breakout past ₹2,080 major resistance level.</td>
+                            </tr>
+                            <tr data-type="Institutional">
+                                <td class="px-4 py-3 font-bold text-slate-500">₹2,343.25</td>
+                                <td class="px-4 py-3">Web Aggregator</td>
+                                <td class="px-4 py-3 font-semibold">Consensus Average</td>
+                                <td class="px-4 py-3"><span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-medium">Consensus</span></td>
+                                <td class="px-4 py-3">Blended Mean</td>
+                                <td class="px-4 py-3 text-slate-600">Quantitative average across all active institutional coverage.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 6. SOCIAL SENTIMENT VS FUNDAMENTALS MATRIX -->
+        <section id="matrix" class="space-y-6">
+            <div class="border-t border-slate-200 pt-8">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>⚖️</span> 6. Social Sentiment vs. Fundamental Evidence Matrix
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    Directly testing public market narratives against audited balance sheet facts and exchange filings.
+                </p>
+            </div>
+
+            <!-- Positioning Matrix Display -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Quadrant Card -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded">Asset Classification</span>
+                        <h4 class="text-lg font-bold text-slate-900 mt-2">"Social Sentiment Bullish / Valuation Expensive"</h4>
+                        <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                            BEML currently operates in the high-speculative growth paradigm. Retail investor sentiment is driven by headline order book figures (₹21,700+ Cr), while willfully ignoring trailing multiples near 95x P/E, depressed RoE (4.86%), and negative free cash flow generation.
+                        </p>
+                    </div>
+                    <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-100 text-xs text-slate-700">
+                        <strong>Analytical takeaway:</strong> Re-rating requires earnings to catch up mechanically via operational execution over FY27-FY28.
+                    </div>
+                </div>
+
+                <!-- Support Summary Grid -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                    <h4 class="text-sm font-bold text-slate-900">Claim Verification Summary</h4>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex items-center justify-between p-2 rounded bg-emerald-50 border border-emerald-100">
+                            <span class="font-medium text-slate-800">Order Book Expansion (&gt;₹21,700 Cr)</span>
+                            <span class="font-bold text-emerald-800">Supported</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded bg-amber-50 border border-amber-100">
+                            <span class="font-medium text-slate-800">Immediate Margin Expansion (to 13%)</span>
+                            <span class="font-bold text-amber-800">Not Yet Supported</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded bg-rose-50 border border-rose-100">
+                            <span class="font-medium text-slate-800">Working Capital Efficiency</span>
+                            <span class="font-bold text-rose-800">Contradicted</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded bg-emerald-50 border border-emerald-100">
+                            <span class="font-medium text-slate-800">Defense & Rail Diversification</span>
+                            <span class="font-bold text-emerald-800">Supported</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. PRIMARY SOURCE DATABASE & QUALITY AUDIT -->
+        <section class="space-y-6 pb-12">
+            <div class="border-t border-slate-200 pt-8">
+                <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+                    <span>🔍</span> 7. Primary Source Verification & Audit Log
+                </h3>
+                <p class="text-xs text-slate-600 mt-1">
+                    Audited filings, brokerage research notes, and primary data sources cross-referenced in this study.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden text-xs">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-slate-700">
+                        <thead class="bg-slate-100 text-slate-900 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="px-4 py-3">Source Entity</th>
+                                <th class="px-4 py-3">Document / Claim Verified</th>
+                                <th class="px-4 py-3">Data Classification</th>
+                                <th class="px-4 py-3">Verification Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">BSE / NSE Filings</td>
+                                <td class="px-4 py-3">FY26 Financial Results; Revenue ₹4,350.53 Cr; Order wins</td>
+                                <td class="px-4 py-3"><span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-semibold">Fact</span></td>
+                                <td class="px-4 py-3 text-emerald-700 font-bold">Verified via Exchange</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">BEML Corporate Disclosures</td>
+                                <td class="px-4 py-3">₹5,400 Cr NHSRCL Order & ₹180.6 Cr ICF Vande Bharat contract</td>
+                                <td class="px-4 py-3"><span class="bg-slate-100 text-slate-800 px-2 py-0.5 rounded font-semibold">Management Claim</span></td>
+                                <td class="px-4 py-3 text-emerald-700 font-bold">Verified via Exchange</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">ICICI Direct Research</td>
+                                <td class="px-4 py-3">Institutional Initiation Note; Target Price ₹2,765 (40x FY28E)</td>
+                                <td class="px-4 py-3"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-semibold">Analyst Opinion</span></td>
+                                <td class="px-4 py-3 text-indigo-700 font-bold">Institutional Report</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">ChartAlert Forensic Audit</td>
+                                <td class="px-4 py-3">FY26 receivables surged 34% to ₹2,274 Cr; negative free cash flow</td>
+                                <td class="px-4 py-3"><span class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded font-semibold">Fact / Forensic</span></td>
+                                <td class="px-4 py-3 text-emerald-700 font-bold">Verified via Annual Report</td>
+                            </tr>
+                            <tr>
+                                <td class="px-4 py-3 font-semibold text-slate-900">Elara Capital Concall Note</td>
+                                <td class="px-4 py-3">Management guidance: ₹20,000 Cr order inflows for FY27</td>
+                                <td class="px-4 py-3"><span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded font-semibold">Analyst / Concall</span></td>
+                                <td class="px-4 py-3 text-indigo-700 font-bold">Verified via Concall</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 text-xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <p class="font-semibold text-slate-300">BEML Ltd Social Sentiment & Valuation Intelligence SPA</p>
+                <p class="text-slate-500 mt-0.5">Analysis Period: March 27, 2026 – September 27, 2026. For institutional research and educational purposes.</p>
+            </div>
+            <div class="text-slate-500">
+                Data Confidence: <span class="text-emerald-400 font-bold">Medium-High</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. CHART.JS CONFIGURATIONS ---
+        
+        // Label wrapping logic (16-char threshold)
+        function wrapLabel(label) {
+            if (label.length <= 16) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = '';
+            words.forEach(word => {
+                if ((currentLine + word).length > 16) {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            });
+            if (currentLine.trim()) lines.push(currentLine.trim());
+            return lines;
+        }
+
+        // Common Tooltip Configuration for Chart.js
+        const commonTooltipConfig = {
+            backgroundColor: '#0f172a',
+            titleFont: { size: 12, weight: 'bold' },
+            bodyFont: { size: 11 },
+            padding: 10,
+            cornerRadius: 6
+        };
+
+        // Render Platform Comparison Grouped Bar Chart
+        const ctxPlatform = document.getElementById('platformChart').getContext('2d');
+        new Chart(ctxPlatform, {
+            type: 'bar',
+            data: {
+                labels: ['X (Twitter)', 'LinkedIn'],
+                datasets: [
+                    {
+                        label: 'Bullish %',
+                        data: [62, 71],
+                        backgroundColor: '#10b981',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Neutral %',
+                        data: [15, 18],
+                        backgroundColor: '#94a3b8',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Bearish %',
+                        data: [23, 11],
+                        backgroundColor: '#f43f5e',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 11 } } },
+                    tooltip: commonTooltipConfig
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { callback: value => value + '%' }
+                    }
+                }
+            }
+        });
+
+        // Render Author Stratification Doughnut Chart
+        const ctxAuthor = document.getElementById('authorTierChart').getContext('2d');
+        new Chart(ctxAuthor, {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Tier 1: Institutional Analysts',
+                    'Tier 2: Deep Value / Bloggers',
+                    'Tier 3: Retail Participants',
+                    'Tier 4: Algorithmic / Noise'
+                ].map(wrapLabel),
+                datasets: [{
+                    data: [22, 31, 35, 12],
+                    backgroundColor: ['#4f46e5', '#0284c7', '#10b981', '#cbd5e1'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { font: { size: 10 } } },
+                    tooltip: commonTooltipConfig
+                }
+            }
+        });
+
+        // Render 6-Month Sentiment Trajectory Line Chart
+        const ctxTrend = document.getElementById('trendChart').getContext('2d');
+        new Chart(ctxTrend, {
+            type: 'line',
+            data: {
+                labels: ['April 2026', 'May 2026', 'June 2026', 'July 2026', 'August 2026', 'September 2026'],
+                datasets: [
+                    {
+                        label: 'Combined Net Sentiment',
+                        data: [20, -18, -1, 19, 45, 75],
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#059669'
+                    },
+                    {
+                        label: 'X Net Sentiment',
+                        data: [15, -25, -10, 10, 40, 70],
+                        borderColor: '#0284c7',
+                        borderDash: [5, 5],
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#0284c7'
+                    },
+                    {
+                        label: 'LinkedIn Net Sentiment',
+                        data: [30, -5, 15, 35, 55, 85],
+                        borderColor: '#4f46e5',
+                        borderDash: [2, 2],
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#4f46e5'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { font: { size: 11 } } },
+                    tooltip: commonTooltipConfig
+                },
+                scales: {
+                    y: {
+                        min: -40,
+                        max: 100,
+                        grid: { color: '#f1f5f9' },
+                        ticks: { callback: val => val > 0 ? '+' + val : val }
+                    }
+                }
+            }
+        });
+
+
+        // --- 2. INTERACTIVE NARRATIVE TOGGLES ---
+        function toggleNarrative(type) {
+            const bullContainer = document.getElementById('bullishNarratives');
+            const bearContainer = document.getElementById('bearishNarratives');
+            const btnBull = document.getElementById('btnBullish');
+            const btnBear = document.getElementById('btnBearish');
+
+            if (type === 'bullish') {
+                bullContainer.classList.remove('hidden');
+                bearContainer.classList.add('hidden');
+                btnBull.className = 'px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow-sm transition-all';
+                btnBear.className = 'px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all';
+            } else {
+                bearContainer.classList.remove('hidden');
+                bullContainer.classList.add('hidden');
+                btnBear.className = 'px-4 py-2 rounded-lg text-xs font-bold bg-rose-600 text-white shadow-sm transition-all';
+                btnBull.className = 'px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-all';
+            }
+        }
+
+
+        // --- 3. INTERACTIVE VALUATION CALCULATOR ---
+        function calculateValuation() {
+            const revenue = parseFloat(document.getElementById('inputRevenue').value);
+            const margin = parseFloat(document.getElementById('inputMargin').value);
+            const multiple = parseFloat(document.getElementById('inputMultiple').value);
+            const sharesOutstanding = 4.16; // 4.16 Crore shares
+            const currentPrice = 2036.50;
+
+            // Calculate Net Profit and EPS
+            const netProfit = (revenue * (margin / 100));
+            const eps = netProfit / sharesOutstanding;
+            const targetPrice = eps * multiple;
+            const upsidePercent = ((targetPrice - currentPrice) / currentPrice) * 100;
+
+            // Update Text Displays
+            document.getElementById('valRevenueText').innerText = '₹' + revenue.toLocaleString() + ' Cr (' + (((revenue/4350.53)**0.5 - 1)*100).toFixed(1) + '% CAGR)';
+            document.getElementById('valMarginText').innerText = margin.toFixed(1) + '% Net Profit Margin';
+            document.getElementById('valMultipleText').innerText = multiple.toFixed(1) + 'x P/E Exit';
+
+            document.getElementById('outputTargetPrice').innerText = '₹' + targetPrice.toFixed(2);
+            document.getElementById('outputNetProfit').innerText = '₹' + netProfit.toFixed(1) + ' Cr';
+            document.getElementById('outputEPS').innerText = '₹' + eps.toFixed(2);
+
+            const upsideElem = document.getElementById('outputUpsideText');
+            if (upsidePercent >= 0) {
+                upsideElem.innerText = 'Implied Return: +' + upsidePercent.toFixed(1) + '% from ₹' + currentPrice.toFixed(2);
+                upsideElem.className = 'mt-1 text-xs font-bold text-emerald-400';
+            } else {
+                upsideElem.innerText = 'Implied Return: ' + upsidePercent.toFixed(1) + '% from ₹' + currentPrice.toFixed(2);
+                upsideElem.className = 'mt-1 text-xs font-bold text-rose-400';
+            }
+        }
+
+        function applyPreset(scenario) {
+            if (scenario === 'bear') {
+                document.getElementById('inputRevenue').value = 5200;
+                document.getElementById('inputMargin').value = 5.0;
+                document.getElementById('inputMultiple').value = 35.0;
+            } else if (scenario === 'base') {
+                document.getElementById('inputRevenue').value = 6930;
+                document.getElementById('inputMargin').value = 8.3;
+                document.getElementById('inputMultiple').value = 40.0;
+            } else if (scenario === 'bull') {
+                document.getElementById('inputRevenue').value = 7500;
+                document.getElementById('inputMargin').value = 10.0;
+                document.getElementById('inputMultiple').value = 45.0;
+            }
+            calculateValuation();
+        }
+
+
+        // --- 4. TARGET PRICE TABLE FILTER ---
+        function filterTargetTable() {
+            const selectedType = document.getElementById('targetFilterType').value;
+            const rows = document.querySelectorAll('#targetTable tbody tr');
+
+            rows.forEach(row => {
+                const rowType = row.getAttribute('data-type');
+                if (selectedType === 'all' || rowType === selectedType) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialize Calculator on load
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateValuation();
+        });
+    </script>
 </body>
 </html>

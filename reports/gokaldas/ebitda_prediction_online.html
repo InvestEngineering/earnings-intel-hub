@@ -1,75 +1,1193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gokaldas | ebitda_prediction_online</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617'
-            },
-            amber: {
-              400: '#fbbf24',
-              500: '#f59e0b'
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gokaldas Exports (GOKEX) - Master Earnings Intelligence & Forecast</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                            950: '#020617'
+                        },
+                        brand: {
+                            blue: '#2563eb',
+                            emerald: '#059669',
+                            amber: '#d97706',
+                            rose: '#e11d48',
+                            indigo: '#4f46e5'
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
-  <style>
-  /* header CSS moved to reports/header.html */
-</style>
-
-  <div id="reportHeader"></div>
-  <script>
-    (function () {
-      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
-      const parts = location.pathname.split('/');
-      const stockFolder = parts[parts.length-2] || '';
-      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      fetch('../header.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-          const host = document.getElementById('reportHeader');
-          if (!host) return;
-          host.innerHTML = html;
-          // set active tab
-          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
-          if (activeTab) activeTab.classList.add('active');
-          // humanize and title-case tabs
-          host.querySelectorAll('.report-tab').forEach(function(t){
-            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
-            const words = label.split(/\s+/).filter(Boolean).map(function(w){
-              if (/^ebitda$/i.test(w)) return 'EBITDA';
-              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            });
-            if (words.length) t.textContent = words.join(' ');
-          });
-          // set stock title if present in header
-          const title = host.querySelector('[data-stock-name]');
-          if (title) title.textContent = stockName || 'Stock Name';
-        })
-        .catch(function () {});
-    })();
-  </script>
+    </script>
+    <!-- Chosen Palette: Financial Slate & Warm Neutrals (Navy, Amber, Emerald, Rose) -->
+    <!-- Application Structure Plan:
+        - Header & Key Operational Status: High-level metrics, active scenario toggle (Base, Bull, Bear), and core thesis overview.
+        - Interactive Navigation Tabs:
+            1. Executive & Forecast Hub: 8-quarter financial dashboard with dynamic Chart.js charts, EPS trajectory, and probability-weighted outputs.
+            2. Financial Driver Models: Deep dive into Revenue, EBITDA margin headwinds/tailwinds, and PAT interest/depreciation drivers.
+            3. M&A & Capex Footprint: Capacity expansion tracker (Bhopal, Jharkhand, Karnataka, BTPL) and timeline.
+            4. Institutional & Sentiment Matrix: Consensus vs Independent comparison table, analyst dispersion analysis, and Alt-Data (Twitter, LinkedIn, ValuePickr) sentiment radar.
+            5. Risks, Catalysts & FAQs: Structured matrix of binary catalysts/risks and direct answers to key strategic questions.
+        - Chosen structure prioritizes immediate quantitative clarity for analysts/investors while enabling intuitive drill-downs into qualitative forensic commentary.
+    -->
+    <!-- Visualization & Content Choices:
+        - 8-Quarter Financial Chart -> Canvas Line & Bar combo (Chart.js) -> Toggle metrics (Revenue/EBITDA/PAT) and Scenarios (Base/Bull/Bear).
+        - EBITDA Margin Bridge -> Canvas Horizontal Bar (Chart.js) -> Headwind vs Tailwind impact decomposition.
+        - Capex & Capacity Rollout -> HTML/CSS Interactive Cards & Progress Bars -> Displays machine additions and revenue potential.
+        - Consensus vs Model -> Interactive Comparison Table with filter highlights -> Visualizes institutional dispersion.
+        - Alt-Data Sentiment -> Dynamic CSS gauge cards & forum insight breakdown -> Visualizes X/Twitter, LinkedIn, and ValuePickr signals.
+        - NO SVG, NO Mermaid JS used.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 340px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased">
-  
+<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-  <main class="report-shell">
-    <section class="report-card">
-      <span class="report-meta">ebitda prediction online</span>
-      <h2>Gokaldas</h2>
-      <p>This section contains the ebitda prediction online report for Gokaldas. Update this file with the stock-specific analysis whenever the report is ready.</p>
-      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
+    <!-- Top Header / App Banner -->
+    <header class="bg-navy-900 text-white border-b border-slate-700 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-xl text-white shadow">
+                    G
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-bold tracking-tight">GOKALDAS EXPORTS LTD (NSE: GOKEX)</h1>
+                        <span class="bg-blue-500/20 text-blue-300 text-xs px-2 py-0.5 rounded border border-blue-400/30 font-medium">Earnings Intelligence</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Master Multi-Source EBITDA & PAT Growth Forecast | Q1 FY27 – Q1 FY29 Horizon</p>
+                </div>
+            </div>
+
+            <!-- Global Filters & Scenario Toggle -->
+            <div class="flex items-center bg-slate-800/80 p-1.5 rounded-lg border border-slate-700 text-xs">
+                <span class="text-slate-400 px-2 font-medium">Scenario:</span>
+                <button onclick="setScenario('base')" id="btn-scenario-base" class="px-3 py-1 rounded-md font-semibold transition bg-blue-600 text-white shadow-sm">Base Case</button>
+                <button onclick="setScenario('bull')" id="btn-scenario-bull" class="px-3 py-1 rounded-md font-semibold transition text-slate-300 hover:text-white">Bull Case</button>
+                <button onclick="setScenario('bear')" id="btn-scenario-bear" class="px-3 py-1 rounded-md font-semibold transition text-slate-300 hover:text-white">Bear Case</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Key Metrics Highlight Bar -->
+    <section class="bg-white border-b border-slate-200 shadow-sm py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">FY27E Revenue</span>
+                    <span class="text-lg font-bold text-navy-900" id="kpi-rev-fy27">₹5,715 Cr</span>
+                    <span class="text-xs text-emerald-600 font-medium block mt-0.5" id="kpi-rev-fy27-g">+43.3% YoY</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">FY28E Revenue</span>
+                    <span class="text-lg font-bold text-navy-900" id="kpi-rev-fy28">₹7,795 Cr</span>
+                    <span class="text-xs text-emerald-600 font-medium block mt-0.5" id="kpi-rev-fy28-g">+36.3% YoY</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">FY27E EBITDA</span>
+                    <span class="text-lg font-bold text-navy-900" id="kpi-ebitda-fy27">₹640 Cr</span>
+                    <span class="text-xs text-blue-600 font-medium block mt-0.5" id="kpi-ebitda-margin-fy27">11.2% Margin</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">FY28E EBITDA Target</span>
+                    <span class="text-lg font-bold text-navy-900" id="kpi-ebitda-fy28">₹960 Cr</span>
+                    <span class="text-xs text-blue-600 font-medium block mt-0.5" id="kpi-ebitda-margin-fy28">12.3% Margin</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">FY27E PAT</span>
+                    <span class="text-lg font-bold text-navy-900" id="kpi-pat-fy27">₹234 Cr</span>
+                    <span class="text-xs text-emerald-600 font-medium block mt-0.5" id="kpi-pat-fy27-g">+134.0% YoY</span>
+                </div>
+                <div class="bg-slate-50 p-3 rounded-lg border border-slate-200">
+                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">M&A Key Catalyst</span>
+                    <span class="text-sm font-bold text-slate-800 truncate block">BRFL Fabrics (BTPL)</span>
+                    <span class="text-xs text-amber-600 font-medium block mt-0.5">Integration Q3 FY27</span>
+                </div>
+            </div>
+        </div>
     </section>
-  </main>
+
+    <!-- Main Navigation Bar -->
+    <nav class="bg-slate-200/60 border-b border-slate-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-1 sm:space-x-4 overflow-x-auto custom-scrollbar py-2 text-xs sm:text-sm font-medium">
+                <button onclick="switchTab('tab-forecast')" id="nav-tab-forecast" class="px-3 py-2 rounded-md bg-white text-blue-700 shadow-sm font-bold whitespace-nowrap">
+                    📊 Forecast Dashboard
+                </button>
+                <button onclick="switchTab('tab-drivers')" id="nav-tab-drivers" class="px-3 py-2 rounded-md text-slate-700 hover:bg-white/60 whitespace-nowrap">
+                    ⚙️ Financial Driver Models
+                </button>
+                <button onclick="switchTab('tab-capex')" id="nav-tab-capex" class="px-3 py-2 rounded-md text-slate-700 hover:bg-white/60 whitespace-nowrap">
+                    🏭 M&A & Expansion Footprint
+                </button>
+                <button onclick="switchTab('tab-consensus')" id="nav-tab-consensus" class="px-3 py-2 rounded-md text-slate-700 hover:bg-white/60 whitespace-nowrap">
+                    🏛️ Consensus & Alt-Data Radar
+                </button>
+                <button onclick="switchTab('tab-risks')" id="nav-tab-risks" class="px-3 py-2 rounded-md text-slate-700 hover:bg-white/60 whitespace-nowrap">
+                    ⚠️ Risks, Catalysts & FAQs
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+        <!-- TAB 1: FORECAST DASHBOARD -->
+        <div id="tab-forecast" class="space-y-6">
+            
+            <!-- Section Introduction -->
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+                <h2 class="text-base font-bold text-blue-900">8-Quarter Forward Earnings Horizon</h2>
+                <p class="text-xs sm:text-sm text-blue-800 mt-1">
+                    Gokaldas Exports is experiencing a structural top-line breakout driven by organic volume growth and the amalgamation of BRFL Textiles (BTPL). Explore the 8-quarter trajectory below, detailing Revenue, EBITDA, and PAT projections alongside historical trough recoveries.
+                </p>
+            </div>
+
+            <!-- Chart & Metric Controls Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex flex-col md:flex-row items-start md:items-center justify-between pb-4 border-b border-slate-200 gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-navy-900">8-Quarter Forecast Visualizer</h3>
+                        <p class="text-xs text-slate-500">Compare Actuals (Q1 FY27) with Forward Projections (Q2 FY27E – Q1 FY29E)</p>
+                    </div>
+                    <div class="flex items-center space-x-2 bg-slate-100 p-1 rounded-lg">
+                        <button onclick="setChartMetric('revenue')" id="chart-btn-rev" class="px-3 py-1 text-xs font-semibold rounded bg-white text-navy-900 shadow-sm">Revenue (₹ Cr)</button>
+                        <button onclick="setChartMetric('ebitda')" id="chart-btn-ebitda" class="px-3 py-1 text-xs font-semibold rounded text-slate-600 hover:text-navy-900">EBITDA & Margins</button>
+                        <button onclick="setChartMetric('pat')" id="chart-btn-pat" class="px-3 py-1 text-xs font-semibold rounded text-slate-600 hover:text-navy-900">PAT & EPS</button>
+                    </div>
+                </div>
+
+                <!-- Main Dynamic Chart Container -->
+                <div class="mt-4">
+                    <div class="chart-container">
+                        <canvas id="forecastMainChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="mt-3 flex items-center justify-between text-xs text-slate-500 italic">
+                    <span>*Note: FY26 earnings trough was driven by a temporary 50% US tariff shock (now rolled back to 10%).</span>
+                    <span id="scenario-indicator-label" class="font-semibold text-blue-600">Active Scenario: Base Case</span>
+                </div>
+            </div>
+
+            <!-- 8-Quarter Master Forecast Data Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                    <h3 class="font-bold text-navy-900 text-sm sm:text-base">8-Quarter Master Forecast Table</h3>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full font-semibold">Q1 FY27 Baseline Verified</span>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Metric</th>
+                                <th class="p-3 bg-blue-50/50">Q1 FY27A</th>
+                                <th class="p-3">Q2 FY27E</th>
+                                <th class="p-3">Q3 FY27E</th>
+                                <th class="p-3">Q4 FY27E</th>
+                                <th class="p-3">Q1 FY28E</th>
+                                <th class="p-3">Q2 FY28E</th>
+                                <th class="p-3">Q3 FY28E</th>
+                                <th class="p-3">Q4 FY28E</th>
+                                <th class="p-3">Q1 FY29E</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 font-mono">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-semibold font-sans text-slate-900">Revenue (₹ Cr)</td>
+                                <td class="p-3 font-bold text-blue-700 bg-blue-50/30">1,180</td>
+                                <td class="p-3">1,225</td>
+                                <td class="p-3 font-bold text-slate-900">1,550</td>
+                                <td class="p-3">1,760</td>
+                                <td class="p-3">1,820</td>
+                                <td class="p-3">1,875</td>
+                                <td class="p-3">1,980</td>
+                                <td class="p-3">2,120</td>
+                                <td class="p-3">2,210</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 text-slate-600">
+                                <td class="p-3 font-semibold font-sans">Revenue YoY %</td>
+                                <td class="p-3 bg-blue-50/30">20.7%</td>
+                                <td class="p-3">22.1%</td>
+                                <td class="p-3 text-emerald-600 font-bold">55.3%</td>
+                                <td class="p-3 text-emerald-600 font-bold">61.9%</td>
+                                <td class="p-3 text-emerald-600">54.2%</td>
+                                <td class="p-3 text-emerald-600">53.0%</td>
+                                <td class="p-3">27.7%</td>
+                                <td class="p-3">20.4%</td>
+                                <td class="p-3">21.4%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-semibold font-sans text-slate-900">EBITDA (₹ Cr)</td>
+                                <td class="p-3 font-bold text-blue-700 bg-blue-50/30">139</td>
+                                <td class="p-3">136</td>
+                                <td class="p-3">163</td>
+                                <td class="p-3 font-bold text-slate-900">205</td>
+                                <td class="p-3">218</td>
+                                <td class="p-3">228</td>
+                                <td class="p-3">247</td>
+                                <td class="p-3">267</td>
+                                <td class="p-3">280</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 text-slate-600">
+                                <td class="p-3 font-semibold font-sans">EBITDA Margin</td>
+                                <td class="p-3 bg-blue-50/30">11.8%</td>
+                                <td class="p-3 text-amber-600">11.1%</td>
+                                <td class="p-3 text-amber-600 font-bold">10.5%</td>
+                                <td class="p-3">11.6%</td>
+                                <td class="p-3">12.0%</td>
+                                <td class="p-3">12.1%</td>
+                                <td class="p-3 text-emerald-600 font-bold">12.5%</td>
+                                <td class="p-3 text-emerald-600">12.6%</td>
+                                <td class="p-3 text-emerald-600">12.7%</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-semibold font-sans text-slate-900">PAT (₹ Cr)</td>
+                                <td class="p-3 font-bold text-blue-700 bg-blue-50/30">44.3</td>
+                                <td class="p-3">47.0</td>
+                                <td class="p-3">58.0</td>
+                                <td class="p-3 font-bold text-slate-900">85.0</td>
+                                <td class="p-3">97.0</td>
+                                <td class="p-3">107.0</td>
+                                <td class="p-3">118.0</td>
+                                <td class="p-3">136.0</td>
+                                <td class="p-3">148.0</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 text-slate-600">
+                                <td class="p-3 font-semibold font-sans">EPS (₹)</td>
+                                <td class="p-3 bg-blue-50/30 font-bold">6.05</td>
+                                <td class="p-3">6.41</td>
+                                <td class="p-3">7.91</td>
+                                <td class="p-3 font-bold text-slate-900">11.60</td>
+                                <td class="p-3">13.24</td>
+                                <td class="p-3">14.60</td>
+                                <td class="p-3">16.10</td>
+                                <td class="p-3">18.56</td>
+                                <td class="p-3">20.20</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-semibold font-sans text-slate-900">Confidence</td>
+                                <td class="p-3 bg-blue-50/30 text-blue-800 font-bold font-sans">Actual</td>
+                                <td class="p-3 font-sans text-emerald-700 font-semibold">High</td>
+                                <td class="p-3 font-sans text-emerald-700 font-semibold">High</td>
+                                <td class="p-3 font-sans text-amber-600 font-semibold">Medium</td>
+                                <td class="p-3 font-sans text-amber-600 font-semibold">Medium</td>
+                                <td class="p-3 font-sans text-amber-600 font-semibold">Medium</td>
+                                <td class="p-3 font-sans text-amber-600 font-semibold">Medium</td>
+                                <td class="p-3 font-sans text-rose-600 font-semibold">Low</td>
+                                <td class="p-3 font-sans text-rose-600 font-semibold">Low</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cumulative Comparison Card -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-navy-900 text-sm sm:text-base border-b border-slate-200 pb-2 mb-3">Previous 8Q Actual vs Next 8Q Estimate</h3>
+                    <div class="space-y-3 text-xs sm:text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-600">Cumulative Revenue:</span>
+                            <div class="text-right">
+                                <span class="line-through text-slate-400 mr-2">₹8,187 Cr</span>
+                                <span class="font-bold text-emerald-600">₹14,530 Cr (+77.4%)</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-emerald-500 h-2 rounded-full" style="width: 77%"></div>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-slate-600">Cumulative EBITDA:</span>
+                            <div class="text-right">
+                                <span class="line-through text-slate-400 mr-2">₹868 Cr</span>
+                                <span class="font-bold text-blue-600">₹1,735 Cr (+99.8%)</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-blue-600 h-2 rounded-full" style="width: 85%"></div>
+                        </div>
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-slate-600">Cumulative PAT:</span>
+                            <div class="text-right">
+                                <span class="line-through text-slate-400 mr-2">₹331 Cr</span>
+                                <span class="font-bold text-indigo-600">₹793 Cr (+139.5%)</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div class="bg-indigo-600 h-2 rounded-full" style="width: 92%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-navy-900 text-sm sm:text-base border-b border-slate-200 pb-2 mb-3">Probability-Weighted FY27 Summary</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            By weighting Base (55%), Bear (30%), and Bull (15%) macro cases (reflecting AGOA risks, promoter pledge overhang, and BTPL turnaround timing), the probability-weighted operational metrics settle at:
+                        </p>
+                        <div class="grid grid-cols-3 gap-2 mt-4 text-center">
+                            <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                                <span class="text-xs text-slate-500 block">Weighted Rev</span>
+                                <span class="font-bold text-slate-900 text-sm">₹5,580 Cr</span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                                <span class="text-xs text-slate-500 block">Weighted EBITDA</span>
+                                <span class="font-bold text-blue-600 text-sm">₹605 Cr</span>
+                            </div>
+                            <div class="bg-slate-50 p-2 rounded border border-slate-200">
+                                <span class="text-xs text-slate-500 block">Weighted PAT</span>
+                                <span class="font-bold text-indigo-600 text-sm">₹212 Cr</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span class="text-slate-500 font-medium">Earnings Inflection Status:</span>
+                        <span class="bg-emerald-100 text-emerald-800 font-bold px-2.5 py-0.5 rounded">Total Breakout in Q4 FY27</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: FINANCIAL DRIVER MODELS -->
+        <div id="tab-drivers" class="hidden space-y-6">
+            
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+                <h2 class="text-base font-bold text-blue-900">Granular Revenue, EBITDA, & PAT Driver Models</h2>
+                <p class="text-xs sm:text-sm text-blue-800 mt-1">
+                    Deconstruct the exact variables driving Gokaldas Exports' performance: core volume expansion, price shifts, BTPL fabric processing addition, minimum wage hikes in Haryana/Karnataka, elevated shipping freights, and debt service.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Revenue Drivers Build-Up -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="font-bold text-navy-900 text-base mb-3 border-b border-slate-200 pb-2">1. Revenue Driver Build-Up</h3>
+                    <p class="text-xs text-slate-600 mb-4">
+                        Revenue expansion is driven by Core Garment volumes scaling toward 105M pieces, Atraco Africa hit of $120M+ run-rate, and BTPL fabric consolidation (~₹1,500 Cr/yr).
+                    </p>
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-slate-800 block">Core Garment Capacity & Volume</span>
+                                <span class="text-slate-500">92M → 105M pieces by FY28 | Utilization rising 75% → 85%+</span>
+                            </div>
+                            <span class="font-bold text-emerald-600">+15% YoY (FY27)</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-slate-800 block">Average Selling Price (ASP) Reset</span>
+                                <span class="text-slate-500">Normalizing pricing post-tariff rollback | Matrix ASP ~₹613</span>
+                            </div>
+                            <span class="font-bold text-emerald-600">+3.5% ASP Drift</span>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-slate-800 block">Africa (Atraco) Subsidiary</span>
+                                <span class="text-slate-500">Restoration of AGOA duty-free status | Q1 FY27 surged 46% YoY</span>
+                            </div>
+                            <span class="font-bold text-blue-600">$127M (FY27E)</span>
+                        </div>
+                        <div class="p-3 bg-blue-50 rounded border border-blue-200 flex justify-between items-center">
+                            <div>
+                                <span class="font-bold text-blue-900 block">BRFL Textiles (BTPL) Amalgamation</span>
+                                <span class="text-blue-700">Consolidating mid-Q3 FY27 | 50L meters/mo fabric processing</span>
+                            </div>
+                            <span class="font-bold text-blue-800">+₹740Cr (FY27) / +₹1,640Cr (FY28)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EBITDA Margin Bridge & Headwinds/Tailwinds -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="font-bold text-navy-900 text-base mb-3 border-b border-slate-200 pb-2">2. EBITDA Margin Headwinds vs. Tailwinds</h3>
+                    <p class="text-xs text-slate-600 mb-2">
+                        Near-term margins contract to 10.5%-11.1% due to BTPL's negative 8% starting EBITDA run-rate and wage hikes, before expanding to 12.5% as fabric vertical integration takes effect.
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="ebitdaBridgeChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- PAT & Debt Service Model -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="font-bold text-navy-900 text-base mb-3 border-b border-slate-200 pb-2">3. PAT Driver Decomposition & Interest Friction</h3>
+                <p class="text-xs text-slate-600 mb-4">
+                    Why PAT growth lags EBITDA in the short term: Assuming ~₹300 Cr debt from BTPL brings total consolidated debt to ~₹850 Cr, locking finance costs at ₹35–45 Cr/qtr alongside elevated capex depreciation.
+                </p>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-100 font-semibold text-slate-600">
+                            <tr>
+                                <th class="p-2.5">P&L Line Item (₹ Cr)</th>
+                                <th class="p-2.5">Q1 FY27A</th>
+                                <th class="p-2.5">Q2 FY27E</th>
+                                <th class="p-2.5">Q3 FY27E</th>
+                                <th class="p-2.5">Q4 FY27E</th>
+                                <th class="p-2.5">Q1 FY28E</th>
+                                <th class="p-2.5">Q2 FY28E</th>
+                                <th class="p-2.5">Q3 FY28E</th>
+                                <th class="p-2.5">Q4 FY28E</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 font-mono">
+                            <tr>
+                                <td class="p-2.5 font-bold font-sans text-slate-900">EBITDA</td>
+                                <td class="p-2.5">139.0</td>
+                                <td class="p-2.5">136.0</td>
+                                <td class="p-2.5">163.0</td>
+                                <td class="p-2.5 font-bold text-blue-700">205.0</td>
+                                <td class="p-2.5">218.0</td>
+                                <td class="p-2.5">228.0</td>
+                                <td class="p-2.5">247.0</td>
+                                <td class="p-2.5">267.0</td>
+                            </tr>
+                            <tr class="text-slate-500">
+                                <td class="p-2.5 font-sans">(-) Depreciation</td>
+                                <td class="p-2.5">41.2</td>
+                                <td class="p-2.5">43.0</td>
+                                <td class="p-2.5">49.0</td>
+                                <td class="p-2.5">51.0</td>
+                                <td class="p-2.5">53.0</td>
+                                <td class="p-2.5">55.0</td>
+                                <td class="p-2.5">56.0</td>
+                                <td class="p-2.5">58.0</td>
+                            </tr>
+                            <tr class="text-rose-600 font-semibold">
+                                <td class="p-2.5 font-sans">(-) Finance Cost (Interest)</td>
+                                <td class="p-2.5">30.5</td>
+                                <td class="p-2.5">36.0</td>
+                                <td class="p-2.5">42.0</td>
+                                <td class="p-2.5">46.0</td>
+                                <td class="p-2.5">44.0</td>
+                                <td class="p-2.5">41.0</td>
+                                <td class="p-2.5">40.0</td>
+                                <td class="p-2.5">38.0</td>
+                            </tr>
+                            <tr class="text-slate-500">
+                                <td class="p-2.5 font-sans">(+) Other Income</td>
+                                <td class="p-2.5">4.8</td>
+                                <td class="p-2.5">5.0</td>
+                                <td class="p-2.5">5.0</td>
+                                <td class="p-2.5">6.0</td>
+                                <td class="p-2.5">6.0</td>
+                                <td class="p-2.5">7.0</td>
+                                <td class="p-2.5">7.0</td>
+                                <td class="p-2.5">8.0</td>
+                            </tr>
+                            <tr class="bg-slate-50 font-bold">
+                                <td class="p-2.5 font-sans text-slate-900">Profit Before Tax (PBT)</td>
+                                <td class="p-2.5">72.1</td>
+                                <td class="p-2.5">62.0</td>
+                                <td class="p-2.5">77.0</td>
+                                <td class="p-2.5 text-blue-800">114.0</td>
+                                <td class="p-2.5">127.0</td>
+                                <td class="p-2.5">139.0</td>
+                                <td class="p-2.5">158.0</td>
+                                <td class="p-2.5">179.0</td>
+                            </tr>
+                            <tr class="text-emerald-700 font-bold">
+                                <td class="p-2.5 font-sans">Expected PAT</td>
+                                <td class="p-2.5">44.3</td>
+                                <td class="p-2.5">47.0</td>
+                                <td class="p-2.5">58.0</td>
+                                <td class="p-2.5 text-indigo-700">85.0</td>
+                                <td class="p-2.5">97.0</td>
+                                <td class="p-2.5">107.0</td>
+                                <td class="p-2.5">118.0</td>
+                                <td class="p-2.5">136.0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 3: M&A & CAPEX FOOTPRINT -->
+        <div id="tab-capex" class="hidden space-y-6">
+            
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+                <h2 class="text-base font-bold text-blue-900">M&A Integration & Capacity Expansion Tracker</h2>
+                <p class="text-xs sm:text-sm text-blue-800 mt-1">
+                    Gokaldas Exports is executing a massive multi-region expansion strategy to capitalize on global "China+1" and "Bangladesh+1" buyer realignments.
+                </p>
+            </div>
+
+            <!-- Expansion Projects Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded">Ongoing</span>
+                            <span class="text-xs font-semibold text-slate-500">Capex: ~₹70 Cr</span>
+                        </div>
+                        <h4 class="font-bold text-navy-900 text-base">Bhopal Phase II (MP)</h4>
+                        <p class="text-xs text-slate-600 mt-2">
+                            Adding 3,000 high-efficiency machines. Operationalizing in Q4 FY27 to fulfill H2 double-shift order backlog.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs">
+                        <div class="flex justify-between text-slate-500 mb-1">
+                            <span>Rev Impact:</span>
+                            <span class="font-bold text-slate-800">₹175 Cr / year</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>EBITDA Margin:</span>
+                            <span class="font-bold text-emerald-600">High (~13%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">In Progress</span>
+                            <span class="text-xs font-semibold text-slate-500">Capex: ~₹50 Cr</span>
+                        </div>
+                        <h4 class="font-bold text-navy-900 text-base">Jharkhand Unit</h4>
+                        <p class="text-xs text-slate-600 mt-2">
+                            Greenfield unit accessing low-cost labor pools. Commissioning scheduled for H2 FY28.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs">
+                        <div class="flex justify-between text-slate-500 mb-1">
+                            <span>Rev Impact:</span>
+                            <span class="font-bold text-slate-800">₹150 Cr / year</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>EBITDA Margin:</span>
+                            <span class="font-bold text-blue-600">Medium (~11.5%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">In Progress</span>
+                            <span class="text-xs font-semibold text-slate-500">Capex: ~₹50 Cr</span>
+                        </div>
+                        <h4 class="font-bold text-navy-900 text-base">Karnataka Unit</h4>
+                        <p class="text-xs text-slate-600 mt-2">
+                            Core regional expansion providing high-complexity outerwear production capabilities.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs">
+                        <div class="flex justify-between text-slate-500 mb-1">
+                            <span>Rev Impact:</span>
+                            <span class="font-bold text-slate-800">₹200 Cr / year</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>EBITDA Margin:</span>
+                            <span class="font-bold text-emerald-600">High (~12.5%)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col justify-between border-l-4 border-l-blue-600">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">99.95% Approved</span>
+                            <span class="text-xs font-semibold text-slate-500">Consolidation</span>
+                        </div>
+                        <h4 class="font-bold text-navy-900 text-base">BRFL Textiles (BTPL)</h4>
+                        <p class="text-xs text-slate-600 mt-2">
+                            Backward vertical integration into fabric processing. Turnaround from -8% EBITDA to PBT positive by Q4 FY27.
+                        </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-100 text-xs">
+                        <div class="flex justify-between text-slate-500 mb-1">
+                            <span>Rev Impact:</span>
+                            <span class="font-bold text-slate-800">₹1,500 Cr / year</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500">
+                            <span>Strategic Role:</span>
+                            <span class="font-bold text-indigo-600">Internal Raw Material</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Integration Timeline Visual -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="font-bold text-navy-900 text-base mb-3 border-b border-slate-200 pb-2">Operational Milestone Timeline</h3>
+                <div class="relative border-l-2 border-slate-200 ml-3 space-y-6 py-2">
+                    <div class="ml-6 relative">
+                        <span class="absolute -left-9 top-0.5 w-4 h-4 rounded-full bg-blue-600 ring-4 ring-white"></span>
+                        <h4 class="text-xs font-bold text-blue-600 uppercase">Q1 FY27 (Completed)</h4>
+                        <p class="text-sm font-bold text-slate-800">Shareholder Approval (99.95%) for BTPL Merger</p>
+                        <p class="text-xs text-slate-500">Core India volume up 16% YoY; Atraco Africa up 46% YoY to ₹239 Cr following AGOA restoration.</p>
+                    </div>
+                    <div class="ml-6 relative">
+                        <span class="absolute -left-9 top-0.5 w-4 h-4 rounded-full bg-amber-500 ring-4 ring-white"></span>
+                        <h4 class="text-xs font-bold text-amber-600 uppercase">Q2 – Q3 FY27 (Imminent)</h4>
+                        <p class="text-sm font-bold text-slate-800">Final NCLT Legal Sanction & BTPL EBITDA Breakeven</p>
+                        <p class="text-xs text-slate-500">BTPL fabric turnover consolidates in Q3; second-shift operations initiated to meet winter order backlog.</p>
+                    </div>
+                    <div class="ml-6 relative">
+                        <span class="absolute -left-9 top-0.5 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-white"></span>
+                        <h4 class="text-xs font-bold text-emerald-600 uppercase">Q4 FY27 – FY28</h4>
+                        <p class="text-sm font-bold text-slate-800">Bhopal Phase II Online & Total Earnings Breakout</p>
+                        <p class="text-xs text-slate-500">BTPL reaches PBT positivity; 3,000 new machines operational; terminal EBITDA margin reaches 12.5% target.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 4: CONSENSUS & ALT-DATA RADAR -->
+        <div id="tab-consensus" class="hidden space-y-6">
+            
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+                <h2 class="text-base font-bold text-blue-900">Institutional Consensus vs. Independent Model & Alt-Data Radar</h2>
+                <p class="text-xs sm:text-sm text-blue-800 mt-1">
+                    Analyze street estimate dispersion (Motilal Oswal, ICICI Direct, PL Capital) alongside alternative data signals gathered from Twitter/X ($GOKEX cashtag), LinkedIn hiring trends, and ValuePickr forum analytics.
+                </p>
+            </div>
+
+            <!-- Analyst Comparison Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 bg-slate-50">
+                    <h3 class="font-bold text-navy-900 text-sm sm:text-base">Institutional Analyst Matrix (FY28 Horizon)</h3>
+                </div>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs text-slate-700">
+                        <thead class="bg-slate-100 font-semibold text-slate-600">
+                            <tr>
+                                <th class="p-3">Brokerage / Source</th>
+                                <th class="p-3">Report Date</th>
+                                <th class="p-3">FY28 Revenue</th>
+                                <th class="p-3">FY28 EBITDA</th>
+                                <th class="p-3">FY28 PAT</th>
+                                <th class="p-3">Key Variance Factor</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-navy-900">Motilal Oswal</td>
+                                <td class="p-3 text-slate-500">Aug 2026</td>
+                                <td class="p-3 font-mono">₹6,400 Cr</td>
+                                <td class="p-3 font-mono">₹800 Cr</td>
+                                <td class="p-3 font-mono">₹450 Cr</td>
+                                <td class="p-3 text-slate-600">Bakes in UK/EU FTA benefits & 12.5% terminal margin.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50">
+                                <td class="p-3 font-bold text-navy-900">ICICI Direct</td>
+                                <td class="p-3 text-slate-500">Aug 2026</td>
+                                <td class="p-3 font-mono">₹5,683 Cr</td>
+                                <td class="p-3 font-mono">₹710 Cr</td>
+                                <td class="p-3 font-mono">₹363 Cr</td>
+                                <td class="p-3 text-slate-600">Cautious on wage hikes; trimmed price target to ₹910.</td>
+                            </tr>
+                            <tr class="hover:bg-slate-50 text-slate-400">
+                                <td class="p-3 font-semibold">PL Capital (Outdated)</td>
+                                <td class="p-3">Jun 2026</td>
+                                <td class="p-3 font-mono">₹3,987 Cr</td>
+                                <td class="p-3 font-mono">₹356 Cr</td>
+                                <td class="p-3 font-mono">₹100 Cr</td>
+                                <td class="p-3">Excludes BTPL amalgamation entirely.</td>
+                            </tr>
+                            <tr class="bg-blue-50/60 font-bold border-t-2 border-blue-200">
+                                <td class="p-3 text-blue-900">Independent Forecast</td>
+                                <td class="p-3 text-blue-700">Current</td>
+                                <td class="p-3 font-mono text-blue-900">₹7,795 Cr</td>
+                                <td class="p-3 font-mono text-blue-900">₹960 Cr</td>
+                                <td class="p-3 font-mono text-blue-900">₹456 Cr</td>
+                                <td class="p-3 text-blue-800 font-sans">Mechanically consolidates full ₹1,500 Cr BTPL run-rate.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Alternative Data Radar Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                
+                <!-- Twitter/X Sentiment -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                        <span class="font-bold text-navy-900 text-sm">X / Twitter ($GOKEX)</span>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded">+10 Score</span>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Positive (45%):</span>
+                            <span class="font-semibold text-emerald-600">Q1 volume & BTPL approval</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Negative (35%):</span>
+                            <span class="font-semibold text-rose-600">96.3% Promoter Pledge panic</span>
+                        </div>
+                        <p class="text-slate-500 pt-2 border-t border-slate-100 italic">
+                            Retail sentiment is heavily fixated on the promoter equity pledge, capping short-term retail valuation enthusiasm.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- LinkedIn Hiring Trends -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                        <span class="font-bold text-navy-900 text-sm">LinkedIn Intelligence</span>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2 py-0.5 rounded">+40 Score</span>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Factory Operations:</span>
+                            <span class="font-semibold text-emerald-600">Aggressive MP & KA hiring</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Middle Management:</span>
+                            <span class="font-semibold text-blue-600">Merchandising expansion</span>
+                        </div>
+                        <p class="text-slate-500 pt-2 border-t border-slate-100 italic">
+                            Factory floor job postings independently confirm Bhopal Phase II operationalization is strictly on schedule.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ValuePickr Forum Intelligence -->
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-200 pb-2 mb-3">
+                        <span class="font-bold text-navy-900 text-sm">ValuePickr Forum</span>
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2 py-0.5 rounded">High Skepticism</span>
+                    </div>
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Primary Red Flag:</span>
+                            <span class="font-semibold text-slate-800">BTPL -8% EBITDA drag</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Policy Risk Focus:</span>
+                            <span class="font-semibold text-rose-600">Dec 2026 AGOA Expiry</span>
+                        </div>
+                        <p class="text-slate-500 pt-2 border-t border-slate-100 italic">
+                            Forensic analysts question management's ability to turn BTPL positive within 2 quarters given historical ARC management.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- TAB 5: RISKS, CATALYSTS & FAQS -->
+        <div id="tab-risks" class="hidden space-y-6">
+            
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+                <h2 class="text-base font-bold text-blue-900">Catalysts, Key Risks, & Analytical Highlights</h2>
+                <p class="text-xs sm:text-sm text-blue-800 mt-1">
+                    Evaluate binary downside risks against multi-year upside triggers, and access structured answers to the report's key investment questions.
+                </p>
+            </div>
+
+            <!-- Catalyst & Risk Matrix Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Key Catalysts -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-emerald-700 text-base mb-3 border-b border-slate-200 pb-2">🚀 Major EBITDA & PAT Catalysts</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-emerald-50 rounded border border-emerald-200">
+                            <span class="font-bold text-emerald-900 block">BTPL Turnaround to PBT Positivity (Q4 FY27)</span>
+                            <p class="text-emerald-800 mt-0.5">Eliminates an 8% EBITDA margin drag on ₹170 Cr quarterly turnover, unlocking raw material gross margin capture.</p>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded border border-emerald-200">
+                            <span class="font-bold text-emerald-900 block">UK & EU Free Trade Agreements (FTA)</span>
+                            <p class="text-emerald-800 mt-0.5">UK FTA expected CY26 / EU FTA Jan 2027. Levels playing field vs duty-free Bangladesh, unlocking $1B+ Indian apparel export window.</p>
+                        </div>
+                        <div class="p-3 bg-emerald-50 rounded border border-emerald-200">
+                            <span class="font-bold text-emerald-900 block">Bhopal Phase II Operationalization</span>
+                            <p class="text-emerald-800 mt-0.5">3,000 new machines hitting fixed overheads, generating ₹175 Cr/yr in high-margin revenue.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Risks -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="font-bold text-rose-700 text-base mb-3 border-b border-slate-200 pb-2">⚠️ Major Downside & Policy Risks</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-rose-50 rounded border border-rose-200">
+                            <span class="font-bold text-rose-900 block">AGOA Expiry in December 2026</span>
+                            <p class="text-rose-800 mt-0.5">African duty-free access to the US expires Dec 2026. Non-renewal severely impairs the $120M Atraco strategic model.</p>
+                        </div>
+                        <div class="p-3 bg-rose-50 rounded border border-rose-200">
+                            <span class="font-bold text-rose-900 block">Government Export Incentive Cuts (RoSCTL / RoDTEP)</span>
+                            <p class="text-rose-800 mt-0.5">DGFT cut RoDTEP by 50%. An equivalent RoSCTL cut would instantly destroy up to 1.75% of Gokaldas's operational margin bridge.</p>
+                        </div>
+                        <div class="p-3 bg-rose-50 rounded border border-rose-200">
+                            <span class="font-bold text-rose-900 block">96.3% Promoter Equity Pledge</span>
+                            <p class="text-rose-800 mt-0.5">Extreme promoter pledge introduces acute liquidity risk if market volatility triggers margin calls.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Strategic Q&A Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="font-bold text-navy-900 text-base mb-4 border-b border-slate-200 pb-2">Core Strategic Questions & Direct Intelligence</h3>
+                <div class="space-y-4 text-xs sm:text-sm">
+                    <div>
+                        <h4 class="font-bold text-slate-800">Q1: Which quarter exhibits the highest expected EBITDA growth?</h4>
+                        <p class="text-slate-600 mt-0.5">
+                            <span class="font-semibold text-blue-700">Q3 FY27 (+117.3% YoY)</span>, driven by the mathematical consolidation of BRFL Textiles and the rollout of Bhopal Phase II capacity against a severely depressed Q3 FY26 base.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Q2: Why is PAT growth lagging EBITDA growth in absolute terms?</h4>
+                        <p class="text-slate-600 mt-0.5">
+                            While PAT % growth appears hyper-inflated due to base effects, operational PAT growth lags EBITDA due to the assumption of ~₹300 Cr debt from BTPL (locking finance costs at ₹35-45 Cr/qtr) and elevated depreciation from annual capex.
+                        </p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800">Q3: What is the street missing regarding the BTPL acquisition?</h4>
+                        <p class="text-slate-600 mt-0.5">
+                            Consensus analysts aggressively consolidate BTPL top-line revenue but heavily underestimate the turnaround friction of a previously ARC-managed asset running at -8% EBITDA. Near-term margins will suffer dilution through Q3 FY27.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-navy-900 text-slate-400 text-xs py-4 border-t border-slate-800 mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div>
+                <span>© 2026 Gokaldas Exports (GOKEX) Financial Intelligence Platform</span>
+            </div>
+            <div class="text-slate-500">
+                Data Sources: NCLT Filings, Q1 FY27 Concalls, Motilal Oswal, ICICI Direct, ValuePickr
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Structures for Scenarios
+        const scenarioData = {
+            base: {
+                rev: [1180, 1225, 1550, 1760, 1820, 1875, 1980, 2120, 2210],
+                ebitda: [139, 136, 163, 205, 218, 228, 247, 267, 280],
+                margin: [11.8, 11.1, 10.5, 11.6, 12.0, 12.1, 12.5, 12.6, 12.7],
+                pat: [44.3, 47.0, 58.0, 85.0, 97.0, 107.0, 118.0, 136.0, 148.0],
+                eps: [6.05, 6.41, 7.91, 11.60, 13.24, 14.60, 16.10, 18.56, 20.20],
+                fy27Rev: '₹5,715 Cr', fy27RevG: '+43.3% YoY',
+                fy28Rev: '₹7,795 Cr', fy28RevG: '+36.3% YoY',
+                fy27Ebitda: '₹640 Cr', fy27Margin: '11.2% Margin',
+                fy28Ebitda: '₹960 Cr', fy28Margin: '12.3% Margin',
+                fy27Pat: '₹234 Cr', fy27PatG: '+134.0% YoY'
+            },
+            bull: {
+                rev: [1180, 1280, 1650, 1880, 1950, 2020, 2150, 2300, 2410],
+                ebitda: [139, 153, 198, 244, 263, 275, 298, 322, 340],
+                margin: [11.8, 12.0, 12.0, 13.0, 13.5, 13.6, 13.8, 14.0, 14.1],
+                pat: [44.3, 58.0, 78.0, 115.0, 125.0, 138.0, 155.0, 178.0, 192.0],
+                eps: [6.05, 7.91, 10.64, 15.68, 17.05, 18.82, 21.14, 24.28, 26.19],
+                fy27Rev: '₹6,110 Cr', fy27RevG: '+53.2% YoY',
+                fy28Rev: '₹8,420 Cr', fy28RevG: '+37.8% YoY',
+                fy27Ebitda: '₹710 Cr', fy27Margin: '11.6% Margin',
+                fy28Ebitda: '₹1,136 Cr', fy28Margin: '13.5% Margin',
+                fy27Pat: '₹280 Cr', fy27PatG: '+180.0% YoY'
+            },
+            bear: {
+                rev: [1180, 1180, 1400, 1600, 1650, 1700, 1780, 1890, 1950],
+                ebitda: [139, 118, 126, 160, 165, 170, 187, 198, 205],
+                margin: [11.8, 10.0, 9.0, 10.0, 10.0, 10.0, 10.5, 10.5, 10.5],
+                pat: [44.3, 35.0, 40.0, 60.0, 65.0, 70.0, 78.0, 88.0, 95.0],
+                eps: [6.05, 4.77, 5.45, 8.18, 8.86, 9.55, 10.64, 12.00, 12.96],
+                fy27Rev: '₹5,360 Cr', fy27RevG: '+34.4% YoY',
+                fy28Rev: '₹7,020 Cr', fy28RevG: '+31.0% YoY',
+                fy27Ebitda: '₹524 Cr', fy27Margin: '9.8% Margin',
+                fy28Ebitda: '₹720 Cr', fy28Margin: '10.2% Margin',
+                fy27Pat: '₹170 Cr', fy27PatG: '+70.0% YoY'
+            }
+        };
+
+        const quarterLabels = ['Q1 FY27A', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E', 'Q2 FY28E', 'Q3 FY28E', 'Q4 FY28E', 'Q1 FY29E'];
+        
+        let currentScenario = 'base';
+        let currentChartMetric = 'revenue';
+        let mainChartInstance = null;
+        let ebitdaBridgeChartInstance = null;
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            initMainChart();
+            initEbitdaBridgeChart();
+        });
+
+        // Scenario Setter
+        function setScenario(scen) {
+            currentScenario = scen;
+            ['base', 'bull', 'bear'].forEach(s => {
+                const btn = document.getElementById(`btn-scenario-${s}`);
+                if (s === scen) {
+                    btn.className = "px-3 py-1 rounded-md font-semibold transition bg-blue-600 text-white shadow-sm";
+                } else {
+                    btn.className = "px-3 py-1 rounded-md font-semibold transition text-slate-300 hover:text-white";
+                }
+            });
+
+            // Update KPI Card Texts
+            const d = scenarioData[scen];
+            document.getElementById('kpi-rev-fy27').innerText = d.fy27Rev;
+            document.getElementById('kpi-rev-fy27-g').innerText = d.fy27RevG;
+            document.getElementById('kpi-rev-fy28').innerText = d.fy28Rev;
+            document.getElementById('kpi-rev-fy28-g').innerText = d.fy28RevG;
+            document.getElementById('kpi-ebitda-fy27').innerText = d.fy27Ebitda;
+            document.getElementById('kpi-ebitda-margin-fy27').innerText = d.fy27Margin;
+            document.getElementById('kpi-ebitda-fy28').innerText = d.fy28Ebitda;
+            document.getElementById('kpi-ebitda-margin-fy28').innerText = d.fy28Margin;
+            document.getElementById('kpi-pat-fy27').innerText = d.fy27Pat;
+            document.getElementById('kpi-pat-fy27-g').innerText = d.fy27PatG;
+
+            document.getElementById('scenario-indicator-label').innerText = `Active Scenario: ${scen.toUpperCase()} Case`;
+
+            updateMainChart();
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            ['tab-forecast', 'tab-drivers', 'tab-capex', 'tab-consensus', 'tab-risks'].forEach(t => {
+                const el = document.getElementById(t);
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (t === tabId) {
+                    el.classList.remove('hidden');
+                    navBtn.className = "px-3 py-2 rounded-md bg-white text-blue-700 shadow-sm font-bold whitespace-nowrap";
+                } else {
+                    el.classList.add('hidden');
+                    navBtn.className = "px-3 py-2 rounded-md text-slate-700 hover:bg-white/60 whitespace-nowrap";
+                }
+            });
+        }
+
+        // Main Chart Metric Selector
+        function setChartMetric(metric) {
+            currentChartMetric = metric;
+            ['rev', 'ebitda', 'pat'].forEach(m => {
+                const btn = document.getElementById(`chart-btn-${m}`);
+                if (m === metric || (m === 'rev' && metric === 'revenue')) {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded bg-white text-navy-900 shadow-sm";
+                } else {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded text-slate-600 hover:text-navy-900";
+                }
+            });
+            updateMainChart();
+        }
+
+        // Initialize Main Chart
+        function initMainChart() {
+            const ctx = document.getElementById('forecastMainChart').getContext('2d');
+            mainChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: getMainChartData(),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                font: { size: 12, family: 'sans-serif' },
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            padding: 10,
+                            bodySpacing: 4
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }
+                        },
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        function getMainChartData() {
+            const d = scenarioData[currentScenario];
+            if (currentChartMetric === 'revenue') {
+                return {
+                    labels: quarterLabels,
+                    datasets: [{
+                        label: 'Quarterly Revenue (₹ Cr)',
+                        data: d.rev,
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                };
+            } else if (currentChartMetric === 'ebitda') {
+                return {
+                    labels: quarterLabels,
+                    datasets: [
+                        {
+                            label: 'EBITDA (₹ Cr)',
+                            data: d.ebitda,
+                            borderColor: '#059669',
+                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
+                            type: 'bar',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'EBITDA Margin (%)',
+                            data: d.margin,
+                            borderColor: '#d97706',
+                            borderWidth: 2,
+                            type: 'line',
+                            yAxisID: 'y1',
+                            tension: 0.2
+                        }
+                    ]
+                };
+            } else {
+                return {
+                    labels: quarterLabels,
+                    datasets: [{
+                        label: 'Quarterly PAT (₹ Cr)',
+                        data: d.pat,
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 4
+                    }]
+                };
+            }
+        }
+
+        function updateMainChart() {
+            if (!mainChartInstance) return;
+            const newData = getMainChartData();
+            mainChartInstance.data = newData;
+            
+            // Handle dual axes for EBITDA margin view
+            if (currentChartMetric === 'ebitda') {
+                mainChartInstance.options.scales.y1 = {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    grid: { drawOnChartArea: false },
+                    ticks: {
+                        callback: function(value) { return value + '%'; }
+                    }
+                };
+            } else {
+                delete mainChartInstance.options.scales.y1;
+            }
+
+            mainChartInstance.update();
+        }
+
+        // Initialize EBITDA Bridge Chart
+        function initEbitdaBridgeChart() {
+            const ctx = document.getElementById('ebitdaBridgeChart').getContext('2d');
+            ebitdaBridgeChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Baseline (11.8%)', 'Pricing Relief', 'Scale Leverage', 'Wage Inflation', 'Red Sea Freight', 'BTPL Short Dilution', 'Terminal (12.5%)'],
+                    datasets: [{
+                        label: 'Margin Bridge Delta (%)',
+                        data: [11.8, 0.8, 1.2, -0.6, -0.5, -0.2, 12.5],
+                        backgroundColor: [
+                            '#2563eb',
+                            '#059669',
+                            '#059669',
+                            '#e11d48',
+                            '#e11d48',
+                            '#d97706',
+                            '#059669'
+                        ],
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const val = context.raw;
+                                    return (val > 0 ? '+' : '') + val + '% Margin Impact';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: {
+                            grid: { color: '#f1f5f9' },
+                            ticks: {
+                                callback: function(val) { return val + '%'; }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 </html>

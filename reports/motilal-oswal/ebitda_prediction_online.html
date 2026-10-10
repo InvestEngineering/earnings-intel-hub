@@ -1,75 +1,1192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Motilal Oswal | ebitda_prediction_online</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            slate: {
-              950: '#020617'
-            },
-            amber: {
-              400: '#fbbf24',
-              500: '#f59e0b'
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motilal Oswal (MOFSL) - Earnings Intelligence & Forecast Terminal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        amberbrand: {
+                            50: '#fffbe1',
+                            100: '#fef3c7',
+                            500: '#d97706',
+                            600: '#b45309',
+                            700: '#92400e',
+                        },
+                        financial: {
+                            navy: '#0f172a',
+                            slate: '#1e293b',
+                            card: '#ffffff',
+                            subtle: '#f8fafc',
+                            accent: '#2563eb',
+                            positive: '#16a34a',
+                            negative: '#dc2626'
+                        }
+                    }
+                }
             }
-          }
         }
-      }
-    }
-  </script>
-  <style>
-  /* header CSS moved to reports/header.html */
-</style>
-
-  <div id="reportHeader"></div>
-  <script>
-    (function () {
-      const pageName = location.pathname.split('/').pop() || 'annual_prediction.html';
-      const parts = location.pathname.split('/');
-      const stockFolder = parts[parts.length-2] || '';
-      const stockName = stockFolder.replace(/[-_]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-      fetch('../header.html')
-        .then(function (res) { return res.text(); })
-        .then(function (html) {
-          const host = document.getElementById('reportHeader');
-          if (!host) return;
-          host.innerHTML = html;
-          // set active tab
-          const activeTab = host.querySelector('.report-tab[data-page="' + pageName + '"]');
-          if (activeTab) activeTab.classList.add('active');
-          // humanize and title-case tabs
-          host.querySelectorAll('.report-tab').forEach(function(t){
-            let label = (t.dataset.label || t.dataset.page || '').replace(/\.html$/i, '').replace(/[-_]+/g, ' ');
-            const words = label.split(/\s+/).filter(Boolean).map(function(w){
-              if (/^ebitda$/i.test(w)) return 'EBITDA';
-              return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-            });
-            if (words.length) t.textContent = words.join(' ');
-          });
-          // set stock title if present in header
-          const title = host.querySelector('[data-stock-name]');
-          if (title) title.textContent = stockName || 'Stock Name';
-        })
-        .catch(function () {});
-    })();
-  </script>
+    </script>
+    <style>
+        /* Embedded CSS for Chart Container Constraints */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 320px;
+            max-height: 380px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 6px;
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased">
-  
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-amber-100 selection:text-amber-900">
 
-  <main class="report-shell">
-    <section class="report-card">
-      <span class="report-meta">ebitda prediction online</span>
-      <h2>Motilal Oswal</h2>
-      <p>This section contains the ebitda prediction online report for Motilal Oswal. Update this file with the stock-specific analysis whenever the report is ready.</p>
-      <p>The active report tab remains pinned to the current page and the navigation above links to the three expected files under the same stock directory.</p>
-    </section>
-  </main>
+    <!-- Chosen Palette: Warm Amber & Financial Slate -->
+    <!-- Application Structure Plan: The SPA is organized into 5 intuitive thematic modules designed for institutional investors, data analysts, and wealth managers:
+         1. Executive Overview & Transformation Hub: Core structural narrative (66% ARR, ₹4.5L Cr AUM, Treasury), KPI cards, and Quality of Earnings breakdown.
+         2. 8-Quarter Forecast & Interactive Scenario Engine: Core quarterly trajectory (Q1 FY27 - Q1 FY29) with dynamic Bear/Base/Bull probability switches, Chart.js multi-axis trajectory visualizer, and confidence toggles.
+         3. Segmental Drivers & Operating Model: Deep-dive into AMC/Wealth, F&O Broking, Housing Finance, and Treasury with volume/realization sliders and interactive qualitative impact matrices.
+         4. Analyst Consensus vs. Independent Intelligence: Independent forecast benchmarked against Street Consensus (ICICI Sec, UBS, Investec), target price dispersion, and valuation re-rating thesis ("What Market is Missing").
+         5. Market Sentiment, Concall & Risk Matrix: Social Sentiment gauges (X vs LinkedIn), concall diagnostic flags, and searchable Catalyst/Risk Matrix.
+         This non-linear architecture allows users to seamlessly jump between high-level macro forecasts and forensic segmental micro-drivers. -->
+    <!-- Visualization & Content Choices: 
+         - KPI Summary Cards: Pure HTML/Tailwind for rapid scanning of core metrics (Revenue, EBITDA, PAT, AUM, ARR %).
+         - 8-Quarter Financial Trajectory: Chart.js Bar + Line combination chart (Canvas) with dynamic dataset updates for scenario switching (Base/Bull/Bear).
+         - Segment Revenue/PAT Mix: Interactive HTML/CSS segment cards with dynamic Chart.js Doughnut chart for ARR vs Cyclical revenue breakdown.
+         - Consensus vs Independent Benchmark: Grouped dynamic Chart.js Bar Chart comparing quarterly revenue/PAT deltas.
+         - Sentiment Gauges: HTML/CSS CSS-styled progress meters for X/Twitter and LinkedIn sentiment scores (No SVG).
+         - Catalyst & Risk Matrix: Interactive searchable/filterable HTML Table with category tags. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Header Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-slate-900 text-white border-b border-slate-800 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Brand Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded bg-gradient-to-tr from-amber-500 to-amber-300 flex items-center justify-center font-bold text-slate-900 text-lg shadow">
+                        MO
+                    </div>
+                    <div>
+                        <span class="font-bold text-base sm:text-lg tracking-tight text-white block leading-tight">MOTILAL OSWAL</span>
+                        <span class="text-xs text-amber-400 font-medium">Earnings Intelligence & Forecast Model</span>
+                    </div>
+                </div>
+
+                <!-- Ticker Banner (Desktop) -->
+                <div class="hidden lg:flex items-center space-x-6 text-xs bg-slate-800/80 px-4 py-2 rounded-lg border border-slate-700">
+                    <div><span class="text-slate-400">ARR Mix:</span> <span class="font-bold text-emerald-400">66.0%</span></div>
+                    <div class="h-3 w-px bg-slate-700"></div>
+                    <div><span class="text-slate-400">Combined AUM:</span> <span class="font-bold text-amber-300">₹4.50 Lakh Cr</span></div>
+                    <div class="h-3 w-px bg-slate-700"></div>
+                    <div><span class="text-slate-400">Prop Treasury:</span> <span class="font-bold text-blue-400">₹10,482 Cr</span></div>
+                    <div class="h-3 w-px bg-slate-700"></div>
+                    <div><span class="text-slate-400">FY27E PAT:</span> <span class="font-bold text-emerald-400">₹4,474 Cr (+126% YoY)</span></div>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="flex items-center space-x-2">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span> Q1 FY27 Live
+                    </span>
+                </div>
+            </div>
+
+            <!-- Tab Navigation Bar -->
+            <nav class="flex space-x-1 sm:space-x-4 overflow-x-auto custom-scrollbar border-t border-slate-800 py-2 text-xs sm:text-sm">
+                <button onclick="switchTab('overview')" id="tab-overview" class="nav-tab px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors bg-amber-500 text-slate-900 font-bold">
+                    Executive Overview
+                </button>
+                <button onclick="switchTab('forecast')" id="tab-forecast" class="nav-tab px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors text-slate-300 hover:text-white hover:bg-slate-800">
+                    8-Quarter Forecast & Scenarios
+                </button>
+                <button onclick="switchTab('drivers')" id="tab-drivers" class="nav-tab px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors text-slate-300 hover:text-white hover:bg-slate-800">
+                    Segment Drivers & Operating Model
+                </button>
+                <button onclick="switchTab('consensus')" id="tab-consensus" class="nav-tab px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors text-slate-300 hover:text-white hover:bg-slate-800">
+                    Analyst Consensus vs. Independent
+                </button>
+                <button onclick="switchTab('sentiment')" id="tab-sentiment" class="nav-tab px-3 py-1.5 rounded-md font-medium whitespace-nowrap transition-colors text-slate-300 hover:text-white hover:bg-slate-800">
+                    Sentiment, Concall & Risks
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- ========================================== -->
+        <!-- TAB 1: EXECUTIVE OVERVIEW -->
+        <!-- ========================================== -->
+        <section id="content-overview" class="tab-content space-y-6">
+            
+            <!-- Intro Paragraph -->
+            <div class="bg-white p-5 sm:p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 mb-2">Executive Summary: The Structural Metamorphosis</h1>
+                <p class="text-slate-6 shadow-none text-sm sm:text-base leading-relaxed">
+                    Motilal Oswal Financial Services Ltd (MOTILALOFS) is undergoing a profound structural metamorphosis, transitioning from a highly cyclical, transaction-dependent retail brokerage into a predictable, annuity-driven asset and wealth management conglomerate. Forensic examination of the Q1 FY27 financial trajectory reveals that Annual Recurring Revenue (ARR) streams now constitute an unprecedented <strong>66% of group operating revenues</strong>. While upcoming SEBI regulatory interventions in F&O derivatives pose a near-term headwind for the retail broking unit, MOFSL's twin-engine wealth flywheel and ₹10,482 Cr proprietary treasury book provide exceptional earnings resilience and margin expansion.
+                </p>
+                <div class="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+                    <span class="bg-amber-100 text-amber-800 px-2.5 py-1 rounded-md">ARR Mix: 66%</span>
+                    <span class="bg-blue-100 text-blue-800 px-2.5 py-1 rounded-md">AMC AUM: ₹1.76 Lakh Cr</span>
+                    <span class="bg-purple-100 text-purple-800 px-2.5 py-1 rounded-md">Wealth AUM: ₹1.97 Lakh Cr</span>
+                    <span class="bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md">IBEF V Fund Closed: ₹8,500 Cr</span>
+                </div>
+            </div>
+
+            <!-- Top Metric KPI Cards Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Q1 FY27 Revenue</div>
+                    <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">₹3,426 Cr</div>
+                    <div class="mt-2 flex items-center text-xs text-emerald-600 font-semibold">
+                        <span class="mr-1">▲</span> +25.1% YoY
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">Driven by Wealth & Treasury</div>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Q1 FY27 EBITDA</div>
+                    <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">₹1,970 Cr</div>
+                    <div class="mt-2 flex items-center text-xs text-emerald-600 font-semibold">
+                        <span class="mr-1">▲</span> 57.5% Margin
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">High Operating Leverage</div>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Q1 FY27 Total PAT</div>
+                    <div class="text-xl sm:text-2xl font-bold text-slate-900 mt-1">₹1,274 Cr</div>
+                    <div class="mt-2 flex items-center text-xs text-amber-600 font-semibold">
+                        <span class="mr-1">●</span> Op PAT: ₹609 Cr (+14%)
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">Treasury PAT: ₹904 Cr</div>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition">
+                    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">FY27E Full-Year PAT</div>
+                    <div class="text-xl sm:text-2xl font-bold text-emerald-600 mt-1">₹4,474 Cr</div>
+                    <div class="mt-2 flex items-center text-xs text-emerald-600 font-semibold">
+                        <span class="mr-1">▲</span> +125.9% YoY
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-1">EPS Est: ₹74.34 / share</div>
+                </div>
+            </div>
+
+            <!-- Transformation Analytics & Quality of Earnings -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- ARR Composition Breakdown -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-1">
+                    <h2 class="text-base font-bold text-slate-900 mb-1">Quality of Earnings Metamorphosis</h2>
+                    <p class="text-xs text-slate-500 mb-4">Transition from Transaction Broker to Annuity Asset Manager</p>
+                    
+                    <div class="chart-container" style="height:220px;">
+                        <canvas id="arrMixChart"></canvas>
+                    </div>
+
+                    <div class="mt-4 space-y-2 text-xs">
+                        <div class="p-2.5 rounded bg-slate-50 border border-slate-100 flex justify-between items-center">
+                            <span class="text-slate-600 font-medium">Annuity Recurring Revenue (ARR)</span>
+                            <span class="font-bold text-slate-900">66.0%</span>
+                        </div>
+                        <div class="p-2.5 rounded bg-slate-50 border border-slate-100 flex justify-between items-center">
+                            <span class="text-slate-600 font-medium">Transaction & Yield Revenue</span>
+                            <span class="font-bold text-slate-900">34.0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Strategic Pillar Comparison -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h2 class="text-base font-bold text-slate-900 mb-1">The Twin-Engine Transformation Framework</h2>
+                    <p class="text-xs text-slate-500 mb-4">Contrasting legacy broker drivers with incoming wealth compounding assets</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Pillar 1: Asset & Wealth Management -->
+                        <div class="border border-emerald-100 bg-emerald-50/40 p-4 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-emerald-800">Annuity Engine</span>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded">55% Op PAT Share</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">Asset & Wealth Management</h3>
+                            <ul class="mt-2 space-y-1.5 text-xs text-slate-600">
+                                <li class="flex items-start"><span class="text-emerald-500 mr-1.5">✓</span> <strong>AMC AUM:</strong> ₹1.76 Lakh Cr (SIP inflows at ₹18,000 Cr/yr)</li>
+                                <li class="flex items-start"><span class="text-emerald-500 mr-1.5">✓</span> <strong>Private Wealth:</strong> ₹1.97 Lakh Cr AUM (+37% YoY)</li>
+                                <li class="flex items-start"><span class="text-emerald-500 mr-1.5">✓</span> <strong>IBEF V Closure:</strong> ₹8,500 Cr closed (beats ₹6,500 Cr target)</li>
+                                <li class="flex items-start"><span class="text-emerald-500 mr-1.5">✓</span> <strong>Operating Leverage:</strong> High fee-accrual with fixed RM structure</li>
+                            </ul>
+                        </div>
+
+                        <!-- Pillar 2: Capital Markets & Broking -->
+                        <div class="border border-amber-100 bg-amber-50/40 p-4 rounded-lg">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-amber-800">Cyclical Engine</span>
+                                <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded">Near-Term Headwind</span>
+                            </div>
+                            <h3 class="font-bold text-slate-900 text-sm">Broking & Capital Markets</h3>
+                            <ul class="mt-2 space-y-1.5 text-xs text-slate-600">
+                                <li class="flex items-start"><span class="text-amber-500 mr-1.5">!</span> <strong>SEBI F&O Shock:</strong> Lot size ₹15-20L & 1 expiry/week restrictions</li>
+                                <li class="flex items-start"><span class="text-amber-500 mr-1.5">!</span> <strong>Q3 FY27 Revenue Impact:</strong> Projected -12% QoQ broking volume contraction</li>
+                                <li class="flex items-start"><span class="text-emerald-500 mr-1.5">✓</span> <strong>Franchise Defense:</strong> Highly variable cost structure buffers margins</li>
+                                <li class="flex items-start"><span class="text-emerald-500 mr-1.5">✓</span> <strong>Investment Banking:</strong> 52 deals in FY26 driving transaction yield</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Berkshire Treasury Book Note -->
+                    <div class="mt-4 p-3 rounded-lg bg-slate-900 text-white text-xs flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-amber-400">Proprietary Treasury Book:</span> ₹10,482 Cr equity deployment generating Berkshire-style capital compounding (17% historical XIRR).
+                        </div>
+                        <span class="font-bold text-slate-300 ml-2">Q1 PAT: ₹904 Cr</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: 8-QUARTER FORECAST & SCENARIOS -->
+        <!-- ========================================== -->
+        <section id="content-forecast" class="tab-content hidden space-y-6">
+            
+            <!-- Intro Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h1 class="text-xl font-bold text-slate-900 mb-2">8-Quarter Forward Earnings Engine (Q1 FY27 - Q1 FY29)</h1>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    This module presents an independent quarter-by-quarter forward forecast from Q1 FY27 actuals through Q1 FY29E. The forward projections explicitly build in the near-term volume shock from SEBI's F&O regulatory overhaul (taking effect in late 2026/Q3 FY27), followed by a dynamic V-shaped operating turnaround in Q4 FY27 driven by base effect reversals and high-margin AMC management fee accruals.
+                </p>
+            </div>
+
+            <!-- Interactive Controls & Scenario Switcher Bar -->
+            <div class="bg-slate-900 text-white p-4 rounded-xl shadow-md flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <span class="text-xs uppercase font-bold text-amber-400 tracking-wider">Scenario Model:</span>
+                    <div class="inline-flex rounded-md shadow-sm bg-slate-800 p-1 border border-slate-700" role="group">
+                        <button onclick="setScenario('bear')" id="btn-bear" class="px-3 py-1 text-xs font-semibold rounded text-slate-400 hover:text-white">Bear (20%)</button>
+                        <button onclick="setScenario('base')" id="btn-base" class="px-3 py-1 text-xs font-semibold rounded bg-amber-500 text-slate-900">Base (60%)</button>
+                        <button onclick="setScenario('bull')" id="btn-bull" class="px-3 py-1 text-xs font-semibold rounded text-slate-400 hover:text-white">Bull (20%)</button>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 text-xs">
+                    <span class="text-slate-400">Chart Metric:</span>
+                    <select id="chartMetricSelect" onchange="updateForecastChart()" class="bg-slate-800 border border-slate-700 text-amber-300 font-semibold rounded px-2.5 py-1 focus:outline-none">
+                        <option value="financials">Revenue, EBITDA & PAT (₹ Cr)</option>
+                        <option value="margins">EBITDA & PAT Margins (%)</option>
+                        <option value="yoy">YoY Growth Rates (%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Main Forecast Chart Container -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center mb-3">
+                    <div>
+                        <h2 class="font-bold text-slate-900 text-base" id="forecastChartTitle">8-Quarter Consolidated Trajectory</h2>
+                        <span class="text-xs text-slate-500" id="forecastChartSubtitle">Base Case (60% Probability) | Explicit margin floor at 50-52%</span>
+                    </div>
+                    <span class="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded font-medium" id="scenarioIndicator">Scenario: BASE CASE</span>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="forecastMainChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Granular 8-Quarter Data Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-900 text-sm">Detailed 8-Quarter Forecast Matrix</h3>
+                    <span class="text-xs text-slate-500">Values in ₹ Crore unless specified</span>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200">
+                                <th class="p-3">Metric</th>
+                                <th class="p-3 bg-amber-50/80 text-amber-900">Q1 FY27 (A)</th>
+                                <th class="p-3">Q2 FY27E</th>
+                                <th class="p-3 bg-red-50/50 text-red-900">Q3 FY27E (F&O Shock)</th>
+                                <th class="p-3 bg-emerald-50/50 text-emerald-900">Q4 FY27E (Rebound)</th>
+                                <th class="p-3">Q1 FY28E</th>
+                                <th class="p-3">Q2 FY28E</th>
+                                <th class="p-3">Q3 FY28E</th>
+                                <th class="p-3">Q4 FY28E</th>
+                                <th class="p-3">Q1 FY29E</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200" id="forecastTableBody">
+                            <!-- Dynamic Content Rendered via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quarterly Highlights Callout Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-xs">
+                    <div class="font-bold text-red-900 text-sm mb-1">⚠️ Q3 FY27 Regulatory Trough Analysis</div>
+                    <p class="text-red-800 leading-relaxed">
+                        Revenue drops to ₹2,750 Cr (-6.7% QoQ) as SEBI F&O restrictions (lot sizes ₹15-20L, restriction to 1 expiry per exchange) force a temporary retail options volume contraction. Margin dips to 50.9% before recovering.
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
+                    <div class="font-bold text-emerald-900 text-sm mb-1">🚀 Q4 FY27 Base-Effect Inflection Point</div>
+                    <p class="text-emerald-800 leading-relaxed">
+                        EBITDA YoY growth reaches an extraordinary <strong>704.8%</strong> due to the depressed base of Q4 FY26 (₹205 Cr EBITDA affected by one-off provisions). Rebound driven by AMC management fee recognition from IBEF V.
+                    </p>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: SEGMENT DRIVERS & OPERATING MODEL -->
+        <!-- ========================================== -->
+        <section id="content-drivers" class="tab-content hidden space-y-6">
+            
+            <!-- Intro Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h1 class="text-xl font-bold text-slate-900 mb-2">Segmental Revenue & EBITDA Operating Drivers</h1>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    The forecast model is grounded in micro-level operational drivers across MOFSL's core business units: Asset Management, Private Wealth, Broking/Capital Markets, Housing Finance (MOHFL), and the Treasury Book. Explore the operational assumptions below to evaluate segment leverage.
+                </p>
+            </div>
+
+            <!-- Segment Selector Tabs -->
+            <div class="flex space-x-2 border-b border-slate-200 pb-2 overflow-x-auto text-xs sm:text-sm">
+                <button onclick="switchSegment('amc')" id="seg-tab-amc" class="seg-btn px-4 py-2 rounded-lg font-bold bg-amber-500 text-slate-900">
+                    AMC & Private Wealth
+                </button>
+                <button onclick="switchSegment('broking')" id="seg-tab-broking" class="seg-btn px-4 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-100">
+                    Capital Markets & Broking
+                </button>
+                <button onclick="switchSegment('housing')" id="seg-tab-housing" class="seg-btn px-4 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-100">
+                    Housing Finance (MOHFL)
+                </button>
+                <button onclick="switchSegment('treasury')" id="seg-tab-treasury" class="seg-btn px-4 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-100">
+                    Proprietary Treasury
+                </button>
+            </div>
+
+            <!-- Dynamic Segment Content Container -->
+            <div id="segmentDisplayContainer" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Driver Projection Matrix -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 text-sm mb-3">Key Operational Assumptions (Driver Model Table)</h3>
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <th class="p-2.5">Driver</th>
+                                <th class="p-2.5">FY26 (A)</th>
+                                <th class="p-2.5">Q1 FY27</th>
+                                <th class="p-2.5">Q2 FY27E</th>
+                                <th class="p-2.5">Q3 FY27E</th>
+                                <th class="p-2.5">Q4 FY27E</th>
+                                <th class="p-2.5">FY27E</th>
+                                <th class="p-2.5">FY28E</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="p-2.5 font-semibold text-slate-900">AMC AUM Growth (QoQ/YoY)</td>
+                                <td class="p-2.5 text-slate-600">34.0%</td>
+                                <td class="p-2.5 text-emerald-600 font-medium">+8.2%</td>
+                                <td class="p-2.5 text-slate-600">+7.0%</td>
+                                <td class="p-2.5 text-slate-600">+6.5%</td>
+                                <td class="p-2.5 text-slate-600">+8.0%</td>
+                                <td class="p-2.5 font-bold text-emerald-600">+30.0%</td>
+                                <td class="p-2.5 font-bold text-slate-900">+25.0%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-semibold text-slate-900">Wealth AUM Growth</td>
+                                <td class="p-2.5 text-slate-600">37.0%</td>
+                                <td class="p-2.5 text-emerald-600 font-medium">+9.1%</td>
+                                <td class="p-2.5 text-slate-600">+8.0%</td>
+                                <td class="p-2.5 text-slate-600">+7.5%</td>
+                                <td class="p-2.5 text-slate-600">+8.5%</td>
+                                <td class="p-2.5 font-bold text-emerald-600">+33.0%</td>
+                                <td class="p-2.5 font-bold text-slate-900">+28.0%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-semibold text-slate-900">Broking Volume Impact (F&O)</td>
+                                <td class="p-2.5 text-slate-600">+15.0%</td>
+                                <td class="p-2.5 text-slate-600">+2.0%</td>
+                                <td class="p-2.5 text-red-600 font-medium">-5.0%</td>
+                                <td class="p-2.5 text-red-600 font-bold">-12.0%</td>
+                                <td class="p-2.5 text-slate-600">-2.0%</td>
+                                <td class="p-2.5 font-bold text-red-600">-8.0%</td>
+                                <td class="p-2.5 font-bold text-slate-900">+15.0%</td>
+                            </tr>
+                            <tr>
+                                <td class="p-2.5 font-semibold text-slate-900">MOHFL Loan Growth</td>
+                                <td class="p-2.5 text-slate-600">23.0%</td>
+                                <td class="p-2.5 text-slate-600">+5.0%</td>
+                                <td class="p-2.5 text-slate-600">+5.0%</td>
+                                <td class="p-2.5 text-slate-600">+5.0%</td>
+                                <td class="p-2.5 text-slate-600">+5.0%</td>
+                                <td class="p-2.5 font-bold text-slate-900">21.0%</td>
+                                <td class="p-2.5 font-bold text-slate-900">21.0%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: CONSENSUS VS INDEPENDENT -->
+        <!-- ========================================== -->
+        <section id="content-consensus" class="tab-content hidden space-y-6">
+            
+            <!-- Intro Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h1 class="text-xl font-bold text-slate-900 mb-2">Street Consensus vs. Independent Intelligence Model</h1>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    This analysis compares our independent forward model against sell-side broker consensus (ICICI Securities, UBS, Investec). The primary divergence occurs in <strong>Q3 FY27</strong>, where our model factors in a sharper upfront F&O regulatory shock, whereas consensus smoothes the impact over time. Conversely, our long-term PAT model is higher than sell-side consensus due to our realistic valuation treatment of the ₹10,482 Cr treasury book.
+                </p>
+            </div>
+
+            <!-- Consensus Comparison Chart & Variance Summary -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Comparison Visualizer -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
+                    <h2 class="font-bold text-slate-900 text-sm mb-1">Quarterly Revenue Benchmark (₹ Cr)</h2>
+                    <p class="text-xs text-slate-500 mb-3">Street Consensus vs. Independent Model Estimates</p>
+                    <div class="chart-container">
+                        <canvas id="consensusChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Street Dispersion Breakdown -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-1 space-y-4">
+                    <h2 class="font-bold text-slate-900 text-sm">Target Price Dispersion</h2>
+                    
+                    <div class="space-y-3">
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-500">Highest Target (Investec)</span>
+                                <span class="font-bold text-emerald-600">₹1,250</span>
+                            </div>
+                            <div class="w-full bg-slate-200 h-2 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-500">Median Street Target</span>
+                                <span class="font-bold text-slate-800">₹1,120</span>
+                            </div>
+                            <div class="w-full bg-slate-200 h-2 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-amber-500 h-2 rounded-full" style="width: 75%"></div>
+                            </div>
+                        </div>
+
+                        <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                            <div class="flex justify-between text-xs">
+                                <span class="text-slate-500">Lowest Target (ICICI Sec)</span>
+                                <span class="font-bold text-red-600">₹975</span>
+                            </div>
+                            <div class="w-full bg-slate-200 h-2 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: 50%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Valuation Paradox Note -->
+                    <div class="p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900 leading-relaxed">
+                        <span class="font-bold">Why Analysts Disagree:</span> Sell-side analysts (like ICICI) value the ₹10,482 Cr treasury book at 1.0x book value to exclude MTM volatility, assigning standard capital market multiples (~15x). Pure-play wealth manager peers like 360 ONE WAM trade at ~37x P/E.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sell-Side Analyst Matrix Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-200">
+                    <h3 class="font-bold text-slate-900 text-sm">Broker Model Intelligence Matrix</h3>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <th class="p-3">Broker / Institution</th>
+                                <th class="p-3">Report Date</th>
+                                <th class="p-3">Recommendation</th>
+                                <th class="p-3">Target Price</th>
+                                <th class="p-3">FY27E Core PAT</th>
+                                <th class="p-3">Valuation Methodology</th>
+                                <th class="p-3">Key Friction Point</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200">
+                            <tr>
+                                <td class="p-3 font-bold text-slate-900">ICICI Securities</td>
+                                <td class="p-3 text-slate-500">Aug 2026</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">BUY (Upgrade)</span></td>
+                                <td class="p-3 font-bold text-slate-900">₹975</td>
+                                <td class="p-3 text-slate-700">₹2,700 Cr</td>
+                                <td class="p-3 text-slate-600">SOTP: AMC/PWM 25x, CapMkts 15x, Treasury 1x P/B</td>
+                                <td class="p-3 text-red-600">Models steep F&O volume drag</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-slate-900">UBS</td>
+                                <td class="p-3 text-slate-500">Jun 2026</td>
+                                <td class="p-3"><span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded text-[10px]">NEUTRAL</span></td>
+                                <td class="p-3 font-bold text-slate-900">₹1,120</td>
+                                <td class="p-3 text-slate-700">N/A</td>
+                                <td class="p-3 text-slate-600">Blended Multiple incorporating wealth expansion</td>
+                                <td class="p-3 text-amber-600">Concerns on RM wage inflation</td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-slate-900">Investec</td>
+                                <td class="p-3 text-slate-500">May 2026</td>
+                                <td class="p-3"><span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">BUY</span></td>
+                                <td class="p-3 font-bold text-slate-900">₹1,250</td>
+                                <td class="p-3 text-slate-700">N/A</td>
+                                <td class="p-3 text-slate-600">SOTP with higher weight on Alternate Assets</td>
+                                <td class="p-3 text-emerald-600">Bullish on IBEF V fee realization</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- "What the Market is Missing" Insight Box -->
+            <div class="p-5 rounded-xl bg-slate-900 text-white border border-slate-800 shadow-md">
+                <h3 class="font-bold text-amber-400 text-base mb-2">💡 What the Market is Missing (Valuation Thesis)</h3>
+                <p class="text-xs text-slate-300 leading-relaxed">
+                    The market is currently pricing MOFSL as a legacy cyclical retail broker (~30x PE) due to historical perceptions. However, with <strong>66% of revenue in Annual Recurring Revenue (ARR)</strong> and IBEF V fund closed at ₹8,500 Cr, core earnings quality is rapidly converging with pure-play wealth conglomerates like 360 ONE WAM (~37x PE). Once SEBI's F&O regulations wash out speculative transactional noise in late 2026, the structural margin expansion to 53%+ will force a major valuation re-rating.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: SENTIMENT, CONCALL & RISKS -->
+        <!-- ========================================== -->
+        <section id="content-sentiment" class="tab-content hidden space-y-6">
+            
+            <!-- Intro Paragraph -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h1 class="text-xl font-bold text-slate-900 mb-2">Social Intelligence, Concall Mining & Risk Matrix</h1>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Alternative intelligence channels provide a leading indicator for operational momentum. This dashboard aggregates social media sentiment across X/Twitter (retail trader panic on F&O lot sizes) and LinkedIn (institutional trust in IBEF V), alongside forensic concall diagnostic signals and an interactive Catalyst/Risk Matrix.
+                </p>
+            </div>
+
+            <!-- Social Media & Sentiment Gauges -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- X / Twitter Sentiment -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">X / Twitter Retail Sentiment</h3>
+                            <span class="text-xs text-slate-500">n=1,250 posts | Focus: SEBI F&O Margin Rules</span>
+                        </div>
+                        <span class="text-xs font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded">+50 Net Score</span>
+                    </div>
+
+                    <!-- Visual Progress Bar -->
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between font-medium">
+                            <span>Positive (65%)</span>
+                            <span>Negative (15%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-3 rounded-full flex overflow-hidden">
+                            <div class="bg-emerald-500 h-full" style="width: 65%"></div>
+                            <div class="bg-slate-300 h-full" style="width: 20%"></div>
+                            <div class="bg-red-500 h-full" style="width: 15%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-3 leading-relaxed">
+                        Retail traders heavily lament SEBI's ₹15-20L lot size limits. Confirms our model's projected Q3 FY27 retail options volume drop.
+                    </p>
+                </div>
+
+                <!-- LinkedIn Sentiment -->
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <h3 class="font-bold text-slate-900 text-sm">LinkedIn Institutional Sentiment</h3>
+                            <span class="text-xs text-slate-500">Professional B2B | Focus: IBEF V & Hiring</span>
+                        </div>
+                        <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">+85 Net Score</span>
+                    </div>
+
+                    <!-- Visual Progress Bar -->
+                    <div class="space-y-2 text-xs">
+                        <div class="flex justify-between font-medium">
+                            <span>Positive (90%)</span>
+                            <span>Negative (5%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-3 rounded-full flex overflow-hidden">
+                            <div class="bg-emerald-500 h-full" style="width: 90%"></div>
+                            <div class="bg-slate-300 h-full" style="width: 5%"></div>
+                            <div class="bg-red-500 h-full" style="width: 5%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-600 mt-3 leading-relaxed">
+                        High praise for IBEF V fund closure at ₹8,500 Cr with backing from IFC and Oman Investment Authority. Confirms institutional trust.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Forensic Concall Signals -->
+            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                <h3 class="font-bold text-slate-900 text-sm mb-3">Concall Forensic Diagnostic Flags (Q1 FY27 Interactions)</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="p-3.5 rounded-lg bg-emerald-50/70 border border-emerald-200 space-y-2">
+                        <span class="font-bold text-emerald-900 block text-sm">🟢 Positive Operational Signals</span>
+                        <ul class="space-y-1.5 text-slate-700">
+                            <li class="flex items-start"><span class="text-emerald-600 font-bold mr-1.5">✓</span> Annuity ARR reached 66%, permanently lowering systemic volatility.</li>
+                            <li class="flex items-start"><span class="text-emerald-600 font-bold mr-1.5">✓</span> Operating ROE stands stellar at 44%.</li>
+                            <li class="flex items-start"><span class="text-emerald-600 font-bold mr-1.5">✓</span> MOHFL Housing Finance turnaround: Disbursements up 64% YoY, NNPA down to 0.6%.</li>
+                            <li class="flex items-start"><span class="text-emerald-600 font-bold mr-1.5">✓</span> CRISIL AA+ rating upgrade permits 15-20 bps borrowing cost reduction.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-3.5 rounded-lg bg-red-50/70 border border-red-200 space-y-2">
+                        <span class="font-bold text-red-900 block text-sm">🔴 Emerging Risks & Watch Items</span>
+                        <ul class="space-y-1.5 text-slate-700">
+                            <li class="flex items-start"><span class="text-red-600 font-bold mr-1.5">!</span> Transaction distribution revenue dipped sequentially to ₹179 Cr from ₹298 Cr in Q4 FY26.</li>
+                            <li class="flex items-start"><span class="text-red-600 font-bold mr-1.5">!</span> Net Interest Income eased to ₹264 Cr due to lending spread compression.</li>
+                            <li class="flex items-start"><span class="text-red-600 font-bold mr-1.5">!</span> Strategic aggressive hiring of senior RMs inflating SG&A lines before productivity peaks.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filterable Catalyst & Risk Matrix Table -->
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <h3 class="font-bold text-slate-900 text-sm">Catalyst & Risk Matrix</h3>
+                    
+                    <div class="flex items-center space-x-2 text-xs">
+                        <button onclick="filterMatrix('all')" id="filter-all" class="matrix-filter px-2.5 py-1 rounded bg-slate-800 text-white font-medium">All</button>
+                        <button onclick="filterMatrix('catalyst')" id="filter-catalyst" class="matrix-filter px-2.5 py-1 rounded bg-slate-200 text-slate-700 hover:bg-slate-300 font-medium">Catalysts</button>
+                        <button onclick="filterMatrix('risk')" id="filter-risk" class="matrix-filter px-2.5 py-1 rounded bg-slate-200 text-slate-700 hover:bg-slate-300 font-medium">Risks</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+                                <th class="p-3">Type</th>
+                                <th class="p-3">Factor / Driver</th>
+                                <th class="p-3">Verified Evidence</th>
+                                <th class="p-3">Timing</th>
+                                <th class="p-3">Potential PAT Impact</th>
+                                <th class="p-3">Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200" id="matrixTableBody">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+                <span class="font-bold text-white">Motilal Oswal Earnings Forecast Model</span> — Independent Research Synthesis
+            </div>
+            <div class="text-slate-500">
+                Source Data: Q1 FY27 Audited Results & Management Concall Transcripts
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Global Application State
+        let currentScenario = 'base';
+        let forecastChart = null;
+        let arrMixChart = null;
+        let consensusChart = null;
+
+        // Base Data Sets (8-Quarter Forecast Matrix)
+        const forecastDatasets = {
+            base: {
+                revenue: [3426, 2950, 2750, 3200, 3350, 3450, 3600, 3900, 3950],
+                ebitda: [1970, 1550, 1400, 1650, 1750, 1800, 1900, 2100, 2150],
+                pat: [1274, 1100, 950, 1150, 1200, 1250, 1300, 1400, 1450],
+                ebitdaMargin: [57.5, 52.5, 50.9, 51.5, 52.2, 52.1, 52.7, 53.8, 54.4],
+                patMargin: [37.1, 37.2, 34.5, 35.9, 35.8, 36.2, 36.1, 35.8, 36.7],
+                revYoY: [25.1, 59.5, 30.2, 19.5, -2.2, 16.9, 30.9, 21.8, 17.9],
+                ebitdaYoY: [14.5, 84.5, 26.6, 704.8, -11.1, 16.1, 35.7, 27.2, 22.8],
+                patYoY: [9.5, 203.0, 67.8, null, -5.8, 13.6, 36.8, 21.7, 20.8],
+                eps: [21.14, 18.25, 15.76, 19.08, 19.91, 20.74, 21.57, 23.23, 24.06]
+            },
+            bull: {
+                revenue: [3426, 3150, 2950, 3450, 3600, 3750, 3950, 4200, 4300],
+                ebitda: [1970, 1750, 1600, 1850, 1950, 2050, 2180, 2350, 2420],
+                pat: [1274, 1300, 1150, 1350, 1400, 1480, 1580, 1680, 1750],
+                ebitdaMargin: [57.5, 55.5, 54.2, 53.6, 54.1, 54.6, 55.1, 55.9, 56.2],
+                patMargin: [37.1, 41.2, 38.9, 39.1, 38.8, 39.4, 40.0, 40.0, 40.6],
+                revYoY: [25.1, 70.3, 39.7, 28.9, 5.0, 19.0, 33.8, 21.7, 19.4],
+                ebitdaYoY: [14.5, 108.3, 44.7, 802.4, -0.8, 17.1, 36.2, 27.0, 24.1],
+                patYoY: [9.5, 258.1, 103.1, null, 7.6, 13.8, 37.3, 24.4, 25.0],
+                eps: [21.14, 21.57, 19.08, 22.40, 23.23, 24.55, 26.21, 27.87, 29.03]
+            },
+            bear: {
+                revenue: [3426, 2750, 2400, 2900, 3050, 3150, 3300, 3550, 3600],
+                ebitda: [1970, 1350, 1100, 1400, 1500, 1550, 1650, 1800, 1850],
+                pat: [1274, 900, 700, 950, 1000, 1050, 1100, 1180, 1220],
+                ebitdaMargin: [57.5, 49.0, 45.8, 48.2, 49.1, 49.2, 50.0, 50.7, 51.4],
+                patMargin: [37.1, 32.7, 29.1, 32.7, 32.7, 33.3, 33.3, 33.2, 33.8],
+                revYoY: [25.1, 48.7, 13.6, 8.3, -11.0, 14.5, 26.9, 16.3, 18.0],
+                ebitdaYoY: [14.5, 60.7, -0.4, 582.9, -23.8, 14.8, 32.0, 16.1, 23.3],
+                patYoY: [9.5, 147.9, 23.6, null, -21.5, 16.6, 37.5, 18.0, 22.0],
+                eps: [21.14, 14.93, 11.61, 15.76, 16.59, 17.42, 18.25, 19.58, 20.24]
+            }
+        };
+
+        const quartersLabels = ['Q1 FY27(A)', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E', 'Q2 FY28E', 'Q3 FY28E', 'Q4 FY28E', 'Q1 FY29E'];
+
+        // Initial setup on Window Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initARRChart();
+            initForecastChart();
+            renderForecastTable();
+            initConsensusChart();
+            renderSegment('amc');
+            renderMatrix('all');
+        });
+
+        // Tab Switching Logic
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(el => {
+                el.classList.remove('bg-amber-500', 'text-slate-900', 'font-bold');
+                el.classList.add('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeTabBtn = document.getElementById(`tab-${tabId}`);
+            activeTabBtn.classList.remove('text-slate-300', 'hover:text-white', 'hover:bg-slate-800');
+            activeTabBtn.classList.add('bg-amber-500', 'text-slate-900', 'font-bold');
+        }
+
+        // Scenario Setter (Base / Bull / Bear)
+        function setScenario(scenario) {
+            currentScenario = scenario;
+            
+            // Toggle Buttons
+            ['bear', 'base', 'bull'].forEach(sc => {
+                const btn = document.getElementById(`btn-${sc}`);
+                if(sc === scenario) {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded bg-amber-500 text-slate-900";
+                } else {
+                    btn.className = "px-3 py-1 text-xs font-semibold rounded text-slate-400 hover:text-white";
+                }
+            });
+
+            // Update Labels
+            const indicator = document.getElementById('scenarioIndicator');
+            const subtitle = document.getElementById('forecastChartSubtitle');
+            if(scenario === 'base') {
+                indicator.innerText = "Scenario: BASE CASE (60%)";
+                subtitle.innerText = "Base Case (60% Probability) | Explicit margin floor at 50-52%";
+            } else if(scenario === 'bull') {
+                indicator.innerText = "Scenario: BULL CASE (20%)";
+                subtitle.innerText = "Bull Case (20% Probability) | Accelerated IBEF V Carry & Wealth Inflows";
+            } else {
+                indicator.innerText = "Scenario: BEAR CASE (20%)";
+                subtitle.innerText = "Bear Case (20% Probability) | SEBI F&O Volume Shock & Treasury Loss";
+            }
+
+            updateForecastChart();
+            renderForecastTable();
+        }
+
+        // Render Quality of Earnings ARR Chart
+        function initARRChart() {
+            const ctx = document.getElementById('arrMixChart').getContext('2d');
+            arrMixChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Annuity Recurring Revenue (ARR)', 'Transactional & Yield'],
+                    datasets: [{
+                        data: [66, 34],
+                        backgroundColor: ['#b45309', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return context.label + ': ' + context.raw + '%'; }
+                            }
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Initialize 8-Quarter Forecast Dynamic Chart
+        function initForecastChart() {
+            const ctx = document.getElementById('forecastMainChart').getContext('2d');
+            forecastChart = new Chart(ctx, {
+                type: 'bar',
+                data: getChartDataStructure(),
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            grid: { color: '#f1f5f9' },
+                            title: { display: true, text: '₹ Crore', font: { size: 11 } }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Margin %', font: { size: 11 } }
+                        },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { boxWidth: 12, font: { size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        // Helper to construct dynamic dataset based on scenario and dropdown selector
+        function getChartDataStructure() {
+            const data = forecastDatasets[currentScenario];
+            const metric = document.getElementById('chartMetricSelect') ? document.getElementById('chartMetricSelect').value : 'financials';
+
+            if(metric === 'financials') {
+                return {
+                    labels: quartersLabels,
+                    datasets: [
+                        { type: 'bar', label: 'Revenue (₹ Cr)', data: data.revenue, backgroundColor: '#3b82f6', borderRadius: 4 },
+                        { type: 'bar', label: 'EBITDA (₹ Cr)', data: data.ebitda, backgroundColor: '#d97706', borderRadius: 4 },
+                        { type: 'line', label: 'PAT (₹ Cr)', data: data.pat, borderColor: '#16a34a', backgroundColor: '#16a34a', borderWidth: 2, pointRadius: 4, yAxisID: 'y' }
+                    ]
+                };
+            } else if(metric === 'margins') {
+                return {
+                    labels: quartersLabels,
+                    datasets: [
+                        { type: 'line', label: 'EBITDA Margin (%)', data: data.ebitdaMargin, borderColor: '#d97706', backgroundColor: '#d97706', borderWidth: 2, pointRadius: 4, yAxisID: 'y1' },
+                        { type: 'line', label: 'PAT Margin (%)', data: data.patMargin, borderColor: '#2563eb', backgroundColor: '#2563eb', borderWidth: 2, pointRadius: 4, yAxisID: 'y1' }
+                    ]
+                };
+            } else {
+                return {
+                    labels: quartersLabels,
+                    datasets: [
+                        { type: 'bar', label: 'Revenue YoY %', data: data.revYoY, backgroundColor: '#60a5fa' },
+                        { type: 'bar', label: 'EBITDA YoY %', data: data.ebitdaYoY, backgroundColor: '#f59e0b' }
+                    ]
+                };
+            }
+        }
+
+        function updateForecastChart() {
+            if(forecastChart) {
+                forecastChart.data = getChartDataStructure();
+                forecastChart.update();
+            }
+        }
+
+        // Render Dynamic Forecast Data Table
+        function renderForecastTable() {
+            const data = forecastDatasets[currentScenario];
+            const tbody = document.getElementById('forecastTableBody');
+            
+            const rows = [
+                { label: 'Revenue (₹ Cr)', key: 'revenue', font: 'font-bold text-slate-900' },
+                { label: 'Revenue YoY %', key: 'revYoY', suffix: '%' },
+                { label: 'EBITDA (₹ Cr)', key: 'ebitda', font: 'font-bold text-amber-700' },
+                { label: 'EBITDA YoY %', key: 'ebitdaYoY', suffix: '%' },
+                { label: 'EBITDA Margin %', key: 'ebitdaMargin', suffix: '%' },
+                { label: 'Total PAT (₹ Cr)', key: 'pat', font: 'font-bold text-emerald-700' },
+                { label: 'PAT YoY %', key: 'patYoY', suffix: '%' },
+                { label: 'PAT Margin %', key: 'patMargin', suffix: '%' },
+                { label: 'EPS (₹)', key: 'eps' }
+            ];
+
+            let html = '';
+            rows.forEach(r => {
+                html += `<tr class="hover:bg-slate-50 transition">
+                    <td class="p-3 font-semibold text-slate-800 border-r border-slate-200">${r.label}</td>`;
+                
+                data[r.key].forEach((val, idx) => {
+                    let displayVal = val === null ? 'N/A' : (val + (r.suffix || ''));
+                    let bgClass = '';
+                    if(idx === 0) bgClass = 'bg-amber-50/50';
+                    if(idx === 2) bgClass = 'bg-red-50/30';
+                    if(idx === 3) bgClass = 'bg-emerald-50/30';
+
+                    html += `<td class="p-3 ${bgClass} ${r.font || 'text-slate-700'}">${displayVal}</td>`;
+                });
+
+                html += `</tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // Render Segment Detail Tabs
+        function switchSegment(segKey) {
+            document.querySelectorAll('.seg-btn').forEach(btn => {
+                btn.className = "seg-btn px-4 py-2 rounded-lg font-medium text-slate-600 hover:bg-slate-100";
+            });
+            document.getElementById(`seg-tab-${segKey}`).className = "seg-btn px-4 py-2 rounded-lg font-bold bg-amber-500 text-slate-900";
+            renderSegment(segKey);
+        }
+
+        function renderSegment(segKey) {
+            const container = document.getElementById('segmentDisplayContainer');
+            
+            if(segKey === 'amc') {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Asset Management (AMC) & Private Wealth</h2>
+                                <p class="text-xs text-slate-500">Core ARR Engine | Combined AUM: ₹4.50 Lakh Cr</p>
+                            </div>
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">55% Share of Group Op PAT</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">AMC AUM</div>
+                                <div class="text-lg font-bold text-slate-900 mt-1">₹1.76 Lakh Cr</div>
+                                <div class="text-emerald-600 mt-1">SIP Inflows: ₹18,000 Cr/yr</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Private Wealth AUM</div>
+                                <div class="text-lg font-bold text-slate-900 mt-1">₹1.97 Lakh Cr</div>
+                                <div class="text-emerald-600 mt-1">ARR Growth: +42% YoY</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">IBEF V Fund Closure</div>
+                                <div class="text-lg font-bold text-emerald-600 mt-1">₹8,500 Cr</div>
+                                <div class="text-slate-500 mt-1">Target was ₹6,500 Cr (Beaten)</div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            <strong>Operating Leverage Mechanism:</strong> The successfully closed IBEF V fund unlocks immediate high-margin management fees without requiring capital expenditure. Senior RM hiring adds short-term cost, but expands long-term family office AUM gathering.
+                        </p>
+                    </div>`;
+            } else if(segKey === 'broking') {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Capital Markets & Retail Broking</h2>
+                                <p class="text-xs text-slate-500">Transactional Business Engine | High Retail Market Share</p>
+                            </div>
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded">Near-Term Headwind</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="p-3 rounded-lg bg-red-50 border border-red-200">
+                                <div class="text-red-700 font-semibold">SEBI F&O Lot Size</div>
+                                <div class="text-lg font-bold text-red-900 mt-1">₹15 - 20 Lakhs</div>
+                                <div class="text-red-700 mt-1">Curbs retail options volume</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Weekly Expiry Restriction</div>
+                                <div class="text-lg font-bold text-slate-900 mt-1">1 Per Exchange</div>
+                                <div class="text-slate-500 mt-1">Effective Q3 FY27</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                                <div class="text-emerald-800 font-semibold">Franchise Protection</div>
+                                <div class="text-lg font-bold text-emerald-900 mt-1">Variable Cost Payout</div>
+                                <div class="text-emerald-700 mt-1">Buffers margin drop</div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            <strong>Regulatory Impact Assessment:</strong> While discount brokers bear the brunt of retail options trading curbs, MOFSL's full-service advisory mix and variable franchise payouts keep group EBITDA margins protected above 50%.
+                        </p>
+                    </div>`;
+            } else if(segKey === 'housing') {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Housing Finance (MOHFL)</h2>
+                                <p class="text-xs text-slate-500">Affordable Housing Subsidiary | Asset Quality Turnaround</p>
+                            </div>
+                            <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded">CRISIL AA+ Upgrade</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Disbursements (Q1)</div>
+                                <div class="text-lg font-bold text-slate-900 mt-1">+64% YoY</div>
+                                <div class="text-emerald-600 mt-1">Strong loan growth</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Gross NPA / Net NPA</div>
+                                <div class="text-lg font-bold text-emerald-600 mt-1">1.1% / 0.6%</div>
+                                <div class="text-slate-500 mt-1">Pristine asset quality</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Borrowing Cost Target</div>
+                                <div class="text-lg font-bold text-blue-600 mt-1">-15 to 20 bps</div>
+                                <div class="text-slate-500 mt-1">Over next 12-18 months</div>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-base font-bold text-slate-900">Proprietary Treasury Investment Book</h2>
+                                <p class="text-xs text-slate-500">Berkshire Hathaway-style Capital Vehicle</p>
+                            </div>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded">₹10,482 Cr Book</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Q1 FY27 PAT Contribution</div>
+                                <div class="text-lg font-bold text-amber-600 mt-1">₹904 Cr</div>
+                                <div class="text-slate-500 mt-1">Equity MTM surge</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Historical Track Record</div>
+                                <div class="text-lg font-bold text-slate-900 mt-1">17% XIRR</div>
+                                <div class="text-slate-500 mt-1">Long-term equity compounding</div>
+                            </div>
+                            <div class="p-3 rounded-lg bg-slate-50 border border-slate-200">
+                                <div class="text-slate-500">Long-Term Aspiration</div>
+                                <div class="text-lg font-bold text-purple-600 mt-1">Multi-Billion $</div>
+                                <div class="text-slate-500 mt-1">Targeted by Management</div>
+                            </div>
+                        </div>
+                    </div>`;
+            }
+        }
+
+        // Initialize Street Consensus Benchmark Chart
+        function initConsensusChart() {
+            const ctx = document.getElementById('consensusChart').getContext('2d');
+            consensusChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1 FY27', 'Q2 FY27E', 'Q3 FY27E', 'Q4 FY27E', 'Q1 FY28E', 'Q2 FY28E'],
+                    datasets: [
+                        { label: 'Street Consensus Revenue (₹ Cr)', data: [3426, 3100, 3200, 3350, 3400, 3500], backgroundColor: '#94a3b8', borderRadius: 4 },
+                        { label: 'Independent Model Revenue (₹ Cr)', data: [3426, 2950, 2750, 3200, 3350, 3450], backgroundColor: '#d97706', borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+                    scales: { y: { grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        // Catalyst and Risk Matrix Table Logic
+        const matrixData = [
+            { type: 'catalyst', driver: 'IBEF V Fee Recognition', evidence: 'Closed at ₹8,500 Cr (beats target)', timing: 'Q2 FY27+', pat: '+₹150-200 Cr Annualized', conf: 'High' },
+            { type: 'catalyst', driver: 'HFC Borrowing Cost Reduction', evidence: 'CRISIL AA+ rating upgrade', timing: 'Q3 FY27', pat: '+₹20-30 Cr', conf: 'High' },
+            { type: 'catalyst', driver: 'Wealth RM Productivity Peak', evidence: 'Aggressive senior hires from foreign banks', timing: 'Q4 FY27', pat: '+₹100-150 Cr', conf: 'Medium' },
+            { type: 'risk', driver: 'SEBI F&O Margin Restrictions', evidence: 'Upfront margins & ₹15-20L lot sizes', timing: 'Q3 FY27', pat: '(₹150-200 Cr)', conf: 'High' },
+            { type: 'risk', driver: 'Treasury Book MTM Correction', evidence: '₹10,482 Cr prop equity exposure', timing: 'Cyclical', pat: '(₹300-500 Cr)', conf: 'Medium' },
+            { type: 'risk', driver: 'RM Wage Inflation', evidence: 'Peer poaching (360 ONE, Nuvama)', timing: 'Ongoing', pat: '(₹50-100 Cr)', conf: 'Medium' }
+        ];
+
+        function filterMatrix(category) {
+            document.querySelectorAll('.matrix-filter').forEach(btn => {
+                btn.className = "matrix-filter px-2.5 py-1 rounded bg-slate-200 text-slate-700 hover:bg-slate-300 font-medium";
+            });
+            document.getElementById(`filter-${category}`).className = "matrix-filter px-2.5 py-1 rounded bg-slate-800 text-white font-medium";
+            renderMatrix(category);
+        }
+
+        function renderMatrix(category) {
+            const tbody = document.getElementById('matrixTableBody');
+            const filtered = category === 'all' ? matrixData : matrixData.filter(d => d.type === category);
+
+            let html = '';
+            filtered.forEach(row => {
+                const badge = row.type === 'catalyst' 
+                    ? `<span class="bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded text-[10px]">CATALYST</span>`
+                    : `<span class="bg-red-100 text-red-800 font-bold px-2 py-0.5 rounded text-[10px]">RISK</span>`;
+
+                html += `<tr class="hover:bg-slate-50 transition">
+                    <td class="p-3">${badge}</td>
+                    <td class="p-3 font-bold text-slate-900">${row.driver}</td>
+                    <td class="p-3 text-slate-600">${row.evidence}</td>
+                    <td class="p-3 text-slate-500">${row.timing}</td>
+                    <td class="p-3 font-semibold ${row.type === 'catalyst' ? 'text-emerald-600' : 'text-red-600'}">${row.pat}</td>
+                    <td class="p-3 text-slate-700">${row.conf}</td>
+                </tr>`;
+            });
+
+            tbody.innerHTML = html;
+        }
+    </script>
 </body>
 </html>
